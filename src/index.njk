@@ -1,0 +1,267 @@
+---
+layout: base.njk
+title: "MLB Projection Accuracy"
+---
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">MLB Projection Accuracy</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        <strong>Whiffs</strong> is an evaluation of Marcel, Steamer, and ZiPS projection accuracy from {{ site.meta.years | first }}-{{ site.meta.years | last }}, adjusting for league average and weighted by playing time.
+      </p>
+      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        Check out the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a> for details.
+      </p>
+    </div>
+
+    <!-- Batting Statistics Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Batting Statistics Over Time</h2>
+        <div class="space-y-6">
+            <!-- PA Charts (Playing-Time Stat - No League Adjustment) -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Plate Appearances (PA) - Raw MAE</h3>
+                <div class="h-80"><canvas id="battingPAMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Plate Appearances (PA) - Raw RMSE</h3>
+                <div class="h-80"><canvas id="battingPAChart"></canvas></div>
+            </div>
+
+            <!-- SO/PA Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingSOWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingSOLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Raw MAE</h3>
+                <div class="h-80"><canvas id="battingSOMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingSOWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingSOLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Raw RMSE</h3>
+                <div class="h-80"><canvas id="battingSOChart"></canvas></div>
+            </div>
+
+            <!-- BB/PA Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingBBWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingBBLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Raw MAE</h3>
+                <div class="h-80"><canvas id="battingBBMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingBBWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingBBLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Raw RMSE</h3>
+                <div class="h-80"><canvas id="battingBBChart"></canvas></div>
+            </div>
+
+            <!-- HR/PA Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingHRWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingHRLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Raw MAE</h3>
+                <div class="h-80"><canvas id="battingHRMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingHRWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingHRLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Raw RMSE</h3>
+                <div class="h-80"><canvas id="battingHRChart"></canvas></div>
+            </div>
+
+            <!-- HBP/PA Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingHBPWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="battingHBPLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Raw MAE</h3>
+                <div class="h-80"><canvas id="battingHBPMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingHBPWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="battingHBPLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Raw RMSE</h3>
+                <div class="h-80"><canvas id="battingHBPChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pitching Statistics Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Pitching Statistics Over Time</h2>
+        <div class="space-y-6">
+            <!-- BF Charts (Playing-Time Stat - No League Adjustment) -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Batters Faced (BF) - Raw MAE</h3>
+                <div class="h-80"><canvas id="pitchingBFMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Batters Faced (BF) - Raw RMSE</h3>
+                <div class="h-80"><canvas id="pitchingBFChart"></canvas></div>
+            </div>
+
+            <!-- SO/BF Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingSOWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingSOLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Raw MAE</h3>
+                <div class="h-80"><canvas id="pitchingSOMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingSOWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingSOLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Raw RMSE</h3>
+                <div class="h-80"><canvas id="pitchingSOChart"></canvas></div>
+            </div>
+
+            <!-- BB/BF Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingBBWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingBBLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Raw MAE</h3>
+                <div class="h-80"><canvas id="pitchingBBMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingBBWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingBBLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Raw RMSE</h3>
+                <div class="h-80"><canvas id="pitchingBBChart"></canvas></div>
+            </div>
+
+            <!-- HR/BF Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingHRWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingHRLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Raw MAE</h3>
+                <div class="h-80"><canvas id="pitchingHRMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHRWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHRLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Raw RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHRChart"></canvas></div>
+            </div>
+
+            <!-- HBP/BF Charts -->
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Weighted League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingHBPWeightedLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - League-Adjusted MAE</h3>
+                <div class="h-80"><canvas id="pitchingHBPLeagueAdjMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Raw MAE</h3>
+                <div class="h-80"><canvas id="pitchingHBPMAEChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Weighted League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHBPWeightedLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - League-Adjusted RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHBPLeagueAdjChart"></canvas></div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Raw RMSE</h3>
+                <div class="h-80"><canvas id="pitchingHBPChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    {% include "chart-utils.js" %}
+    {% include "index-charts.js" %}
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeIndexCharts({{ years | dump | safe }}, {{ site.meta.projection_systems | dump | safe }});
+    });
+</script>
+{% endblock %}
+

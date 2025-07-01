@@ -1,0 +1,206 @@
+---
+layout: base.njk
+pagination:
+    data: players
+    size: 1
+    alias: player
+permalink: "/players/{{ player.id }}/"
+eleventyComputed:
+    title: "{{ player.name | safe }} Projection Accuracy"
+---
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ player.name | safe }}</h1>
+    <div class="flex justify-center items-center space-x-4">
+      <span class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm font-medium rounded-full">
+        {{ player.primary_type | title }}
+      </span>
+      <span class="text-sm text-gray-500 dark:text-gray-400">ID: <span class="font-mono">{{ player.id }}</span></span>
+    </div>
+  </div>
+
+  <!-- Performance Metrics Section -->
+  <div class="mb-12">
+    <div class="flex items-center mb-6">
+      <div class="mr-4 p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+        <svg class="size-6 text-blue-600 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Performance Metrics</h2>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {% set statsToShow = ['PA', 'SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['BF', 'SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
+      {% for stat in statsToShow %}
+      <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} Comparison</h3>
+        <div class="h-80"><canvas id="rate{{ stat }}Chart"></canvas></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Projection Accuracy Section -->
+  <div class="mb-12">
+    <div class="flex items-center mb-6">
+      <div class="mr-4 p-2 bg-rose-100 dark:bg-rose-900 rounded-lg">
+        <svg class="size-6 text-rose-600 dark:text-rose-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v15a1 1 0 0 0 1 1h15M8 16l2.5-5.5 3 3L17.273 7 20 9.667"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Projection Accuracy</h2>
+    </div>
+
+    <!-- League-Adjusted Accuracy Charts -->
+    <div class="mb-8">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">League-Adjusted Projection Errors</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        These charts show projection errors relative to league averages, helping identify how well systems predict
+        individual player performance compared to league-wide trends.
+      </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% set rateStatsOnly = ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
+        {% for stat in rateStatsOnly %}
+        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} League-Adjusted Error</h4>
+          <div class="h-80"><canvas id="accuracyLA{{ stat }}Chart"></canvas></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Raw Accuracy Charts -->
+    <div class="mb-8">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Raw Projection Errors</h3>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% set statsToShow = ['PA', 'SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['BF', 'SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
+        {% for stat in statsToShow %}
+        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} Error</h4>
+          <div class="h-80"><canvas id="accuracy{{ stat }}Chart"></canvas></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistical Summary Tables -->
+  <div class="mb-12">
+    <div class="flex items-center mb-6">
+      <div class="mr-4 p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+        <svg class="size-6 text-green-600 dark:text-green-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-width="2" d="M3 11h18M3 15h18m-9-4v8m-8 0h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Statistical Summary</h2>
+    </div>
+
+    <!-- Yearly Performance Table -->
+    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Yearly Performance - {{ player.primary_type | title }}</h3>
+      <div class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-4 py-3">Year</th>
+              <th scope="col" class="px-4 py-3">System</th>
+              {% set rawStats = ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB'] if player.primary_type == 'batting' else ['BF', 'IP', 'H', 'HR', 'BB', 'SO', 'HBP', 'ER', 'W', 'L', 'SV'] %}
+              {% for stat in rawStats %}
+              <th scope="col" class="px-4 py-3 text-right">{{ stat }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for year, yearData in player.years %}
+            {% if yearData[player.primary_type] %}
+
+            <!-- Marcel Projections Row -->
+            {% if yearData[player.primary_type]['Marcel'] %}
+            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
+              <td class="px-4 py-3 text-red-600 dark:text-red-400">Marcel</td>
+              {% for stat in rawStats %}
+              <td class="px-4 py-3 text-right">
+                {% if yearData[player.primary_type]['Marcel'][stat] is defined and yearData[player.primary_type]['Marcel'][stat] is not none %}
+                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['Marcel'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Marcel'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Marcel'][stat] | round(1) }}{% endif %}</span>
+                {% else %}
+                -
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endif %}
+
+            <!-- Steamer Projections Row -->
+            {% if yearData[player.primary_type]['Steamer'] %}
+            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
+              <td class="px-4 py-3 text-indigo-600 dark:text-indigo-400">Steamer</td>
+              {% for stat in rawStats %}
+              <td class="px-4 py-3 text-right">
+                {% if yearData[player.primary_type]['Steamer'][stat] is defined and yearData[player.primary_type]['Steamer'][stat] is not none %}
+                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['Steamer'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Steamer'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Steamer'][stat] | round(1) }}{% endif %}</span>
+                {% else %}
+                -
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endif %}
+
+            <!-- ZiPS Projections Row -->
+            {% if yearData[player.primary_type]['ZiPS'] %}
+            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
+              <td class="px-4 py-3 text-green-600 dark:text-green-400">ZiPS</td>
+              {% for stat in rawStats %}
+              <td class="px-4 py-3 text-right">
+                {% if yearData[player.primary_type]['ZiPS'][stat] is defined and yearData[player.primary_type]['ZiPS'][stat] is not none %}
+                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['ZiPS'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['ZiPS'][stat] | round(1) }}{% endif %}</span>
+                {% else %}
+                -
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endif %}
+
+            <!-- Actual Stats Row -->
+            {% if yearData[player.primary_type]['Actual'] %}
+            <tr class="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-600">
+              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
+              <td class="px-4 py-3 text-gray-900 dark:text-white font-medium">Actual</td>
+              {% for stat in rawStats %}
+              <td class="px-4 py-3 text-right">
+                {% if yearData[player.primary_type]['Actual'][stat] is defined and yearData[player.primary_type]['Actual'][stat] is not none %}
+                <span class="font-medium text-gray-900 dark:text-white font-mono">
+                {% if stat == 'IP' %}{{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Actual'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Actual'][stat] | round(1) }}{% endif %}
+                </span>
+                {% else %}
+                -
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endif %}
+
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  {% include "chart-utils.js" %}
+  {% include "player-charts.js" %}
+  document.addEventListener('DOMContentLoaded', function() {
+    initializePlayerCharts({{ player.years | dump | safe }}, '{{ player.primary_type }}', {{ site.meta.projection_systems | dump | safe }});
+  });
+</script>
+{% endblock %}
+

@@ -1,0 +1,91 @@
+---
+layout: base.njk
+permalink: "/players/"
+title: "All Players"
+---
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">All Players</h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300">Projection accuracy analysis for <span class="font-mono">{{ players | length }}</span> MLB players</p>
+    </div>
+
+    <!-- Players Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for player in players %}
+        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
+            <div class="flex flex-col h-full">
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        <a href="/players/{{ player.id }}/" class="hover:text-blue-600 dark:hover:text-blue-400">
+                            {{ player.name | safe }}
+                        </a>
+                    </h3>
+                    <div class="flex items-center mb-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if player.primary_type == 'batting' %}
+                                bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                            {% else %}
+                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            {% endif %}">
+                            {{ player.primary_type | title }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        ID: <span class="font-mono">{{ player.id }}</span>
+                    </p>
+                </div>
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        <div class="flex justify-between mb-1">
+                            <span>Years:</span>
+                            <span class="font-mono">{{ player.years | length }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Data points:</span>
+                            <span class="font-mono">
+                                {% set total_points = 0 %}
+                                {% for year, yearData in player.years %}
+                                    {% if yearData[player.primary_type] %}
+                                        {% set total_points = total_points + (yearData[player.primary_type] | length) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ total_points }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="mt-12 bg-gray-50 dark:bg-gray-900 rounded-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">Dataset Summary</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2 font-mono">{{ players | length }}</div>
+                <div class="text-gray-600 dark:text-gray-400">Total Players</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2 font-mono">
+                    {% set batting_count = 0 %}
+                    {% for player in players %}
+                        {% if player.primary_type == 'batting' %}
+                            {% set batting_count = batting_count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ batting_count }}
+                </div>
+                <div class="text-gray-600 dark:text-gray-400">Batters</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2 font-mono">
+                    {{ players | length - batting_count }}
+                </div>
+                <div class="text-gray-600 dark:text-gray-400">Pitchers</div>
+            </div>
+        </div>
+    </div>
+</div>

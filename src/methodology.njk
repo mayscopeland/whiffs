@@ -1,0 +1,42 @@
+---
+layout: base.njk
+title: Methodology
+permalink: /methodology/
+---
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Methodology</h1>
+  </div>
+
+  <div class="text-gray-700 dark:text-gray-300">
+    <p class="my-6 text-lg leading-8">The Whiffs methodology is my attempt at implementing ideas from Tom Tango on how to properly evaluate projection systems.</p>
+
+    <p class="my-6 text-lg leading-8">Here are a couple important posts I'm drawing from:</p>
+    <ul class="list-disc list-outside pl-7 mb-6 space-y-2 text-lg">
+      <li><a href="https://www.insidethebook.com/ee/index.php/site/comments/forecast_evaluations/" class="text-blue-600 dark:text-blue-400 hover:underline">Forecast Evaluations</a> - Tom Tango responds to Nate Silver (remember when he was just a baseball nerd?)</li>
+      <li><a href="https://www.insidethebook.com/ee/index.php/site/article/testing_the_2007_2010_forecasting_systems_official_results/" class="text-blue-600 dark:text-blue-400 hover:underline">Testing the 2007-2010 Forecasting Systems: Official Results</a> - Tom Tango's results from testing projection systems using his recommended methodology.</li>
+    </ul>
+    <p class="my-6 text-lg leading-8">Based on these posts, Whiffs uses three key principles:</p>
+
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mt-12 mb-8 leading-10">Separate playing time from rate stats</h2>
+    <p class="my-6 text-lg leading-8">Consider a player projected for 300 PA and 30 HR who actually gets 600 PA with 30 HR. Was that a good HR projection?</p>
+    <p class="my-6 text-lg leading-8">If you only look at raw HR totals, the projection appears perfect. But it actually got lucky—vastly underestimating playing time while overestimating power, with the errors canceling out.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Whiffs evaluates playing time separately from rate stats to prevent this misleading assessment.</strong></p>
+    <p class="my-6 text-lg leading-8">Playing time is measured by <strong class="font-semibold">plate appearances</strong> for batters and <strong class="font-semibold">batters faced</strong> for pitchers. All other stats are then evaluated on a per-PA or per-BF basis.</p>
+    <p class="my-6 text-lg leading-8"><em>Future improvement: Some stats might be better evaluated with different denominators, like doubles per ball-in-play or steals per time-on-first.</em></p>
+
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mt-12 mb-8 leading-10">Adjust for league average</h2>
+    <p class="my-6 text-lg leading-8">Here's an example based on <a href="https://www.insidethebook.com/ee/index.php/site/article/testing_the_2007_2010_forecasting_systems_official_results/" class="text-blue-600 dark:text-blue-400 hover:underline">one from Tom Tango</a>:</p>
+    <p class="my-6 text-lg leading-8">One system projects .340 wOBA for a player in a .330 league. Another projects .330 wOBA in a .330 league. The player ends up with .338 wOBA in a .338 league. Which projection was more accurate?</p>
+    <p class="my-6 text-lg leading-8">The player turned out to be league average, so the second projection is more useful to us, even though
+    it was further from the raw number.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Whiffs subtracts a projections league average of a rate stat before calculating error.</strong></p>
+    <p class="my-6 text-lg leading-8">In this example, the projected league-adjusted wOBAs would be +.010 and .000, respectively. The second
+    projection better predicted the actual league-adjusted wOBA (also .000).</p>
+
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mt-12 mb-8 leading-10">Weight by playing time</h2>
+    <p class="my-6 text-lg leading-8">A projection error for a 100 PA player matters less than the same error for a 600 PA player. Projection systems shouldn't be penalized equally for mistakes on marginal versus regular players.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Whiffs weights each error by the player's actual PA or BF to reflect real-world impact.</strong></p>
+  </div>
+</div>
