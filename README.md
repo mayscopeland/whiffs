@@ -62,19 +62,19 @@ Projections and stats are not included in the repository, so you'll need to buil
 
 2. **Build Marcels**
 
-  ```bash
-  python marcel-like.py
-  ```
+    ```bash
+    python marcel-like.py
+    ```
 
-  Builds Marcel-like projections into `/projections` using the MLB data from Step 1.
+    Builds Marcel-like projections into `/projections` using the MLB data from Step 1.
 
-  *Note: these differ somewhat from the [official Marcel projections](https://www.tangotiger.net/marcel/). If you can improve my code, please go for it!*
+    *Note: these differ somewhat from the [official Marcel projections](https://www.tangotiger.net/marcel/). If you can improve my code, please go for it!*
 
 3. **Add historical Steamer and ZiPS from FanGraphs**
 
-  [Historical Steamer and ZiPS projections](https://www.fangraphs.com/projections) are available on FanGraphs for members.
+    [Historical Steamer and ZiPS projections](https://www.fangraphs.com/projections) are available on FanGraphs for members.
 
-  Whiffs expects these to be in the `/projections` directory in a format like `steamer_2012_bat.csv`.
+    Whiffs expects these to be in the `/projections` directory in a format like `steamer_2012_bat.csv`.
 
 ### Run the evaluation
 
