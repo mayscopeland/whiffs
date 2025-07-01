@@ -44,6 +44,8 @@ logs/
 *.tmp
 *.temp
 
+*.cache
+
 # Node.js
 node_modules/
 npm-debug.log*
