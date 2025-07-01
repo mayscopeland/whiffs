@@ -1,6 +1,6 @@
 # Whiffs: MLB Projection Accuracy Evaluation
 
-**Whiffs** is a comprehensive evaluation of MLB projection system accuracy, comparing Marcel, Steamer, and ZiPS projections against actual player performance from 2019-2024.
+**Whiffs** is a comprehensive evaluation of MLB projection system accuracy, comparing Marcel, Steamer, and ZiPS projections against actual player performance from 2010-2024.
 
 The analysis follows Tom Tango's methodology for evaluating projection systems, adjusting for league averages and weighting errors by playing time to provide meaningful accuracy metrics.
 
