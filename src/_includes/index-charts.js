@@ -22,36 +22,36 @@ function initializeIndexCharts(yearsData, projectionSystems) {
             // Volume stats: only create raw charts (no league adjustment)
             // 1. Raw MAE
             const rawMaeData = prepareStatMaeData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}MAEChart`, 'bar', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
+            createChart(`${baseName}MAEChart`, 'line', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
 
             // 2. Raw RMSE
             const rawRmseData = prepareStatRmseData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}Chart`, 'bar', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
+            createChart(`${baseName}Chart`, 'line', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
         } else {
             // Rate stats: create all 6 charts including weighted league-adjusted
             // 1. Weighted League-Adjusted MAE
             const weightedLeagueAdjMaeData = prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}WeightedLeagueAdjMAEChart`, 'bar', weightedLeagueAdjMaeData, `${title} Weighted League-Adjusted MAE by Year`, 'Weighted League-Adjusted MAE');
+            createChart(`${baseName}WeightedLeagueAdjMAEChart`, 'line', weightedLeagueAdjMaeData, `${title} Weighted League-Adjusted MAE by Year`, 'Weighted League-Adjusted MAE');
 
             // 2. League-Adjusted MAE
             const leagueAdjMaeData = prepareStatLeagueAdjustedMaeData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}LeagueAdjMAEChart`, 'bar', leagueAdjMaeData, `${title} League-Adjusted MAE by Year`, 'League-Adjusted MAE');
+            createChart(`${baseName}LeagueAdjMAEChart`, 'line', leagueAdjMaeData, `${title} League-Adjusted MAE by Year`, 'League-Adjusted MAE');
 
             // 3. Raw MAE
             const rawMaeData = prepareStatMaeData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}MAEChart`, 'bar', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
+            createChart(`${baseName}MAEChart`, 'line', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
 
             // 4. Weighted League-Adjusted RMSE
             const weightedLeagueAdjRmseData = prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}WeightedLeagueAdjChart`, 'bar', weightedLeagueAdjRmseData, `${title} Weighted League-Adjusted RMSE by Year`, 'Weighted League-Adjusted RMSE');
+            createChart(`${baseName}WeightedLeagueAdjChart`, 'line', weightedLeagueAdjRmseData, `${title} Weighted League-Adjusted RMSE by Year`, 'Weighted League-Adjusted RMSE');
 
             // 5. League-Adjusted RMSE
             const leagueAdjRmseData = prepareStatLeagueAdjustedRmseData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}LeagueAdjChart`, 'bar', leagueAdjRmseData, `${title} League-Adjusted RMSE by Year`, 'League-Adjusted RMSE');
+            createChart(`${baseName}LeagueAdjChart`, 'line', leagueAdjRmseData, `${title} League-Adjusted RMSE by Year`, 'League-Adjusted RMSE');
 
             // 6. Raw RMSE
             const rawRmseData = prepareStatRmseData(yearsData, stat, 'batting', projectionSystems);
-            createChart(`${baseName}Chart`, 'bar', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
+            createChart(`${baseName}Chart`, 'line', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
         }
     });
 
@@ -61,36 +61,36 @@ function initializeIndexCharts(yearsData, projectionSystems) {
             // Volume stats: only create raw charts (no league adjustment)
             // 1. Raw MAE
             const rawMaeData = prepareStatMaeData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}MAEChart`, 'bar', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
+            createChart(`${baseName}MAEChart`, 'line', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
 
             // 2. Raw RMSE
             const rawRmseData = prepareStatRmseData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}Chart`, 'bar', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
+            createChart(`${baseName}Chart`, 'line', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
         } else {
             // Rate stats: create all 6 charts including weighted league-adjusted
             // 1. Weighted League-Adjusted MAE
             const weightedLeagueAdjMaeData = prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}WeightedLeagueAdjMAEChart`, 'bar', weightedLeagueAdjMaeData, `${title} Weighted League-Adjusted MAE by Year`, 'Weighted League-Adjusted MAE');
+            createChart(`${baseName}WeightedLeagueAdjMAEChart`, 'line', weightedLeagueAdjMaeData, `${title} Weighted League-Adjusted MAE by Year`, 'Weighted League-Adjusted MAE');
 
             // 2. League-Adjusted MAE
             const leagueAdjMaeData = prepareStatLeagueAdjustedMaeData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}LeagueAdjMAEChart`, 'bar', leagueAdjMaeData, `${title} League-Adjusted MAE by Year`, 'League-Adjusted MAE');
+            createChart(`${baseName}LeagueAdjMAEChart`, 'line', leagueAdjMaeData, `${title} League-Adjusted MAE by Year`, 'League-Adjusted MAE');
 
             // 3. Raw MAE
             const rawMaeData = prepareStatMaeData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}MAEChart`, 'bar', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
+            createChart(`${baseName}MAEChart`, 'line', rawMaeData, `${title} Raw MAE by Year`, 'MAE');
 
             // 4. Weighted League-Adjusted RMSE
             const weightedLeagueAdjRmseData = prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}WeightedLeagueAdjChart`, 'bar', weightedLeagueAdjRmseData, `${title} Weighted League-Adjusted RMSE by Year`, 'Weighted League-Adjusted RMSE');
+            createChart(`${baseName}WeightedLeagueAdjChart`, 'line', weightedLeagueAdjRmseData, `${title} Weighted League-Adjusted RMSE by Year`, 'Weighted League-Adjusted RMSE');
 
             // 5. League-Adjusted RMSE
             const leagueAdjRmseData = prepareStatLeagueAdjustedRmseData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}LeagueAdjChart`, 'bar', leagueAdjRmseData, `${title} League-Adjusted RMSE by Year`, 'League-Adjusted RMSE');
+            createChart(`${baseName}LeagueAdjChart`, 'line', leagueAdjRmseData, `${title} League-Adjusted RMSE by Year`, 'League-Adjusted RMSE');
 
             // 6. Raw RMSE
             const rawRmseData = prepareStatRmseData(yearsData, stat, 'pitching', projectionSystems);
-            createChart(`${baseName}Chart`, 'bar', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
+            createChart(`${baseName}Chart`, 'line', rawRmseData, `${title} Raw RMSE by Year`, 'RMSE');
         }
     });
 }

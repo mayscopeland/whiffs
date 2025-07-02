@@ -3,14 +3,41 @@ layout: base.njk
 title: "MLB Projection Accuracy"
 ---
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">MLB Projection Accuracy</h1>
-      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        <strong>Whiffs</strong> is an evaluation of Marcel, Steamer, and ZiPS projection accuracy from {{ site.meta.years | first }}-{{ site.meta.years | last }}, adjusting for league average and weighted by playing time.
+{% set battingStats = [
+  { name: 'Plate Appearances', stat: 'PA', baseName: 'battingPA', isVolume: true },
+  { name: 'Strikeout Rate', stat: 'SO/PA', baseName: 'battingSO', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/PA', baseName: 'battingBB', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/PA', baseName: 'battingHR', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', baseName: 'battingHBP', isVolume: false }
+] %}
+
+{% set pitchingStats = [
+  { name: 'Batters Faced', stat: 'BF', baseName: 'pitchingBF', isVolume: true },
+  { name: 'Strikeout Rate', stat: 'SO/BF', baseName: 'pitchingSO', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/BF', baseName: 'pitchingBB', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BF', baseName: 'pitchingHR', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', baseName: 'pitchingHBP', isVolume: false }
+] %}
+
+{% set metrics = [
+  { value: 'MAE', name: 'MAE', title: 'MAE' },
+  { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { value: 'weighted-league-adj', name: 'Weighted League-Adjusted', chartSuffix: 'WeightedLeagueAdj' },
+  { value: 'league-adj', name: 'League-Adjusted', chartSuffix: 'LeagueAdj' },
+  { value: 'raw', name: 'Raw', chartSuffix: '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-16">
+      <h1 class="text-center text-balance text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-8">An open-source framework for analyzing MLB player projection accuracy</h1>
+      <p class="mb-6 text-lg sm:text-xl">
+        <strong>Whiffs</strong> does the normal MAE and RMSE analysis you might find in other projection evaluations, then takes it to the next level. It scales projections to a consistent league average and weights errors by playing time. (Check out the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a> for details.)
       </p>
-      <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        Check out the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a> for details.
+      <p class="mb-8 text-lg sm:text-xl">
+        It currently has accuracy data for Marcel, Steamer, and ZiPS projection from 2010-2024, with more to come.
       </p>
     </div>
 
@@ -18,119 +45,46 @@ title: "MLB Projection Accuracy"
     <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Batting Statistics Over Time</h2>
         <div class="space-y-6">
-            <!-- PA Charts (Playing-Time Stat - No League Adjustment) -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Plate Appearances (PA) - Raw MAE</h3>
-                <div class="h-80"><canvas id="battingPAMAEChart"></canvas></div>
+            {% for statInfo in battingStats %}
+            <div class="mb-6">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg py-4">
+                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex">
+                            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                {% for metric in metrics %}
+                                <option value="{{ metric.value }}">{{ metric.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if not statInfo.isVolume %}
+                        <div class="flex">
+                            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                                {% for adj in adjustments %}
+                                <option value="{{ adj.value }}">{{ adj.name }}</option>
+                                {% endfor %}
+                            </select>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Plate Appearances (PA) - Raw RMSE</h3>
-                <div class="h-80"><canvas id="battingPAChart"></canvas></div>
+                        {% endif %}
             </div>
-
-            <!-- SO/PA Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingSOWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingSOLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Raw MAE</h3>
-                <div class="h-80"><canvas id="battingSOMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingSOWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingSOLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/PA - Raw RMSE</h3>
-                <div class="h-80"><canvas id="battingSOChart"></canvas></div>
             </div>
 
-            <!-- BB/PA Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingBBWeightedLeagueAdjMAEChart"></canvas></div>
+                {% for metric in metrics %}
+                    {% if statInfo.isVolume %}
+                        {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingBBLeagueAdjMAEChart"></canvas></div>
+                    {% else %}
+                        {% for adj in adjustments %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Raw MAE</h3>
-                <div class="h-80"><canvas id="battingBBMAEChart"></canvas></div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingBBWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingBBLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/PA - Raw RMSE</h3>
-                <div class="h-80"><canvas id="battingBBChart"></canvas></div>
-            </div>
-
-            <!-- HR/PA Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingHRWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingHRLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Raw MAE</h3>
-                <div class="h-80"><canvas id="battingHRMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingHRWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingHRLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/PA - Raw RMSE</h3>
-                <div class="h-80"><canvas id="battingHRChart"></canvas></div>
-            </div>
-
-            <!-- HBP/PA Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingHBPWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="battingHBPLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Raw MAE</h3>
-                <div class="h-80"><canvas id="battingHBPMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingHBPWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="battingHBPLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/PA - Raw RMSE</h3>
-                <div class="h-80"><canvas id="battingHBPChart"></canvas></div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -138,119 +92,42 @@ title: "MLB Projection Accuracy"
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Pitching Statistics Over Time</h2>
         <div class="space-y-6">
-            <!-- BF Charts (Playing-Time Stat - No League Adjustment) -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Batters Faced (BF) - Raw MAE</h3>
-                <div class="h-80"><canvas id="pitchingBFMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Batters Faced (BF) - Raw RMSE</h3>
-                <div class="h-80"><canvas id="pitchingBFChart"></canvas></div>
-            </div>
-
-            <!-- SO/BF Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingSOWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingSOLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Raw MAE</h3>
-                <div class="h-80"><canvas id="pitchingSOMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingSOWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingSOLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">SO/BF - Raw RMSE</h3>
-                <div class="h-80"><canvas id="pitchingSOChart"></canvas></div>
+            {% for statInfo in pitchingStats %}
+            <div class="mb-6">
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg py-4">
+                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                    <div class="flex flex-wrap gap-4">
+                      <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                          {% for metric in metrics %}
+                          <option value="{{ metric.value }}">{{ metric.title }}</option>
+                          {% endfor %}
+                      </select>
+                      {% if not statInfo.isVolume %}
+                        <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                          {% for adj in adjustments %}
+                          <option value="{{ adj.value }}">{{ adj.name }}</option>
+                          {% endfor %}
+                        </select>
+                      {% endif %}
+                </div>
             </div>
 
-            <!-- BB/BF Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingBBWeightedLeagueAdjMAEChart"></canvas></div>
+                {% for metric in metrics %}
+                    {% if statInfo.isVolume %}
+                        {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingBBLeagueAdjMAEChart"></canvas></div>
+                    {% else %}
+                        {% for adj in adjustments %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Raw MAE</h3>
-                <div class="h-80"><canvas id="pitchingBBMAEChart"></canvas></div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingBBWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingBBLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">BB/BF - Raw RMSE</h3>
-                <div class="h-80"><canvas id="pitchingBBChart"></canvas></div>
-            </div>
-
-            <!-- HR/BF Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingHRWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingHRLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Raw MAE</h3>
-                <div class="h-80"><canvas id="pitchingHRMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHRWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHRLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HR/BF - Raw RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHRChart"></canvas></div>
-            </div>
-
-            <!-- HBP/BF Charts -->
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Weighted League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingHBPWeightedLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - League-Adjusted MAE</h3>
-                <div class="h-80"><canvas id="pitchingHBPLeagueAdjMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Raw MAE</h3>
-                <div class="h-80"><canvas id="pitchingHBPMAEChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Weighted League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHBPWeightedLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - League-Adjusted RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHBPLeagueAdjChart"></canvas></div>
-            </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">HBP/BF - Raw RMSE</h3>
-                <div class="h-80"><canvas id="pitchingHBPChart"></canvas></div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -261,7 +138,72 @@ title: "MLB Projection Accuracy"
     {% include "index-charts.js" %}
     document.addEventListener('DOMContentLoaded', function() {
         initializeIndexCharts({{ years | dump | safe }}, {{ site.meta.projection_systems | dump | safe }});
+        initializeChartFilters();
     });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            // Get current values from any metric/adjustment dropdown (they should all be synced)
+            const selectedMetric = metricSelects[0].value;
+            const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
+
+            // Get all chart containers
+            const chartContainers = document.querySelectorAll('.chart-container');
+
+            chartContainers.forEach(container => {
+                const chartMetric = container.dataset.metric;
+                const chartAdjustment = container.dataset.adjustment;
+                const chartStat = container.dataset.stat;
+
+                // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
+                const isVolumestat = chartStat === 'PA' || chartStat === 'BF';
+
+                const shouldShow = chartMetric === selectedMetric &&
+                    (isVolumestat || chartAdjustment === selectedAdjustment);
+
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            if (selectType === 'metric') {
+                // Sync all metric dropdowns
+                metricSelects.forEach(select => {
+                    if (select !== changedSelect) {
+                        select.value = changedSelect.value;
+                    }
+                });
+            } else if (selectType === 'adjustment') {
+                // Sync all adjustment dropdowns
+                adjustmentSelects.forEach(select => {
+                    if (select !== changedSelect) {
+                        select.value = changedSelect.value;
+                    }
+                });
+            }
+            updateChartVisibility();
+        }
+
+        // Add event listeners to all metric dropdowns
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                syncDropdowns(this, 'metric');
+            });
+        });
+
+        // Add event listeners to all adjustment dropdowns
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                syncDropdowns(this, 'adjustment');
+            });
+        });
+
+        // Initial visibility setup
+        updateChartVisibility();
+    }
 </script>
 {% endblock %}
 
