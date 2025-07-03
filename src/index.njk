@@ -46,27 +46,26 @@ title: "MLB Projection Accuracy"
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Batting Statistics Over Time</h2>
         <div class="space-y-6">
             {% for statInfo in battingStats %}
-            <div class="mb-6">
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg py-4">
-                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
-                    <div class="flex flex-wrap gap-4">
-                        <div class="flex">
-                            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                {% for metric in metrics %}
-                                <option value="{{ metric.value }}">{{ metric.title }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% if not statInfo.isVolume %}
-                        <div class="flex">
-                            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                {% for adj in adjustments %}
-                                <option value="{{ adj.value }}">{{ adj.name }}</option>
-                                {% endfor %}
-                            </select>
-            </div>
-                        {% endif %}
-            </div>
+            <div class="mb-4 py-4">
+              <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+              <div class="flex flex-wrap gap-4">
+                <div class="flex">
+                  <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    {% for metric in metrics %}
+                    <option value="{{ metric.value }}">{{ metric.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% if not statInfo.isVolume %}
+                <div class="flex">
+                  <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    {% for adj in adjustments %}
+                    <option value="{{ adj.value }}">{{ adj.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% endif %}
+              </div>
             </div>
 
                 {% for metric in metrics %}
@@ -89,27 +88,25 @@ title: "MLB Projection Accuracy"
     </div>
 
     <!-- Pitching Statistics Section -->
-    <div class="mb-8">
+    <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Pitching Statistics Over Time</h2>
         <div class="space-y-6">
             {% for statInfo in pitchingStats %}
-            <div class="mb-6">
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg py-4">
-                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
-                    <div class="flex flex-wrap gap-4">
-                      <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                          {% for metric in metrics %}
-                          <option value="{{ metric.value }}">{{ metric.title }}</option>
-                          {% endfor %}
-                      </select>
-                      {% if not statInfo.isVolume %}
-                        <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                          {% for adj in adjustments %}
-                          <option value="{{ adj.value }}">{{ adj.name }}</option>
-                          {% endfor %}
-                        </select>
-                      {% endif %}
-                </div>
+            <div class="mb-4 py-4">
+              <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+              <div class="flex flex-wrap gap-4">
+                <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                  {% for metric in metrics %}
+                  <option value="{{ metric.value }}">{{ metric.title }}</option>
+                  {% endfor %}
+                </select>
+                {% if not statInfo.isVolume %}
+                  <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    {% for adj in adjustments %}
+                    <option value="{{ adj.value }}">{{ adj.name }}</option>
+                    {% endfor %}
+                  </select>
+                {% endif %}
             </div>
 
                 {% for metric in metrics %}

@@ -421,9 +421,45 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
 }
 
 /**
- * Prepare data for a player accuracy chart over their career
+ * Prepare data for a player accuracy chart over their career (RMSE version)
  */
 function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectionSystems) {
+    if (!playerYears || typeof playerYears !== 'object') {
+        return { labels: [], datasets: [] };
+    }
+    const years = Object.keys(playerYears).sort();
+    const yearLabels = years.map(y => y.toString());
+
+    const projSystems = projectionSystems.filter(s => s !== 'Actual');
+    const datasets = projSystems.map(system => {
+        const errorData = years.map(year => {
+            const yearData = playerYears[year];
+            if (yearData && yearData[playerType] && yearData[playerType]['Actual'] && yearData[playerType][system]) {
+                const actual = yearData[playerType]['Actual'][stat];
+                const projected = yearData[playerType][system][stat];
+                if (actual != null && projected != null) {
+                    return Math.abs(projected - actual);
+                }
+            }
+            return null;
+        });
+
+        return {
+            label: `${system} Error`,
+            data: errorData,
+            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
+            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            fill: false
+        };
+    });
+
+    return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
+}
+
+/**
+ * Prepare data for a player accuracy chart over their career (MAE version)
+ */
+function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projectionSystems) {
     if (!playerYears || typeof playerYears !== 'object') {
         return { labels: [], datasets: [] };
     }
@@ -460,6 +496,46 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
  * Prepare league-adjusted accuracy data (error) for a specific player (for player pages)
  */
 function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerType, projectionSystems) {
+    const years = Object.keys(playerYears).sort();
+    const yearLabels = years.map(y => y.toString());
+
+    const datasets = projectionSystems.map(system => {
+        const data = years.map(year => {
+            const yearData = playerYears[year];
+            if (!yearData || !yearData[playerType] || !yearData[playerType][system] || !yearData[playerType]['Actual']) {
+                return null;
+            }
+
+            // Get pre-calculated league-adjusted values
+            const projected_la = yearData[playerType][system][`${stat}_la`];
+            const actual_la = yearData[playerType]['Actual'][`${stat}_la`];
+
+            if (projected_la === undefined || actual_la === undefined || projected_la === null || actual_la === null) {
+                return null;
+            }
+
+            // The league-adjusted error is the difference between the projected LA value and the actual LA value
+            const la_error = projected_la - actual_la;
+            return la_error;
+        });
+
+        return {
+            label: system,
+            data: data.map(e => (e !== null ? Math.abs(e) : null)),
+            fill: false,
+            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
+            tension: 0.1
+        };
+    });
+
+    return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
+}
+
+/**
+ * Prepare league-adjusted accuracy data (MAE) for a specific player (for player pages)
+ */
+function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, playerType, projectionSystems) {
     const years = Object.keys(playerYears).sort();
     const yearLabels = years.map(y => y.toString());
 

@@ -26,102 +26,90 @@ eleventyComputed:
     </div>
 
     <!-- Batting Section -->
-    <div class="space-y-8 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Batting Projection Accuracy</h2>
+    <div class="space-y-8 mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Batting Projection Accuracy</h2>
 
-        <!-- Batting Volume Section -->
-        <div class="chart-section mb-8">
-            <div class="mb-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Plate Appearances (PA)</h4>
-                <div class="flex flex-wrap gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metric Type</label>
-                        <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                            {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw">
-                <div class="h-80"><canvas id="battingVolumeMaeChart"></canvas></div>
-            </div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw">
-                <div class="h-80"><canvas id="battingVolumeRmseChart"></canvas></div>
-            </div>
+      <!-- Batting Volume Section -->
+      <div class="chart-section mb-8">
+        <div class="mb-4 py-4">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Plate Appearances (PA)</h4>
+          <div class="flex flex-wrap gap-4">
+            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw">
+          <div class="h-80"><canvas id="battingVolumeMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw">
+          <div class="h-80"><canvas id="battingVolumeRmseChart"></canvas></div>
+        </div>
+      </div>
 
-        <!-- Batting Rate Section -->
-        <div class="chart-section mb-8">
-            <div class="mb-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
-                <div class="flex flex-wrap gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metric Type</label>
-                        <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                            {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Adjustment Type</label>
-                        <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                            {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateRmseChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjRmseChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLAMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLARmseChart"></canvas></div></div>
+      <!-- Batting Rate Section -->
+      <div class="chart-section mb-8">
+        <div class="mb-4 py-4">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
+          <div class="flex flex-wrap gap-4">
+            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+            </select>
+            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateRmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjRmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLAMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLARmseChart"></canvas></div></div>
+      </div>
     </div>
 
     <!-- Pitching Section -->
-    <div class="space-y-8 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pitching Projection Accuracy</h2>
-        <!-- Pitching Volume Section -->
-        <div class="chart-section mb-8">
-            <div class="mb-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Batters Faced (BF)</h4>
-                <div class="flex flex-wrap gap-4">
-                    <div class="flex flex-col">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metric Type</label>
-                        <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                            {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeRmseChart"></canvas></div></div>
+    <div class="space-y-8 mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pitching Projection Accuracy</h2>
+      <!-- Pitching Volume Section -->
+      <div class="chart-section mb-8">
+        <div class="mb-4 py-4">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Batters Faced (BF)</h4>
+          <div class="flex flex-wrap gap-4">
+            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeRmseChart"></canvas></div></div>
+      </div>
 
-        <!-- Pitching Rate Section -->
-        <div class="chart-section mb-8">
-            <div class="mb-4 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
-                <div class="flex flex-wrap gap-4">
-                  <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                    {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
-                  </select>
-                  <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                    {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
-                  </select>
-                </div>
-            </div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateRmseChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjRmseChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLAMaeChart"></canvas></div></div>
-            <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLARmseChart"></canvas></div></div>
+      <!-- Pitching Rate Section -->
+      <div class="chart-section mb-8">
+        <div class="mb-4 py-4">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
+          <div class="flex flex-wrap gap-4">
+            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+            </select>
+            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateRmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjRmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLAMaeChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLARmseChart"></canvas></div></div>
+      </div>
     </div>
 
     <!-- Biggest Misses Section -->
-    <div class="mb-8">
+    <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Biggest Misses - {{ year }}</h2>
 
         {% set yearData = years[year] %}

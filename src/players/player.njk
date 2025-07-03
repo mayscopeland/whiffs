@@ -9,6 +9,30 @@ eleventyComputed:
     title: "{{ player.name | safe }} Projection Accuracy"
 ---
 
+{% set statsConfig = [
+  { name: 'Plate Appearances', stat: 'PA', isVolume: true },
+  { name: 'Strikeout Rate', stat: 'SO/PA', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/PA', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/PA', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false }
+] if player.primary_type == 'batting' else [
+  { name: 'Batters Faced', stat: 'BF', isVolume: true },
+  { name: 'Strikeout Rate', stat: 'SO/BF', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/BF', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BF', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false }
+] %}
+
+{% set metrics = [
+  { value: 'MAE', name: 'MAE', title: 'MAE' },
+  { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { value: 'league-adj', name: 'League-Adjusted', chartSuffix: 'LA' },
+  { value: 'raw', name: 'Raw', chartSuffix: '' }
+] %}
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="text-center mb-12">
     <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ player.name | safe }}</h1>
@@ -31,11 +55,10 @@ eleventyComputed:
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Performance Metrics</h2>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {% set statsToShow = ['PA', 'SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['BF', 'SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
-      {% for stat in statsToShow %}
+      {% for statConfig in statsConfig %}
       <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} Comparison</h3>
-        <div class="h-80"><canvas id="rate{{ stat }}Chart"></canvas></div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ statConfig.stat }} Comparison</h3>
+        <div class="h-80"><canvas id="rate{{ statConfig.stat }}Chart"></canvas></div>
       </div>
       {% endfor %}
     </div>
@@ -52,36 +75,41 @@ eleventyComputed:
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Projection Accuracy</h2>
     </div>
 
-    <!-- League-Adjusted Accuracy Charts -->
-    <div class="mb-8">
-      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">League-Adjusted Projection Errors</h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        These charts show projection errors relative to league averages, helping identify how well systems predict
-        individual player performance compared to league-wide trends.
-      </p>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {% set rateStatsOnly = ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
-        {% for stat in rateStatsOnly %}
-        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} League-Adjusted Error</h4>
-          <div class="h-80"><canvas id="accuracyLA{{ stat }}Chart"></canvas></div>
+    <div class="space-y-6">
+      {% for statConfig in statsConfig %}
+      <div class="mb-4 py-4">
+        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }} ({{ statConfig.stat }})</h4>
+        <div class="flex flex-wrap gap-4">
+          <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+            {% for metric in metrics %}
+            <option value="{{ metric.value }}">{{ metric.title }}</option>
+            {% endfor %}
+          </select>
+          {% if not statConfig.isVolume %}
+            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for adj in adjustments %}
+              <option value="{{ adj.value }}">{{ adj.name }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
         </div>
-        {% endfor %}
       </div>
-    </div>
 
-    <!-- Raw Accuracy Charts -->
-    <div class="mb-8">
-      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Raw Projection Errors</h3>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {% set statsToShow = ['PA', 'SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if player.primary_type == 'batting' else ['BF', 'SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
-        {% for stat in statsToShow %}
-        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ stat }} Error</h4>
-          <div class="h-80"><canvas id="accuracy{{ stat }}Chart"></canvas></div>
-        </div>
+        {% for metric in metrics %}
+          {% if statConfig.isVolume %}
+            {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+              <div class="h-80"><canvas id="accuracy{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
+            </div>
+          {% else %}
+            {% for adj in adjustments %}
+            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+              <div class="h-80"><canvas id="accuracy{{ adj.chartSuffix }}{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
+            </div>
+            {% endfor %}
+          {% endif %}
         {% endfor %}
-      </div>
+      {% endfor %}
     </div>
   </div>
 
@@ -200,7 +228,72 @@ eleventyComputed:
   {% include "player-charts.js" %}
   document.addEventListener('DOMContentLoaded', function() {
     initializePlayerCharts({{ player.years | dump | safe }}, '{{ player.primary_type }}', {{ site.meta.projection_systems | dump | safe }});
+    initializePlayerChartFilters();
   });
+
+  function initializePlayerChartFilters() {
+    const metricSelects = document.querySelectorAll('.metric-select');
+    const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+    function updateChartVisibility() {
+      // Get current values from the dropdowns
+      const selectedMetric = metricSelects[0].value;
+      const selectedAdjustment = adjustmentSelects[0].value;
+
+      // Get all chart containers
+      const chartContainers = document.querySelectorAll('.chart-container');
+
+      chartContainers.forEach(container => {
+        const chartMetric = container.dataset.metric;
+        const chartAdjustment = container.dataset.adjustment;
+        const chartStat = container.dataset.stat;
+
+        // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
+        const isVolumeStat = chartStat === 'PA' || chartStat === 'BF';
+
+        const shouldShow = chartMetric === selectedMetric &&
+          (isVolumeStat || chartAdjustment === selectedAdjustment);
+
+        container.style.display = shouldShow ? 'block' : 'none';
+      });
+    }
+
+    function syncDropdowns(changedSelect, selectType) {
+      if (selectType === 'metric') {
+        // Sync all metric dropdowns
+        metricSelects.forEach(select => {
+          if (select !== changedSelect) {
+            select.value = changedSelect.value;
+          }
+        });
+      } else if (selectType === 'adjustment') {
+        // Sync all adjustment dropdowns
+        adjustmentSelects.forEach(select => {
+          if (select !== changedSelect) {
+            select.value = changedSelect.value;
+          }
+        });
+      }
+      updateChartVisibility();
+    }
+
+    // Add event listeners to all metric dropdowns
+    metricSelects.forEach(select => {
+      select.addEventListener('change', function() {
+        syncDropdowns(this, 'metric');
+      });
+    });
+
+    // Add event listeners to all adjustment dropdowns
+    adjustmentSelects.forEach(select => {
+      select.addEventListener('change', function() {
+        syncDropdowns(this, 'adjustment');
+      });
+    });
+
+    // Initial visibility setup
+    updateChartVisibility();
+  }
 </script>
 {% endblock %}
 
