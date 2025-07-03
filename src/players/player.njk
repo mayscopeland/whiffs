@@ -11,16 +11,40 @@ eleventyComputed:
 
 {% set statsConfig = [
   { name: 'Plate Appearances', stat: 'PA', isVolume: true },
+  { name: 'wOBA', stat: 'wOBA', isVolume: false },
   { name: 'Strikeout Rate', stat: 'SO/PA', isVolume: false },
   { name: 'Walk Rate', stat: 'BB/PA', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/PA', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false }
+  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
+  { name: 'Run Rate', stat: 'R/PA', isVolume: false },
+  { name: 'RBI Rate', stat: 'RBI/PA', isVolume: false },
+  { name: 'Stolen Base Rate', stat: 'SB/TOF', isVolume: false },
+  { name: 'Batting Average', stat: 'AVG', isVolume: false },
+  { name: 'On-Base Percentage', stat: 'OBP', isVolume: false },
+  { name: 'Slugging Percentage', stat: 'SLG', isVolume: false }
 ] if player.primary_type == 'batting' else [
   { name: 'Batters Faced', stat: 'BF', isVolume: true },
+  { name: 'wOBA', stat: 'wOBA', isVolume: false },
   { name: 'Strikeout Rate', stat: 'SO/BF', isVolume: false },
   { name: 'Walk Rate', stat: 'BB/BF', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/BF', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false }
+  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
+  { name: 'Run Rate', stat: 'R/BF', isVolume: false },
+  { name: 'Earned Run Rate', stat: 'ER/BF', isVolume: false },
+  { name: 'Win Rate', stat: 'W/G', isVolume: false },
+  { name: 'Loss Rate', stat: 'L/G', isVolume: false },
+  { name: 'Save Rate', stat: 'SV/G', isVolume: false },
+  { name: 'Hold Rate', stat: 'HLD/G', isVolume: false },
+  { name: 'ERA', stat: 'ERA', isVolume: false },
+  { name: 'WHIP', stat: 'WHIP', isVolume: false }
 ] %}
 
 {% set metrics = [
@@ -78,22 +102,23 @@ eleventyComputed:
     <div class="space-y-6">
       {% for statConfig in statsConfig %}
       <div class="mb-4 py-4">
-        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }} ({{ statConfig.stat }})</h4>
-        <div class="flex flex-wrap gap-4">
-          <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-            {% for metric in metrics %}
-            <option value="{{ metric.value }}">{{ metric.title }}</option>
-            {% endfor %}
-          </select>
-          {% if not statConfig.isVolume %}
-            <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-              {% for adj in adjustments %}
-              <option value="{{ adj.value }}">{{ adj.name }}</option>
+        <div class="mb-4 py-4">
+          <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }} ({{ statConfig.stat }})</h4>
+          <div class="flex flex-wrap gap-4">
+            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              {% for metric in metrics %}
+              <option value="{{ metric.value }}">{{ metric.title }}</option>
               {% endfor %}
             </select>
-          {% endif %}
+            {% if not statConfig.isVolume %}
+              <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                {% for adj in adjustments %}
+                <option value="{{ adj.value }}">{{ adj.name }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+          </div>
         </div>
-      </div>
 
         {% for metric in metrics %}
           {% if statConfig.isVolume %}
@@ -109,6 +134,7 @@ eleventyComputed:
             {% endfor %}
           {% endif %}
         {% endfor %}
+      </div>
       {% endfor %}
     </div>
   </div>
@@ -133,7 +159,7 @@ eleventyComputed:
             <tr>
               <th scope="col" class="px-4 py-3">Year</th>
               <th scope="col" class="px-4 py-3">System</th>
-              {% set rawStats = ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB'] if player.primary_type == 'batting' else ['BF', 'IP', 'H', 'HR', 'BB', 'SO', 'HBP', 'ER', 'W', 'L', 'SV'] %}
+              {% set rawStats = ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'wOBA', 'AVG', 'OBP', 'SLG'] if player.primary_type == 'batting' else ['BF', 'IP', 'H', 'HR', 'BB', 'SO', 'HBP', 'ER', 'W', 'L', 'SV', 'wOBA', 'ERA', 'WHIP'] %}
               {% for stat in rawStats %}
               <th scope="col" class="px-4 py-3 text-right">{{ stat }}</th>
               {% endfor %}

@@ -6,14 +6,47 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime, UTC
 
-# Config constants
 YEARS: List[int] = list(range(2010, 2025))
 
 BATTING_VOLUME_STATS: List[str] = ["PA"]
-BATTING_RATE_STATS: List[str] = ["SO/PA", "BB/PA", "HR/PA", "HBP/PA"]
+BATTING_RATE_STATS: List[str] = [
+    "wOBA",
+    "SO/PA",
+    "BB/PA",
+    "HBP/PA",
+    "HR/BIP",
+    "BABIP",
+    "1B/(BIP-HR)",
+    "2B/(BIP-HR)",
+    "3B/(BIP-HR)",
+    "R/PA",
+    "RBI/PA",
+    "SB/TOF",
+    "AVG",
+    "OBP",
+    "SLG",
+]
 
 PITCHING_VOLUME_STATS: List[str] = ["BF"]
-PITCHING_RATE_STATS: List[str] = ["SO/BF", "BB/BF", "HR/BF", "HBP/BF"]
+PITCHING_RATE_STATS: List[str] = [
+    "wOBA",
+    "SO/BF",
+    "BB/BF",
+    "HBP/BF",
+    "HR/BIP",
+    "BABIP",
+    "1B/(BIP-HR)",
+    "2B/(BIP-HR)",
+    "3B/(BIP-HR)",
+    "R/BF",
+    "ER/BF",
+    "W/G",
+    "L/G",
+    "SV/G",
+    "HLD/G",
+    "ERA",
+    "WHIP",
+]
 
 PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS"]
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
@@ -22,6 +55,213 @@ STATS_DIR: str = "stats"
 PROJECTIONS_DIR: str = "projections"
 OUTPUT_DIR: str = "src/_data"
 
+# Load wOBA constants
+WOBA_CONSTANTS = pd.read_csv(Path(STATS_DIR) / "woba.csv")
+WOBA_CONSTANTS.set_index("Season", inplace=True)
+
+def calculate_woba(df: pd.DataFrame, year: int, player_type: str = "batting") -> pd.Series:
+    """Calculate wOBA for a dataframe using the constants for a given year"""
+    if year not in WOBA_CONSTANTS.index:
+        return pd.Series(index=df.index)
+
+    constants = WOBA_CONSTANTS.loc[year]
+
+    # Fill missing values with 0
+    for stat in ["BB", "HBP", "1B", "2B", "3B", "HR"]:
+        if stat not in df.columns:
+            df[stat] = 0
+        else:
+            df[stat] = df[stat].fillna(0)
+
+    # Calculate wOBA
+    woba = (
+        constants.wBB * df["BB"] +
+        constants.wHBP * df["HBP"] +
+        constants.w1B * df["1B"] +
+        constants.w2B * df["2B"] +
+        constants.w3B * df["3B"] +
+        constants.wHR * df["HR"]
+    )
+
+    # Get plate appearances/batters faced
+    if player_type == "batting":
+        if "PA" in df.columns:
+            denom = df["PA"]
+        else:
+            # Calculate PA if not available
+            required_cols = ["AB", "BB", "HBP", "SF", "SH"]
+            if all(col in df.columns for col in required_cols):
+                denom = df["AB"] + df["BB"] + df["HBP"] + df["SF"] + df["SH"]
+            else:
+                return pd.Series(index=df.index)  # Can't calculate without required stats
+    else:  # pitching
+        if "BF" in df.columns:
+            denom = df["BF"]
+        elif "TBF" in df.columns:
+            denom = df["TBF"]
+        else:
+            # Calculate BF if not available: IP*3 + H + BB + HBP
+            required_cols = ["IP", "H", "BB", "HBP"]
+            if all(col in df.columns for col in required_cols):
+                denom = df["IP"] * 3 + df["H"] + df["BB"] + df["HBP"]
+            else:
+                return pd.Series(index=df.index)  # Can't calculate without required stats
+
+    # Return wOBA, handling division by zero and infinity
+    result = woba.div(denom)
+    result = result.replace([np.inf, -np.inf], np.nan)
+    return result.fillna(0)
+
+def calculate_rate_stats(df: pd.DataFrame, player_type: str, year: Optional[int] = None) -> pd.DataFrame:
+    """Calculate all rate stats for a dataframe"""
+    # Fill missing values with 0 for required stats
+    required_cols = (
+        ["PA", "AB", "H", "BB", "SO", "HBP", "HR", "2B", "3B", "SF", "SH"]
+        if player_type == "batting"
+        else ["BF", "H", "BB", "SO", "HBP", "HR", "2B", "3B", "IP", "ER", "G"]
+    )
+
+    for col in required_cols:
+        if col in df.columns:
+            df[col] = df[col].fillna(0)
+
+    # Calculate singles
+    if all(col in df.columns for col in ["H", "2B", "3B", "HR"]):
+        df["1B"] = df["H"] - df["2B"] - df["3B"] - df["HR"]
+
+    if player_type == "batting":
+        # Calculate PA if missing
+        if "PA" not in df.columns and all(col in df.columns for col in ["AB", "BB", "HBP", "SF", "SH"]):
+            df["PA"] = df["AB"] + df["BB"] + df["HBP"] + df["SF"] + df["SH"]
+
+        if "PA" in df.columns:
+            # Basic rate stats
+            df["SO/PA"] = df.apply(lambda row: 0 if row["PA"] == 0 else row["SO"] / row["PA"], axis=1)
+            df["BB/PA"] = df.apply(lambda row: 0 if row["PA"] == 0 else row["BB"] / row["PA"], axis=1)
+            df["HBP/PA"] = df.apply(lambda row: 0 if row["PA"] == 0 else row["HBP"] / row["PA"], axis=1)
+
+            # Calculate BIP and related stats
+            df["BIP"] = df["PA"] - df["SO"] - df["BB"] - df["HBP"]
+            df["HR/BIP"] = df.apply(lambda row: 0 if row["BIP"] == 0 else row["HR"] / row["BIP"], axis=1)
+
+            # Traditional stats
+            df["AVG"] = df.apply(lambda row: 0 if row["AB"] == 0 else row["H"] / row["AB"], axis=1)
+            df["OBP"] = df.apply(
+                lambda row: 0
+                if (row["AB"] + row["BB"] + row["HBP"] + row.get("SF", 0)) == 0
+                else (row["H"] + row["BB"] + row["HBP"]) / (row["AB"] + row["BB"] + row["HBP"] + row.get("SF", 0)),
+                axis=1
+            )
+            df["SLG"] = df.apply(
+                lambda row: 0
+                if row["AB"] == 0
+                else (row["1B"] + 2*row["2B"] + 3*row["3B"] + 4*row["HR"]) / row["AB"],
+                axis=1
+            )
+
+            # Calculate wOBA if year is provided
+            if year is not None:
+                df["wOBA"] = calculate_woba(df, year, player_type)
+
+            # Additional rate stats
+            if "R" in df.columns:
+                df["R/PA"] = df.apply(lambda row: 0 if row["PA"] == 0 else row["R"] / row["PA"], axis=1)
+
+            if "RBI" in df.columns:
+                df["RBI/PA"] = df.apply(lambda row: 0 if row["PA"] == 0 else row["RBI"] / row["PA"], axis=1)
+
+            # Calculate BABIP and hit type rates
+            if all(col in df.columns for col in ["H", "2B", "3B", "HR"]):
+                df["BABIP"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else (row["H"] - row["HR"]) / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["1B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["1B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["2B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["2B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["3B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["3B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+
+            # Calculate SB/TOF if all required columns are available
+            if all(col in df.columns for col in ["SB", "BB", "HBP", "H", "2B", "3B", "HR"]):
+                df["SB"] = df["SB"].fillna(0)
+                df["TOF"] = df["BB"] + df["HBP"] + df["H"] - df["2B"] - df["3B"] - df["HR"]
+                df["SB/TOF"] = df.apply(lambda row: 0 if row["TOF"] == 0 else row["SB"] / row["TOF"], axis=1)
+    else:  # pitching
+        # Calculate BF when missing or empty: IP*3 + H + BB + HBP
+        required_cols = ["IP", "H", "BB", "HBP"]
+        should_calculate_bf = True
+
+        # Check if BF or TBF exists and has valid data
+        if "BF" in df.columns and df["BF"].sum() > 0:
+            should_calculate_bf = False
+        elif "TBF" in df.columns and df["TBF"].sum() > 0:
+            df["BF"] = df["TBF"]
+            should_calculate_bf = False
+
+        if should_calculate_bf and all(col in df.columns for col in required_cols):
+            df["BF"] = df["IP"] * 3 + df["H"] + df["BB"] + df["HBP"]
+
+        if "BF" in df.columns:
+            # Basic rate stats
+            df["SO/BF"] = df.apply(lambda row: 0 if row["BF"] == 0 else row["SO"] / row["BF"], axis=1)
+            df["BB/BF"] = df.apply(lambda row: 0 if row["BF"] == 0 else row["BB"] / row["BF"], axis=1)
+            df["HBP/BF"] = df.apply(lambda row: 0 if row["BF"] == 0 else row["HBP"] / row["BF"], axis=1)
+
+            # Calculate BIP and related stats
+            df["BIP"] = df["BF"] - df["SO"] - df["BB"] - df["HBP"]
+            df["HR/BIP"] = df.apply(lambda row: 0 if row["BIP"] == 0 else row["HR"] / row["BIP"], axis=1)
+
+            # Traditional stats
+            if "IP" in df.columns and "ER" in df.columns:
+                df["ERA"] = df.apply(lambda row: 0 if row["IP"] == 0 else (row["ER"] * 9) / row["IP"], axis=1)
+                df["WHIP"] = df.apply(lambda row: 0 if row["IP"] == 0 else (row["BB"] + row["H"]) / row["IP"], axis=1)
+
+            # Calculate wOBA if year is provided
+            if year is not None:
+                df["wOBA"] = calculate_woba(df, year, player_type)
+
+            # Additional rate stats
+            if "R" in df.columns:
+                df["R/BF"] = df.apply(lambda row: 0 if row["BF"] == 0 else row["R"] / row["BF"], axis=1)
+
+            if "ER" in df.columns:
+                df["ER/BF"] = df.apply(lambda row: 0 if row["BF"] == 0 else row["ER"] / row["BF"], axis=1)
+
+            # Calculate BABIP and hit type rates
+            if all(col in df.columns for col in ["H", "2B", "3B", "HR"]):
+                df["BABIP"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else (row["H"] - row["HR"]) / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["1B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["1B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["2B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["2B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+                df["3B/(BIP-HR)"] = df.apply(
+                    lambda row: 0 if (row["BIP"] - row["HR"]) == 0 else row["3B"] / (row["BIP"] - row["HR"]),
+                    axis=1,
+                )
+
+            # Calculate per-game stats if G column is available
+            if "G" in df.columns:
+                for stat in ["W", "L", "SV", "HLD"]:
+                    if stat in df.columns:
+                        df[stat] = df[stat].fillna(0)
+                        df[f"{stat}/G"] = df.apply(lambda row: 0 if row["G"] == 0 else row[stat] / row["G"], axis=1)
+
+    return df
 
 def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
     """Load actual stats for a given year and player type"""
@@ -47,50 +287,10 @@ def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
             # Only keep pitchers in pitching data
             df = df[df["position"] == "P"]
 
-    # Calculate rate stats with safe division (use 0 when no opportunities)
-    if player_type == "batting":
-        # Fill missing values with 0 and calculate rates, setting to 0 when PA=0
-        df["SO"] = df["SO"].fillna(0)
-        df["BB"] = df["BB"].fillna(0)
-        df["HR"] = df["HR"].fillna(0)
-        df["HBP"] = df["HBP"].fillna(0)
-        df["PA"] = df["PA"].fillna(0)
-
-        df["SO/PA"] = df.apply(
-            lambda row: 0 if row["PA"] == 0 else row["SO"] / row["PA"], axis=1
-        )
-        df["BB/PA"] = df.apply(
-            lambda row: 0 if row["PA"] == 0 else row["BB"] / row["PA"], axis=1
-        )
-        df["HR/PA"] = df.apply(
-            lambda row: 0 if row["PA"] == 0 else row["HR"] / row["PA"], axis=1
-        )
-        df["HBP/PA"] = df.apply(
-            lambda row: 0 if row["PA"] == 0 else row["HBP"] / row["PA"], axis=1
-        )
-    else:
-        # Fill missing values with 0 and calculate rates, setting to 0 when BF=0
-        df["SO"] = df["SO"].fillna(0)
-        df["BB"] = df["BB"].fillna(0)
-        df["HR"] = df["HR"].fillna(0)
-        df["HBP"] = df["HBP"].fillna(0)
-        df["BF"] = df["BF"].fillna(0)
-
-        df["SO/BF"] = df.apply(
-            lambda row: 0 if row["BF"] == 0 else row["SO"] / row["BF"], axis=1
-        )
-        df["BB/BF"] = df.apply(
-            lambda row: 0 if row["BF"] == 0 else row["BB"] / row["BF"], axis=1
-        )
-        df["HR/BF"] = df.apply(
-            lambda row: 0 if row["BF"] == 0 else row["HR"] / row["BF"], axis=1
-        )
-        df["HBP/BF"] = df.apply(
-            lambda row: 0 if row["BF"] == 0 else row["HBP"] / row["BF"], axis=1
-        )
+    # Calculate all rate stats
+    df = calculate_rate_stats(df, player_type, year)
 
     return df
-
 
 def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     """Load projections for a given year, system, and player type"""
@@ -127,108 +327,10 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
             .astype(str)
         )
 
-    # For Marcel batting, calculate PA if it's missing
-    if (
-        system.lower() == "marcel"
-        and player_type == "batting"
-        and "PA" not in df.columns
-    ):
-        required_cols = ["AB", "BB", "HBP", "SF", "SH"]
-        if all(col in df.columns for col in required_cols):
-            for col in required_cols:
-                df[col] = df[col].fillna(0)
-            df["PA"] = df["AB"] + df["BB"] + df["HBP"] + df["SF"] + df["SH"]
-
-    # Calculate rate stats from projections with safe division
-    if player_type == "batting":
-        if "PA" in df.columns:
-            # Fill missing values with 0 and calculate rates, setting to 0 when PA=0
-            df["SO"] = df["SO"].fillna(0)
-            df["BB"] = df["BB"].fillna(0)
-            df["HR"] = df["HR"].fillna(0)
-            df["HBP"] = df["HBP"].fillna(0)
-            df["PA"] = df["PA"].fillna(0)
-
-            df["SO/PA"] = df.apply(
-                lambda row: 0 if row["PA"] == 0 else row["SO"] / row["PA"], axis=1
-            )
-            df["BB/PA"] = df.apply(
-                lambda row: 0 if row["PA"] == 0 else row["BB"] / row["PA"], axis=1
-            )
-            df["HR/PA"] = df.apply(
-                lambda row: 0 if row["PA"] == 0 else row["HR"] / row["PA"], axis=1
-            )
-            df["HBP/PA"] = df.apply(
-                lambda row: 0 if row["PA"] == 0 else row["HBP"] / row["PA"], axis=1
-            )
-    else:
-        if "BF" in df.columns and df["BF"].notna().sum() > 0:
-            # Fill missing values with 0 and calculate rates, setting to 0 when BF=0
-            df["SO"] = df["SO"].fillna(0)
-            df["BB"] = df["BB"].fillna(0)
-            df["HR"] = df["HR"].fillna(0)
-            df["HBP"] = df["HBP"].fillna(0)
-            df["BF"] = df["BF"].fillna(0)
-
-            df["SO/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["SO"] / row["BF"], axis=1
-            )
-            df["BB/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["BB"] / row["BF"], axis=1
-            )
-            df["HR/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["HR"] / row["BF"], axis=1
-            )
-            df["HBP/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["HBP"] / row["BF"], axis=1
-            )
-        elif (
-            "TBF" in df.columns and df["TBF"].notna().sum() > 0
-        ):  # Some projections use TBF instead of BF
-            df["BF"] = df["TBF"]
-            # Fill missing values with 0 and calculate rates, setting to 0 when BF=0
-            df["SO"] = df["SO"].fillna(0)
-            df["BB"] = df["BB"].fillna(0)
-            df["HR"] = df["HR"].fillna(0)
-            df["HBP"] = df["HBP"].fillna(0)
-            df["BF"] = df["BF"].fillna(0)
-
-            df["SO/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["SO"] / row["BF"], axis=1
-            )
-            df["BB/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["BB"] / row["BF"], axis=1
-            )
-            df["HR/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["HR"] / row["BF"], axis=1
-            )
-            df["HBP/BF"] = df.apply(
-                lambda row: 0 if row["BF"] == 0 else row["HBP"] / row["BF"], axis=1
-            )
-        else:
-            # Calculate TBF/BF when missing: IP*3 + H + BB + HBP
-            required_cols = ["IP", "H", "BB", "HBP", "SO", "HR"]
-            if all(col in df.columns for col in required_cols):
-                # Fill missing values with 0 first
-                for col in required_cols:
-                    df[col] = df[col].fillna(0)
-
-                df["BF"] = df["IP"] * 3 + df["H"] + df["BB"] + df["HBP"]
-                df["SO/BF"] = df.apply(
-                    lambda row: 0 if row["BF"] == 0 else row["SO"] / row["BF"], axis=1
-                )
-                df["BB/BF"] = df.apply(
-                    lambda row: 0 if row["BF"] == 0 else row["BB"] / row["BF"], axis=1
-                )
-                df["HR/BF"] = df.apply(
-                    lambda row: 0 if row["BF"] == 0 else row["HR"] / row["BF"], axis=1
-                )
-                df["HBP/BF"] = df.apply(
-                    lambda row: 0 if row["BF"] == 0 else row["HBP"] / row["BF"], axis=1
-                )
+    # Calculate all rate stats
+    df = calculate_rate_stats(df, player_type, year)
 
     return df
-
 
 @dataclass
 class ProjectionResult:
@@ -398,6 +500,9 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                                     "PA",
                                     "AB",
                                     "H",
+                                    "1B",
+                                    "2B",
+                                    "3B",
                                     "HR",
                                     "BB",
                                     "SO",
@@ -405,20 +510,29 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                                     "R",
                                     "RBI",
                                     "SB",
+                                    "BIP",
+                                    "TOF",
                                 ]
                                 if player_type == "batting"
                                 else [
                                     "BF",
                                     "IP",
                                     "H",
+                                    "1B",
+                                    "2B",
+                                    "3B",
                                     "HR",
                                     "BB",
                                     "SO",
                                     "HBP",
                                     "ER",
+                                    "R",
                                     "W",
                                     "L",
                                     "SV",
+                                    "HLD",
+                                    "G",
+                                    "BIP",
                                 ]
                             )
                             rate_stats = (
@@ -457,20 +571,43 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                         # Projection stats for this system
                         proj_stats = {}
                         all_cols = (
-                            ["PA", "AB", "H", "HR", "BB", "SO", "HBP", "R", "RBI", "SB"]
+                            [
+                                "PA",
+                                "AB",
+                                "H",
+                                "1B",
+                                "2B",
+                                "3B",
+                                "HR",
+                                "BB",
+                                "SO",
+                                "HBP",
+                                "R",
+                                "RBI",
+                                "SB",
+                                "BIP",
+                                "TOF",
+                            ]
                             if player_type == "batting"
                             else [
                                 "BF",
                                 "IP",
                                 "H",
+                                "1B",
+                                "2B",
+                                "3B",
                                 "HR",
                                 "BB",
                                 "SO",
                                 "HBP",
                                 "ER",
+                                "R",
                                 "W",
                                 "L",
                                 "SV",
+                                "HLD",
+                                "G",
+                                "BIP",
                             ]
                         )
                         rate_stats = (
@@ -539,7 +676,7 @@ def save_json_file(data: Any, filepath: Path) -> None:
             if isinstance(obj, np.integer):
                 return int(obj)
             elif isinstance(obj, np.floating):
-                if np.isnan(obj) or pd.isna(obj):
+                if np.isnan(obj) or pd.isna(obj) or np.isinf(obj):
                     return None
                 return float(obj)
             elif isinstance(obj, np.ndarray):

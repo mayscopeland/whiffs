@@ -1,19 +1,42 @@
-
 function initializeIndexCharts(yearsData, projectionSystems) {
     const battingStats = [
         { stat: 'PA', baseName: 'battingPA', title: 'Plate Appearances', isVolumestat: true },
+        { stat: 'wOBA', baseName: 'battingwOBA', title: 'wOBA', isVolumestat: false },
         { stat: 'SO/PA', baseName: 'battingSO', title: 'Strikeout Rate', isVolumestat: false },
         { stat: 'BB/PA', baseName: 'battingBB', title: 'Walk Rate', isVolumestat: false },
-        { stat: 'HR/PA', baseName: 'battingHR', title: 'Home Run Rate', isVolumestat: false },
-        { stat: 'HBP/PA', baseName: 'battingHBP', title: 'Hit By Pitch Rate', isVolumestat: false }
+        { stat: 'HBP/PA', baseName: 'battingHBP', title: 'Hit By Pitch Rate', isVolumestat: false },
+        { stat: 'HR/BIP', baseName: 'battingHR', title: 'Home Run Rate', isVolumestat: false },
+        { stat: 'BABIP', baseName: 'battingBABIP', title: 'BABIP', isVolumestat: false },
+        { stat: '1B/(BIP-HR)', baseName: 'batting1B', title: 'Single Rate', isVolumestat: false },
+        { stat: '2B/(BIP-HR)', baseName: 'batting2B', title: 'Double Rate', isVolumestat: false },
+        { stat: '3B/(BIP-HR)', baseName: 'batting3B', title: 'Triple Rate', isVolumestat: false },
+        { stat: 'R/PA', baseName: 'battingR', title: 'Run Rate', isVolumestat: false },
+        { stat: 'RBI/PA', baseName: 'battingRBI', title: 'RBI Rate', isVolumestat: false },
+        { stat: 'SB/TOF', baseName: 'battingSB', title: 'Stolen Base Rate', isVolumestat: false },
+        { stat: 'AVG', baseName: 'battingAVG', title: 'Batting Average', isVolumestat: false },
+        { stat: 'OBP', baseName: 'battingOBP', title: 'On-Base Percentage', isVolumestat: false },
+        { stat: 'SLG', baseName: 'battingSLG', title: 'Slugging Percentage', isVolumestat: false }
     ];
 
     const pitchingStats = [
         { stat: 'BF', baseName: 'pitchingBF', title: 'Batters Faced', isVolumestat: true },
+        { stat: 'wOBA', baseName: 'pitchingwOBA', title: 'wOBA', isVolumestat: false },
         { stat: 'SO/BF', baseName: 'pitchingSO', title: 'Strikeout Rate', isVolumestat: false },
         { stat: 'BB/BF', baseName: 'pitchingBB', title: 'Walk Rate', isVolumestat: false },
-        { stat: 'HR/BF', baseName: 'pitchingHR', title: 'Home Run Rate', isVolumestat: false },
-        { stat: 'HBP/BF', baseName: 'pitchingHBP', title: 'Hit By Pitch Rate', isVolumestat: false }
+        { stat: 'HBP/BF', baseName: 'pitchingHBP', title: 'Hit By Pitch Rate', isVolumestat: false },
+        { stat: 'HR/BIP', baseName: 'pitchingHR', title: 'Home Run Rate', isVolumestat: false },
+        { stat: 'BABIP', baseName: 'pitchingBABIP', title: 'BABIP', isVolumestat: false },
+        { stat: '1B/(BIP-HR)', baseName: 'pitching1B', title: 'Single Rate', isVolumestat: false },
+        { stat: '2B/(BIP-HR)', baseName: 'pitching2B', title: 'Double Rate', isVolumestat: false },
+        { stat: '3B/(BIP-HR)', baseName: 'pitching3B', title: 'Triple Rate', isVolumestat: false },
+        { stat: 'R/BF', baseName: 'pitchingR', title: 'Run Rate', isVolumestat: false },
+        { stat: 'ER/BF', baseName: 'pitchingER', title: 'Earned Run Rate', isVolumestat: false },
+        { stat: 'W/G', baseName: 'pitchingW', title: 'Win Rate', isVolumestat: false },
+        { stat: 'L/G', baseName: 'pitchingL', title: 'Loss Rate', isVolumestat: false },
+        { stat: 'SV/G', baseName: 'pitchingSV', title: 'Save Rate', isVolumestat: false },
+        { stat: 'HLD/G', baseName: 'pitchingHLD', title: 'Hold Rate', isVolumestat: false },
+        { stat: 'ERA', baseName: 'pitchingERA', title: 'ERA', isVolumestat: false },
+        { stat: 'WHIP', baseName: 'pitchingWHIP', title: 'WHIP', isVolumestat: false }
     ];
 
     // Create batting charts

@@ -9,6 +9,44 @@ eleventyComputed:
     title: "{{ year }} Projection Accuracy"
 ---
 
+{% set battingStats = [
+  { name: 'wOBA', stat: 'wOBA', isVolume: false },
+  { name: 'Strikeout Rate', stat: 'SO/PA', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/PA', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
+  { name: 'Run Rate', stat: 'R/PA', isVolume: false },
+  { name: 'RBI Rate', stat: 'RBI/PA', isVolume: false },
+  { name: 'Stolen Base Rate', stat: 'SB/TOF', isVolume: false },
+  { name: 'Batting Average', stat: 'AVG', isVolume: false },
+  { name: 'On-Base Percentage', stat: 'OBP', isVolume: false },
+  { name: 'Slugging Percentage', stat: 'SLG', isVolume: false }
+] %}
+
+{% set pitchingStats = [
+  { name: 'wOBA', stat: 'wOBA', isVolume: false },
+  { name: 'Strikeout Rate', stat: 'SO/BF', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/BF', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
+  { name: 'Run Rate', stat: 'R/BF', isVolume: false },
+  { name: 'Earned Run Rate', stat: 'ER/BF', isVolume: false },
+  { name: 'Win Rate', stat: 'W/G', isVolume: false },
+  { name: 'Loss Rate', stat: 'L/G', isVolume: false },
+  { name: 'Save Rate', stat: 'SV/G', isVolume: false },
+  { name: 'Hold Rate', stat: 'HLD/G', isVolume: false },
+  { name: 'ERA', stat: 'ERA', isVolume: false },
+  { name: 'WHIP', stat: 'WHIP', isVolume: false }
+] %}
+
 {% set metrics = [
   { value: 'MAE', name: 'MAE', title: 'MAE' },
   { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
@@ -47,10 +85,11 @@ eleventyComputed:
         </div>
       </div>
 
-      <!-- Batting Rate Section -->
+      <!-- Individual Batting Rate Stats -->
+      {% for statInfo in battingStats %}
       <div class="chart-section mb-8">
         <div class="mb-4 py-4">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
           <div class="flex flex-wrap gap-4">
             <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
@@ -60,18 +99,32 @@ eleventyComputed:
             </select>
           </div>
         </div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="battingRateRmseChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="battingRateLeagueAdjRmseChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLAMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="battingRateWLARmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}MaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}RmseChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}LeagueAdjMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}LeagueAdjRmseChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLAMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj">
+          <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLARmseChart"></canvas></div>
+        </div>
       </div>
+      {% endfor %}
     </div>
 
     <!-- Pitching Section -->
     <div class="space-y-8 mb-12">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pitching Projection Accuracy</h2>
+
       <!-- Pitching Volume Section -->
       <div class="chart-section mb-8">
         <div class="mb-4 py-4">
@@ -82,14 +135,19 @@ eleventyComputed:
             </select>
           </div>
         </div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingVolumeRmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw">
+          <div class="h-80"><canvas id="pitchingVolumeMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw">
+          <div class="h-80"><canvas id="pitchingVolumeRmseChart"></canvas></div>
+        </div>
       </div>
 
-      <!-- Pitching Rate Section -->
+      <!-- Individual Pitching Rate Stats -->
+      {% for statInfo in pitchingStats %}
       <div class="chart-section mb-8">
         <div class="mb-4 py-4">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Rate Stats</h4>
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
           <div class="flex flex-wrap gap-4">
             <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
@@ -99,13 +157,26 @@ eleventyComputed:
             </select>
           </div>
         </div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw"><div class="h-80"><canvas id="pitchingRateRmseChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj"><div class="h-80"><canvas id="pitchingRateLeagueAdjRmseChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLAMaeChart"></canvas></div></div>
-        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj"><div class="h-80"><canvas id="pitchingRateWLARmseChart"></canvas></div></div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="raw">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}MaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="raw">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}RmseChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="league-adj">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}LeagueAdjMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="league-adj">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}LeagueAdjRmseChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLAMaeChart"></canvas></div>
+        </div>
+        <div class="chart-container bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj">
+          <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLARmseChart"></canvas></div>
+        </div>
       </div>
+      {% endfor %}
     </div>
 
     <!-- Biggest Misses Section -->
@@ -171,7 +242,19 @@ eleventyComputed:
 
             <!-- Rate Stats Misses -->
             {% for playerType in ['batting', 'pitching'] %}
-            {% set rateStats = ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] if playerType == 'batting' else ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'] %}
+            {% set rateStats = [
+                'wOBA',
+                'SO/PA', 'BB/PA', 'HBP/PA', 'HR/BIP',
+                'BABIP', '1B/(BIP-HR)', '2B/(BIP-HR)', '3B/(BIP-HR)',
+                'R/PA', 'RBI/PA', 'SB/TOF',
+                'AVG', 'OBP', 'SLG'
+            ] if playerType == 'batting' else [
+                'wOBA',
+                'SO/BF', 'BB/BF', 'HBP/BF', 'HR/BIP',
+                'BABIP', '1B/(BIP-HR)', '2B/(BIP-HR)', '3B/(BIP-HR)',
+                'R/BF', 'ER/BF', 'W/G', 'L/G', 'SV/G', 'HLD/G',
+                'ERA', 'WHIP'
+            ] %}
             {% for stat in rateStats %}
             <div class="mb-8">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">{{ playerType | title }} - Biggest {{ stat }} Misses (weighted league-adjusted)</h3>
