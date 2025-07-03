@@ -177,7 +177,19 @@ eleventyComputed:
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type]['Marcel'][stat] is defined and yearData[player.primary_type]['Marcel'][stat] is not none %}
-                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['Marcel'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Marcel'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Marcel'][stat] | round(1) }}{% endif %}</span>
+                <span class="font-mono">
+                  {%- if stat == 'IP' -%}
+                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(1) }}
+                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
+                    {{ yearData[player.primary_type]['Marcel'][stat] | round(0) }}
+                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
+                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(3) }}
+                  {%- elif stat in ['ERA', 'WHIP'] -%}
+                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(2) }}
+                  {%- else -%}
+                    {{ yearData[player.primary_type]['Marcel'][stat] | round(1) }}
+                  {%- endif -%}
+                </span>
                 {% else %}
                 -
                 {% endif %}
@@ -194,7 +206,19 @@ eleventyComputed:
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type]['Steamer'][stat] is defined and yearData[player.primary_type]['Steamer'][stat] is not none %}
-                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['Steamer'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Steamer'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Steamer'][stat] | round(1) }}{% endif %}</span>
+                <span class="font-mono">
+                  {%- if stat == 'IP' -%}
+                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(1) }}
+                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
+                    {{ yearData[player.primary_type]['Steamer'][stat] | round(0) }}
+                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
+                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(3) }}
+                  {%- elif stat in ['ERA', 'WHIP'] -%}
+                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(2) }}
+                  {%- else -%}
+                    {{ yearData[player.primary_type]['Steamer'][stat] | round(1) }}
+                  {%- endif -%}
+                </span>
                 {% else %}
                 -
                 {% endif %}
@@ -211,7 +235,19 @@ eleventyComputed:
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type]['ZiPS'][stat] is defined and yearData[player.primary_type]['ZiPS'][stat] is not none %}
-                <span class="font-mono">{% if stat == 'IP' %}{{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['ZiPS'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['ZiPS'][stat] | round(1) }}{% endif %}</span>
+                <span class="font-mono">
+                  {%- if stat == 'IP' -%}
+                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(1) }}
+                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
+                    {{ yearData[player.primary_type]['ZiPS'][stat] | round(0) }}
+                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
+                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(3) }}
+                  {%- elif stat in ['ERA', 'WHIP'] -%}
+                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(2) }}
+                  {%- else -%}
+                    {{ yearData[player.primary_type]['ZiPS'][stat] | round(1) }}
+                  {%- endif -%}
+                </span>
                 {% else %}
                 -
                 {% endif %}
@@ -229,7 +265,17 @@ eleventyComputed:
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type]['Actual'][stat] is defined and yearData[player.primary_type]['Actual'][stat] is not none %}
                 <span class="font-medium text-gray-900 dark:text-white font-mono">
-                {% if stat == 'IP' %}{{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}{% elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] %}{{ yearData[player.primary_type]['Actual'][stat] | round(0) }}{% else %}{{ yearData[player.primary_type]['Actual'][stat] | round(1) }}{% endif %}
+                  {%- if stat == 'IP' -%}
+                    {{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}
+                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
+                    {{ yearData[player.primary_type]['Actual'][stat] | round(0) }}
+                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
+                    {{ yearData[player.primary_type]['Actual'][stat] | toFixed(3) }}
+                  {%- elif stat in ['ERA', 'WHIP'] -%}
+                    {{ yearData[player.primary_type]['Actual'][stat] | toFixed(2) }}
+                  {%- else -%}
+                    {{ yearData[player.primary_type]['Actual'][stat] | round(1) }}
+                  {%- endif -%}
                 </span>
                 {% else %}
                 -
