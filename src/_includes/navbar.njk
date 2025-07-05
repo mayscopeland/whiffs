@@ -35,6 +35,11 @@
           </a>
         </li>
         <li>
+          <a href="{{ '/stats/' | url }}" class="{% if page.url == '/stats/' %}block py-2 px-3 text-white bg-blue-400 rounded md:bg-transparent md:text-blue-400 md:p-0{% else %}block py-2 px-3 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-400 md:p-0{% endif %}">
+            All-Time
+          </a>
+        </li>
+        <li>
           <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar" class="{% if page.url.startsWith('/seasons/') %}flex items-center justify-between w-full py-2 px-3 text-white bg-blue-400 rounded md:bg-transparent md:text-blue-400 md:p-0 md:w-auto{% else %}flex items-center justify-between w-full py-2 px-3 text-white rounded hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-400 md:p-0 md:w-auto{% endif %}">
             Seasons
             <svg class="w-2.5 h-2.5 ms-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,0 +1,223 @@
+---
+layout: base.njk
+title: "All-Time Projection Accuracy"
+---
+
+{% set battingStats = [
+  { name: 'Plate Appearances', stat: 'PA', baseName: 'battingPA', isVolume: true },
+  { name: 'wOBA', stat: 'wOBA', baseName: 'battingwOBA', isVolume: false },
+  { name: 'Strikeout Rate', stat: 'SO/PA', baseName: 'battingSO', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/PA', baseName: 'battingBB', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', baseName: 'battingHBP', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', baseName: 'battingHR', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', baseName: 'battingBABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', baseName: 'batting1B', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', baseName: 'batting2B', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', baseName: 'batting3B', isVolume: false },
+  { name: 'Run Rate', stat: 'R/PA', baseName: 'battingR', isVolume: false },
+  { name: 'RBI Rate', stat: 'RBI/PA', baseName: 'battingRBI', isVolume: false },
+  { name: 'Stolen Base Rate', stat: 'SB/TOF', baseName: 'battingSB', isVolume: false },
+  { name: 'Batting Average', stat: 'AVG', baseName: 'battingAVG', isVolume: false },
+  { name: 'On-Base Percentage', stat: 'OBP', baseName: 'battingOBP', isVolume: false },
+  { name: 'Slugging Percentage', stat: 'SLG', baseName: 'battingSLG', isVolume: false }
+] %}
+
+{% set pitchingStats = [
+  { name: 'Batters Faced', stat: 'BF', baseName: 'pitchingBF', isVolume: true },
+  { name: 'wOBA', stat: 'wOBA', baseName: 'pitchingwOBA', isVolume: false },
+  { name: 'Strikeout Rate', stat: 'SO/BF', baseName: 'pitchingSO', isVolume: false },
+  { name: 'Walk Rate', stat: 'BB/BF', baseName: 'pitchingBB', isVolume: false },
+  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', baseName: 'pitchingHBP', isVolume: false },
+  { name: 'Home Run Rate', stat: 'HR/BIP', baseName: 'pitchingHR', isVolume: false },
+  { name: 'BABIP', stat: 'BABIP', baseName: 'pitchingBABIP', isVolume: false },
+  { name: 'Single Rate', stat: '1B/(BIP-HR)', baseName: 'pitching1B', isVolume: false },
+  { name: 'Double Rate', stat: '2B/(BIP-HR)', baseName: 'pitching2B', isVolume: false },
+  { name: 'Triple Rate', stat: '3B/(BIP-HR)', baseName: 'pitching3B', isVolume: false },
+  { name: 'Run Rate', stat: 'R/BF', baseName: 'pitchingR', isVolume: false },
+  { name: 'Earned Run Rate', stat: 'ER/BF', baseName: 'pitchingER', isVolume: false },
+  { name: 'Win Rate', stat: 'W/G', baseName: 'pitchingW', isVolume: false },
+  { name: 'Loss Rate', stat: 'L/G', baseName: 'pitchingL', isVolume: false },
+  { name: 'Save Rate', stat: 'SV/G', baseName: 'pitchingSV', isVolume: false },
+  { name: 'Hold Rate', stat: 'HLD/G', baseName: 'pitchingHLD', isVolume: false },
+  { name: 'ERA', stat: 'ERA', baseName: 'pitchingERA', isVolume: false },
+  { name: 'WHIP', stat: 'WHIP', baseName: 'pitchingWHIP', isVolume: false }
+] %}
+
+{% set metrics = [
+  { value: 'MAE', name: 'MAE', title: 'MAE' },
+  { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { value: 'weighted-league-adj', name: 'Weighted League-Adjusted', chartSuffix: 'WeightedLeagueAdj' },
+  { value: 'league-adj', name: 'League-Adjusted', chartSuffix: 'LeagueAdj' },
+  { value: 'raw', name: 'Raw', chartSuffix: '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Methodology</h1>
+  </div>
+
+    <!-- Batting Statistics Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Batting Statistics</h2>
+        <div class="space-y-6">
+            {% for statInfo in battingStats %}
+            <div class="mb-4 py-4">
+              <div class="mb-4 py-4">
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                <div class="flex flex-wrap gap-4">
+                    <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                      {% for metric in metrics %}
+                      <option value="{{ metric.value }}">{{ metric.title }}</option>
+                      {% endfor %}
+                    </select>
+                  {% if not statInfo.isVolume %}
+                    <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                      {% for adj in adjustments %}
+                      <option value="{{ adj.value }}">{{ adj.name }}</option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
+                </div>
+              </div>
+
+                {% for metric in metrics %}
+                    {% if statInfo.isVolume %}
+                        {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                        </div>
+                    {% else %}
+                        {% for adj in adjustments %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pitching Statistics Section -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Pitching Statistics</h2>
+        <div class="space-y-6">
+            {% for statInfo in pitchingStats %}
+            <div class="mb-4 py-4">
+              <div class="mb-4 py-4">
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                <div class="flex flex-wrap gap-4">
+                  <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    {% for metric in metrics %}
+                    <option value="{{ metric.value }}">{{ metric.title }}</option>
+                    {% endfor %}
+                  </select>
+                  {% if not statInfo.isVolume %}
+                    <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                      {% for adj in adjustments %}
+                      <option value="{{ adj.value }}">{{ adj.name }}</option>
+                      {% endfor %}
+                    </select>
+                  {% endif %}
+                </div>
+              </div>
+
+                {% for metric in metrics %}
+                    {% if statInfo.isVolume %}
+                        {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                        </div>
+                    {% else %}
+                        {% for adj in adjustments %}
+                        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                            <div class="h-80"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    {% include "chart-utils.js" %}
+    {% include "stats-charts.js" %}
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeStatsCharts({{ years | dump | safe }}, {{ site.meta.projection_systems | dump | safe }});
+        initializeChartFilters();
+    });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            // Get current values from any metric/adjustment dropdown (they should all be synced)
+            const selectedMetric = metricSelects[0].value;
+            const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
+
+            // Get all chart containers
+            const chartContainers = document.querySelectorAll('.chart-container');
+
+            chartContainers.forEach(container => {
+                const chartMetric = container.dataset.metric;
+                const chartAdjustment = container.dataset.adjustment;
+                const chartStat = container.dataset.stat;
+
+                // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
+                const isVolumestat = chartStat === 'PA' || chartStat === 'BF';
+
+                const shouldShow = chartMetric === selectedMetric &&
+                    (isVolumestat || chartAdjustment === selectedAdjustment);
+
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            if (selectType === 'metric') {
+                // Sync all metric dropdowns
+                metricSelects.forEach(select => {
+                    if (select !== changedSelect) {
+                        select.value = changedSelect.value;
+                    }
+                });
+            } else if (selectType === 'adjustment') {
+                // Sync all adjustment dropdowns
+                adjustmentSelects.forEach(select => {
+                    if (select !== changedSelect) {
+                        select.value = changedSelect.value;
+                    }
+                });
+            }
+            updateChartVisibility();
+        }
+
+        // Add event listeners to all metric dropdowns
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                syncDropdowns(this, 'metric');
+            });
+        });
+
+        // Add event listeners to all adjustment dropdowns
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                syncDropdowns(this, 'adjustment');
+            });
+        });
+
+        // Initial visibility setup
+        updateChartVisibility();
+    }
+</script>
+{% endblock %}
+
