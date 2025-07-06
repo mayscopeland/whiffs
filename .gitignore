@@ -58,4 +58,4 @@ _site/
 # Project data
 stats/
 projections/
-_data/
+src/_data/**/*.json

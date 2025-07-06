@@ -1,12 +1,17 @@
----
-layout: base.njk
-pagination:
-    data: players
-    size: 1
-    alias: player
-permalink: "/players/{{ player.id }}/"
-eleventyComputed:
-    title: "{{ player.name | safe }} Projection Accuracy"
+---js
+module.exports = {
+  layout: "base.njk",
+  pagination: {
+    data: "players.items",
+    size: 1,
+    alias: "player_id",
+  },
+  permalink: "/players/{{ player_id }}/",
+  eleventyComputed: {
+    player: (data) => data.players.getPlayer(data.player_id),
+    title: (data) => `${data.players.getPlayerName(data.player_id)} Projection Accuracy`,
+  },
+};
 ---
 
 {% set statsConfig = [

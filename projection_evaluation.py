@@ -457,7 +457,7 @@ def calculate_summary_stats(results: List[ProjectionResult]) -> Dict:
 
 
 def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str, Any]]:
-    """Generate player data using already-processed merged dataframes"""
+    """Generate player data using already-processed merged dataframes and split into chunks"""
     print("Generating player data from merged dataframes...")
 
     # Collect unique players
@@ -664,8 +664,45 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
             player_info["primary_type"] = primary_type
             players_list.append(player_info)
 
-    return players_list
+    # Sort players by ID to ensure consistent chunking
+    players_list.sort(key=lambda x: x["id"])
 
+    # Split players into chunks of approximately 100 players each
+    chunk_size = 100
+    player_chunks = [players_list[i:i + chunk_size] for i in range(0, len(players_list), chunk_size)]
+
+    # Create a manifest of all players and their chunk assignments
+    player_manifest = {
+        "total_players": len(players_list),
+        "chunk_size": chunk_size,
+        "total_chunks": len(player_chunks),
+        "players": {
+            player["id"]: {
+                "name": player["name"],
+                "primary_type": player["primary_type"],
+                "chunk": idx // chunk_size
+            }
+            for idx, player in enumerate(players_list)
+        }
+    }
+
+    return player_chunks, player_manifest
+
+def save_player_chunks(player_chunks: List[List[Dict]], player_manifest: Dict, data_dir: Path) -> None:
+    """Save player data chunks and manifest to separate files"""
+    players_dir = data_dir / "players"
+    players_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save each chunk
+    for i, chunk in enumerate(player_chunks):
+        chunk_file = players_dir / f"chunk_{i}.json"
+        save_json_file(chunk, chunk_file)
+        print(f"  Saved player chunk {i} with {len(chunk)} players")
+
+    # Save the manifest
+    manifest_file = players_dir / "manifest.json"
+    save_json_file(player_manifest, manifest_file)
+    print(f"  Saved player manifest with {player_manifest['total_players']} total players")
 
 def save_json_file(data: Any, filepath: Path) -> None:
     """Save data as JSON file with proper formatting"""
@@ -793,18 +830,20 @@ def run_evaluation():
 
         years_data[str(year)] = {"batting": batting_data, "pitching": pitching_data}
 
-    # Generate players data using the stored merged dataframes
-    players_data = generate_players_data_from_merged(merged_dataframes)
+    # Generate and save player data in chunks
+    print("\nGenerating player data chunks...")
+    player_chunks, player_manifest = generate_players_data_from_merged(merged_dataframes)
 
     # Save all files
+    print("\nSaving JSON files...")
     save_json_file(site_data, data_dir / "site.json")
     save_json_file(years_data, data_dir / "years.json")
-    save_json_file(players_data, data_dir / "players.json")
+    save_player_chunks(player_chunks, player_manifest, data_dir)
 
     print(f"\nJSON generation complete!")
     print(f"  Site data: {len(site_data['years'])} years")
     print(f"  Years data: {len(years_data)} years with results")
-    print(f"  Players data: {len(players_data)} players")
+    print(f"  Players data: {len(player_chunks)} chunks with {player_manifest['total_players']} total players")
     print(f"  Files saved to: {data_dir}")
 
 

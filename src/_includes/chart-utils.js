@@ -32,7 +32,8 @@ function prepareStatRmseData(yearsData, stat, playerType, projectionSystems) {
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
@@ -58,7 +59,8 @@ function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projecti
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
@@ -84,7 +86,8 @@ function prepareStatMaeData(yearsData, stat, playerType, projectionSystems) {
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
@@ -110,7 +113,8 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
@@ -392,7 +396,8 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
         borderColor: 'rgba(55, 65, 81, 1)',
         borderWidth: 1,
         type: 'line',
-        order: 0
+        order: 0,
+        tension: 0.1
     });
 
     // Create datasets for each projection system
@@ -449,7 +454,8 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
             data: errorData,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            fill: false
+            fill: false,
+            tension: 0.1
         };
     });
 
@@ -485,7 +491,8 @@ function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projec
             data: errorData,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            fill: false
+            fill: false,
+            tension: 0.1
         };
     });
 
@@ -591,7 +598,8 @@ function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, 
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
@@ -617,7 +625,8 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
             data: data,
             backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
             borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            tension: 0.1
         };
     });
 
