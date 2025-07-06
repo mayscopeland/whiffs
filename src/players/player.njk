@@ -71,6 +71,8 @@ module.exports = {
       </span>
       <span class="text-sm text-gray-500 dark:text-gray-400">ID: <span class="font-mono">{{ player.id }}</span></span>
     </div>
+
+    {% include "2020-toggle.njk" %}
   </div>
 
   <!-- Performance Metrics Section -->
@@ -303,9 +305,17 @@ module.exports = {
 <script>
   {% include "chart-utils.js" %}
   {% include "player-charts.js" %}
+
+  // Global variables to store original data and chart instances
+  let originalPlayerYears = {{ player.years | dump | safe }};
+  let originalPlayerType = '{{ player.primary_type }}';
+  let projectionSystems = {{ site.meta.projection_systems | dump | safe }};
+  let chartInstances = {};
+
   document.addEventListener('DOMContentLoaded', function() {
-    initializePlayerCharts({{ player.years | dump | safe }}, '{{ player.primary_type }}', {{ site.meta.projection_systems | dump | safe }});
+    initializePlayerCharts(originalPlayerYears, originalPlayerType, projectionSystems);
     initializePlayerChartFilters();
+    initialize2020Toggle();
   });
 
   function initializePlayerChartFilters() {

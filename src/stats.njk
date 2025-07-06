@@ -56,7 +56,9 @@ title: "All-Time Projection Accuracy"
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Methodology</h1>
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">All-Time Projection Accuracy</h1>
+
+    {% include "2020-toggle.njk" %}
   </div>
 
     <!-- Batting Statistics Section -->
@@ -150,9 +152,16 @@ title: "All-Time Projection Accuracy"
 <script>
     {% include "chart-utils.js" %}
     {% include "stats-charts.js" %}
+
+    // Global variables to store original data and chart instances
+    let originalYearsData = {{ years | dump | safe }};
+    let projectionSystems = {{ site.meta.projection_systems | dump | safe }};
+    let chartInstances = {};
+
     document.addEventListener('DOMContentLoaded', function() {
-        initializeStatsCharts({{ years | dump | safe }}, {{ site.meta.projection_systems | dump | safe }});
+        initializeStatsCharts(originalYearsData, projectionSystems);
         initializeChartFilters();
+        initialize2020Toggle();
     });
 
     function initializeChartFilters() {
@@ -218,6 +227,8 @@ title: "All-Time Projection Accuracy"
         // Initial visibility setup
         updateChartVisibility();
     }
+
+
 </script>
 {% endblock %}
 

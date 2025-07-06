@@ -1,5 +1,5 @@
-// Chart utility functions for MLB projection evaluation
-// Replaces Python chart generation logic
+
+let exclude2020 = true; // Default to exclude 2020
 
 const projectionSystemColors = {
     'Marcel': 'rgba(239, 68, 68, 0.8)', // red-500
@@ -13,16 +13,62 @@ const projectionSystemBorderColors = {
     'ZiPS': 'rgba(34, 197, 94, 1)',
 };
 
-/**
- * Prepare RMSE data for a specific stat over time (for index page)
- */
+function filterYearsData(yearsData) {
+    if (!exclude2020) {
+        return yearsData;
+    }
+
+    const filteredData = {};
+    for (const [year, data] of Object.entries(yearsData)) {
+        if (year !== '2020') {
+            filteredData[year] = data;
+        } else {
+            // Keep 2020 but nullify the data to create a break in the chart
+            filteredData[year] = {
+                batting: data.batting?.map(item => ({ ...item, rmse: null, mae: null, la_rmse: null, la_mae: null, wla_rmse: null, wla_mae: null })) || [],
+                pitching: data.pitching?.map(item => ({ ...item, rmse: null, mae: null, la_rmse: null, la_mae: null, wla_rmse: null, wla_mae: null })) || []
+            };
+        }
+    }
+    return filteredData;
+}
+
+function filterPlayerYearsData(playerYears) {
+    if (!exclude2020) {
+        return playerYears;
+    }
+
+    const filteredData = {};
+    for (const [year, data] of Object.entries(playerYears)) {
+        if (year !== '2020') {
+            filteredData[year] = data;
+        } else {
+            // Keep 2020 but nullify the data to create a break in the chart
+            const nullifiedData = {};
+            for (const [playerType, systems] of Object.entries(data)) {
+                nullifiedData[playerType] = {};
+                for (const [system, stats] of Object.entries(systems)) {
+                    nullifiedData[playerType][system] = {};
+                    for (const [stat, value] of Object.entries(stats)) {
+                        nullifiedData[playerType][system][stat] = null;
+                    }
+                }
+            }
+            filteredData[year] = nullifiedData;
+        }
+    }
+    return filteredData;
+}
+
+
 function prepareStatRmseData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.rmse) ? result.rmse : null;
@@ -40,16 +86,14 @@ function prepareStatRmseData(yearsData, stat, playerType, projectionSystems) {
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare league-adjusted RMSE data for a specific stat over time (for index page)
- */
 function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.la_rmse) ? result.la_rmse : null;
@@ -67,16 +111,14 @@ function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projecti
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare MAE data for a specific stat over time (for index page)
- */
 function prepareStatMaeData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.mae) ? result.mae : null;
@@ -94,16 +136,14 @@ function prepareStatMaeData(yearsData, stat, playerType, projectionSystems) {
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare league-adjusted MAE data for a specific stat over time (for index page)
- */
 function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.la_mae) ? result.la_mae : null;
@@ -121,9 +161,6 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare volume RMSE data for a specific year (for season pages)
- */
 function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
     const volumeStats = playerType === 'batting' ? ['PA'] : ['BF'];
     const stats = volumeStats.filter(stat =>
@@ -147,88 +184,6 @@ function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
     return { labels: stats, datasets };
 }
 
-/**
- * Prepare rate RMSE data for a specific year (for season pages)
- */
-function prepareRateRmseData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.rmse : 0;
-        });
-        return {
-            label: system,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare league-adjusted volume RMSE data for a specific year (for season pages)
- */
-function prepareVolumeLeagueAdjustedRmseData(yearData, playerType, projectionSystems) {
-    const volumeStats = playerType === 'batting' ? ['PA'] : ['BF'];
-    const stats = volumeStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.la_rmse : 0;
-        });
-        return {
-            label: `${system} (LA)`,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare league-adjusted rate RMSE data for a specific year (for season pages)
- */
-function prepareRateLeagueAdjustedRmseData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.la_rmse : 0;
-        });
-        return {
-            label: `${system} (LA)`,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
 
 /**
  * Prepare volume MAE data for a specific year (for season pages)
@@ -256,133 +211,20 @@ function prepareVolumeMaeData(yearData, playerType, projectionSystems) {
     return { labels: stats, datasets };
 }
 
-/**
- * Prepare rate MAE data for a specific year (for season pages)
- */
-function prepareRateMaeData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
 
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.mae : 0;
-        });
-        return {
-            label: system,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare league-adjusted rate MAE data for a specific year (for season pages)
- */
-function prepareRateLeagueAdjustedMaeData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.la_mae : 0;
-        });
-        return {
-            label: `${system} (LA)`,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare weighted league-adjusted rate RMSE data for a specific year (for season pages)
- */
-function prepareRateWeightedLeagueAdjustedRmseData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.wla_rmse : 0;
-        });
-        return {
-            label: `${system} (WLA)`,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare weighted league-adjusted rate MAE data for a specific year (for season pages)
- */
-function prepareRateWeightedLeagueAdjustedMaeData(yearData, playerType, projectionSystems) {
-    const rateStats = playerType === 'batting' ?
-        ['SO/PA', 'BB/PA', 'HR/PA', 'HBP/PA'] :
-        ['SO/BF', 'BB/BF', 'HR/BF', 'HBP/BF'];
-    const stats = rateStats.filter(stat =>
-        yearData[playerType] && yearData[playerType].some(r => r.stat === stat)
-    );
-
-    const datasets = projectionSystems.map(system => {
-        const data = stats.map(stat => {
-            const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.wla_mae : 0;
-        });
-        return {
-            label: `${system} (WLA)`,
-            data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            borderWidth: 1
-        };
-    });
-
-    return { labels: stats, datasets };
-}
-
-/**
- * Prepare data for a player stat chart over their career
- */
 function preparePlayerStatChartData(playerYears, stat, playerType, projectionSystems) {
     if (!playerYears || typeof playerYears !== 'object') {
         return { labels: [], datasets: [] };
     }
-    const years = Object.keys(playerYears).sort();
+    const filteredPlayerYears = filterPlayerYearsData(playerYears);
+    const years = Object.keys(filteredPlayerYears).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = [];
 
     // Create a dataset for actual performance
     const actualData = years.map(year => {
-        const yearData = playerYears[year];
+        const yearData = filteredPlayerYears[year];
         if (yearData && yearData[playerType] && yearData[playerType]['Actual']) {
             return yearData[playerType]['Actual'][stat] ?? null;
         }
@@ -404,7 +246,7 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
     const projSystems = projectionSystems.filter(s => s !== 'Actual');
     projSystems.forEach(system => {
         const projData = years.map(year => {
-            const yearData = playerYears[year];
+            const yearData = filteredPlayerYears[year];
             if (yearData && yearData[playerType] && yearData[playerType][system]) {
                 return yearData[playerType][system][stat] ?? null;
             }
@@ -425,20 +267,18 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare data for a player accuracy chart over their career (RMSE version)
- */
 function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectionSystems) {
     if (!playerYears || typeof playerYears !== 'object') {
         return { labels: [], datasets: [] };
     }
-    const years = Object.keys(playerYears).sort();
+    const filteredPlayerYears = filterPlayerYearsData(playerYears);
+    const years = Object.keys(filteredPlayerYears).sort();
     const yearLabels = years.map(y => y.toString());
 
     const projSystems = projectionSystems.filter(s => s !== 'Actual');
     const datasets = projSystems.map(system => {
         const errorData = years.map(year => {
-            const yearData = playerYears[year];
+            const yearData = filteredPlayerYears[year];
             if (yearData && yearData[playerType] && yearData[playerType]['Actual'] && yearData[playerType][system]) {
                 const actual = yearData[playerType]['Actual'][stat];
                 const projected = yearData[playerType][system][stat];
@@ -462,20 +302,18 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
     return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
 }
 
-/**
- * Prepare data for a player accuracy chart over their career (MAE version)
- */
 function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projectionSystems) {
     if (!playerYears || typeof playerYears !== 'object') {
         return { labels: [], datasets: [] };
     }
-    const years = Object.keys(playerYears).sort();
+    const filteredPlayerYears = filterPlayerYearsData(playerYears);
+    const years = Object.keys(filteredPlayerYears).sort();
     const yearLabels = years.map(y => y.toString());
 
     const projSystems = projectionSystems.filter(s => s !== 'Actual');
     const datasets = projSystems.map(system => {
         const errorData = years.map(year => {
-            const yearData = playerYears[year];
+            const yearData = filteredPlayerYears[year];
             if (yearData && yearData[playerType] && yearData[playerType]['Actual'] && yearData[playerType][system]) {
                 const actual = yearData[playerType]['Actual'][stat];
                 const projected = yearData[playerType][system][stat];
@@ -499,16 +337,15 @@ function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projec
     return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
 }
 
-/**
- * Prepare league-adjusted accuracy data (error) for a specific player (for player pages)
- */
+
 function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerType, projectionSystems) {
-    const years = Object.keys(playerYears).sort();
+    const filteredPlayerYears = filterPlayerYearsData(playerYears);
+    const years = Object.keys(filteredPlayerYears).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = playerYears[year];
+            const yearData = filteredPlayerYears[year];
             if (!yearData || !yearData[playerType] || !yearData[playerType][system] || !yearData[playerType]['Actual']) {
                 return null;
             }
@@ -539,16 +376,14 @@ function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerT
     return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
 }
 
-/**
- * Prepare league-adjusted accuracy data (MAE) for a specific player (for player pages)
- */
 function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, playerType, projectionSystems) {
-    const years = Object.keys(playerYears).sort();
+    const filteredPlayerYears = filterPlayerYearsData(playerYears);
+    const years = Object.keys(filteredPlayerYears).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = playerYears[year];
+            const yearData = filteredPlayerYears[year];
             if (!yearData || !yearData[playerType] || !yearData[playerType][system] || !yearData[playerType]['Actual']) {
                 return null;
             }
@@ -579,16 +414,14 @@ function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, play
     return { labels: yearLabels, datasets: datasets.filter(d => d.data.some(v => v !== null)) };
 }
 
-/**
- * Prepare weighted league-adjusted RMSE data for a specific stat over time (for index page)
- */
 function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.wla_rmse) ? result.wla_rmse : null;
@@ -606,16 +439,14 @@ function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, 
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Prepare weighted league-adjusted MAE data for a specific stat over time (for index page)
- */
 function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, projectionSystems) {
-    const years = Object.keys(yearsData).sort();
+    const filteredYearsData = filterYearsData(yearsData);
+    const years = Object.keys(filteredYearsData).sort();
     const yearLabels = years.map(y => y.toString());
 
     const datasets = projectionSystems.map(system => {
         const data = years.map(year => {
-            const yearData = yearsData[year];
+            const yearData = filteredYearsData[year];
             if (!yearData || !yearData[playerType]) return null;
             const result = yearData[playerType].find(r => r.system === system && r.stat === stat);
             return result && !isNaN(result.wla_mae) ? result.wla_mae : null;
@@ -633,14 +464,11 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
     return { labels: yearLabels, datasets };
 }
 
-/**
- * Create a Chart.js chart with standard options
- */
 function createChart(canvasId, type, data, title, yAxisLabel = 'RMSE') {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
 
-    return new Chart(canvas.getContext('2d'), {
+    const chart = new Chart(canvas.getContext('2d'), {
         type: type,
         data: data,
         options: {
@@ -673,4 +501,11 @@ function createChart(canvasId, type, data, title, yAxisLabel = 'RMSE') {
             }
         }
     });
+
+    // Store chart instance globally if chartInstances exists
+    if (typeof chartInstances !== 'undefined') {
+        chartInstances[canvasId] = chart;
+    }
+
+    return chart;
 }

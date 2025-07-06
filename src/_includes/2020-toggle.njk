@@ -1,0 +1,44 @@
+<div class="w-full flex justify-end mb-8">
+  <label class="inline-flex items-center cursor-pointer">
+    <input type="checkbox" id="exclude2020Toggle" class="sr-only peer" checked>
+    <div class="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+    <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Exclude 2020</span>
+  </label>
+</div>
+
+<script>
+  function initialize2020Toggle() {
+    const toggle = document.getElementById('exclude2020Toggle');
+    exclude2020 = toggle.checked;
+
+    toggle.addEventListener('change', function() {
+      exclude2020 = toggle.checked;
+      updateAllCharts();
+    });
+  }
+
+  function updateAllCharts() {
+    Object.values(chartInstances).forEach(chart => {
+      if (chart) {
+        chart.destroy();
+      }
+    });
+    chartInstances = {};
+
+    // Recreate all charts with filtered data
+    if (typeof initializeIndexCharts === 'function') {
+      initializeIndexCharts(originalYearsData, projectionSystems);
+    }
+    if (typeof initializeStatsCharts === 'function') {
+      initializeStatsCharts(originalYearsData, projectionSystems);
+    }
+    if (typeof initializePlayerCharts === 'function') {
+      initializePlayerCharts(originalPlayerYears, originalPlayerType, projectionSystems);
+    }
+
+    // Reapply current filter visibility if the function exists
+    if (typeof initializeChartFilters === 'function') {
+      initializeChartFilters();
+    }
+  }
+</script>

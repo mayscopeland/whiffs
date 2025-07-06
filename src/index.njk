@@ -35,6 +35,8 @@ title: "MLB Projection Accuracy"
       </p>
     </div>
 
+    {% include "2020-toggle.njk" %}
+
     <!-- Playing Time Section -->
     <div class="mb-12">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Playing Time Projection Accuracy</h2>
@@ -151,9 +153,16 @@ title: "MLB Projection Accuracy"
 <script>
     {% include "chart-utils.js" %}
     {% include "index-charts.js" %}
+
+    // Global variables to store original data and chart instances
+    let originalYearsData = {{ years | dump | safe }};
+    let projectionSystems = {{ site.meta.projection_systems | dump | safe }};
+    let chartInstances = {};
+
     document.addEventListener('DOMContentLoaded', function() {
-        initializeIndexCharts({{ years | dump | safe }}, {{ site.meta.projection_systems | dump | safe }});
+        initializeIndexCharts(originalYearsData, projectionSystems);
         initializeChartFilters();
+        initialize2020Toggle();
     });
 
     function initializeChartFilters() {
@@ -219,6 +228,8 @@ title: "MLB Projection Accuracy"
         // Initial visibility setup
         updateChartVisibility();
     }
+
+
 </script>
 {% endblock %}
 
