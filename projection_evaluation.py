@@ -359,31 +359,57 @@ class ProjectionResult:
     biggest_misses: List[Dict]
 
 
-def calculate_metrics(actual: np.ndarray, projected: np.ndarray) -> Dict[str, float]:
+def calculate_metrics(
+    actual: np.ndarray, projected: np.ndarray, weights: Optional[np.ndarray] = None
+) -> Dict[str, float]:
     """Calculate basic metrics (RMSE, MAE, bias, R²)"""
     if len(actual) == 0 or len(projected) == 0:
         return {"rmse": np.nan, "mae": np.nan, "bias": np.nan, "r_squared": np.nan}
 
     errors = projected - actual
-    rmse = np.sqrt(np.mean(errors**2))
-    mae = np.mean(np.abs(errors))
-    bias = np.mean(errors)
 
-    ss_res = np.sum(errors**2)
-    ss_tot = np.sum((actual - np.mean(actual)) ** 2)
+    # np.average correctly handles unweighted (weights=None) and weighted calculations
+    mae = np.average(np.abs(errors), weights=weights)
+    rmse = np.sqrt(np.average(errors**2, weights=weights))
+    bias = np.average(errors, weights=weights)
+
+    # R-squared calculation needs to be aware of weights
+    if weights is not None:
+        ss_res = np.sum(weights * (errors**2))
+        weighted_actual_mean = np.average(actual, weights=weights)
+        ss_tot = np.sum(weights * ((actual - weighted_actual_mean) ** 2))
+    else:
+        ss_res = np.sum(errors**2)
+        ss_tot = np.sum((actual - np.mean(actual)) ** 2)
+
     r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0
 
     return {"rmse": rmse, "mae": mae, "bias": bias, "r_squared": max(0, r_squared)}
 
 
 def find_biggest_misses(
-    df: pd.DataFrame, stat: str, actual_col: str, proj_col: str, n_misses: int = 10
+    df: pd.DataFrame,
+    stat: str,
+    actual_col: str,
+    proj_col: str,
+    n_misses: int = 10,
+    error_col: Optional[str] = None,
 ) -> List[Dict]:
     """Find the biggest projection misses for a stat"""
     if actual_col not in df.columns or proj_col not in df.columns:
         return []
 
-    errors = np.abs(df[proj_col] - df[actual_col])
+    if error_col and error_col in df.columns:
+        # Use the pre-calculated error column if provided
+        errors = df[error_col]
+    else:
+        # Otherwise, calculate absolute error from actual and projected columns
+        errors = np.abs(df[proj_col] - df[actual_col])
+
+    # Handle cases where there are fewer players than n_misses
+    if len(errors) < n_misses:
+        n_misses = len(errors)
+
     biggest_indices = errors.nlargest(n_misses).index
 
     misses = []
@@ -904,10 +930,10 @@ def process_year_system(
             weights = merged_df[playing_time_col_y]
             proj_league_avgs[stat] = np.average(merged_df[proj_col], weights=weights)
 
-    # Add league-adjusted and weighted league-adjusted columns to merged_df
+    # Add league-adjusted columns to merged_df
     all_stats = rate_stats + volume_stats
     playing_time_col_x = f"{playing_time_col}_x"  # For actual data
-    for stat in all_stats:
+    for stat in rate_stats:
         actual_col = f"{stat}_x"
         proj_col = f"{stat}_y"
 
@@ -925,14 +951,6 @@ def process_year_system(
                 merged_df[f"{stat}_proj_la"] = (
                     merged_df[proj_col] - proj_league_avgs[stat]
                 )
-                # Weighted league-adjusted (both use actual playing time for fair comparison)
-                if playing_time_col_x in merged_df.columns:
-                    merged_df[f"{stat}_actual_wla"] = (
-                        merged_df[f"{stat}_actual_la"] * merged_df[playing_time_col_x]
-                    )
-                    merged_df[f"{stat}_proj_wla"] = (
-                        merged_df[f"{stat}_proj_la"] * merged_df[playing_time_col_x]
-                    )
 
     print(f"  Found {len(merged_df)} players")
 
@@ -960,39 +978,43 @@ def process_year_system(
         if len(actual_clean) == 0:
             continue
 
-        # 5 & 6. Calculate league-adjusted and weighted league-adjusted versions
+        weights = merged_df[playing_time_col_x][mask].values
+
+        # 5, 6, 7: Calculate all metric versions and find biggest misses
         if stat in rate_stats:
             # League-adjusted (stat - league_avg)
             actual_la = actual_clean - actual_league_avgs[stat]
             proj_la = proj_clean - proj_league_avgs[stat]
 
-            # Weighted league-adjusted (league_adjusted * playing_time)
-            weights = merged_df[playing_time_col_x][mask].values
-            actual_wla = actual_la * weights
-            proj_wla = proj_la * weights
-        else:
-            # For volume stats, league-adjusted doesn't make as much sense
-            actual_la = actual_clean  # Just use raw values
-            proj_la = proj_clean
-            actual_wla = actual_clean
-            proj_wla = proj_clean
+            # Calculate the three types of metrics
+            raw_metrics = calculate_metrics(actual_clean, proj_clean) # Unweighted raw
+            la_metrics = calculate_metrics(actual_la, proj_la)  # Unweighted league-adjusted
+            wla_metrics = calculate_metrics(
+                actual_la, proj_la, weights=weights
+            )  # Weighted league-adjusted
 
-        # 7. Calculate metrics for all three versions
-        raw_metrics = calculate_metrics(actual_clean, proj_clean)
-        la_metrics = calculate_metrics(actual_la, proj_la)
-        wla_metrics = calculate_metrics(actual_wla, proj_wla)
+            # Determine error for biggest misses based on weighted league-adjusted error
+            miss_errors = np.abs(actual_la - proj_la) * weights
+        else: # Volume stats
+            # For volume stats, we only really care about the raw error.
+            raw_metrics = calculate_metrics(actual_clean, proj_clean)
+            la_metrics = raw_metrics  # No separate league adjustment
+            wla_metrics = raw_metrics # No separate weighting scheme for volume stats
 
-        # Find biggest misses (using weighted league-adjusted for rate stats, raw for volume stats)
+            # Determine error for biggest misses based on raw error
+            miss_errors = np.abs(actual_clean - proj_clean)
+
         temp_df = merged_df[mask].copy()
-        if stat in rate_stats:
-            temp_df["actual_for_misses"] = actual_wla
-            temp_df["proj_for_misses"] = proj_wla
-        else:
-            temp_df["actual_for_misses"] = actual_clean
-            temp_df["proj_for_misses"] = proj_clean
+        temp_df["miss_error"] = miss_errors
+        temp_df["actual_for_misses"] = actual_clean
+        temp_df["proj_for_misses"] = proj_clean
 
         biggest_misses = find_biggest_misses(
-            temp_df, stat, "actual_for_misses", "proj_for_misses"
+            temp_df,
+            stat,
+            "actual_for_misses",
+            "proj_for_misses",
+            error_col="miss_error",
         )
 
         result = ProjectionResult(
