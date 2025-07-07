@@ -54,10 +54,10 @@ title: "MLB Projection Accuracy"
               </div>
 
                 {% for metric in metrics %}
-                    {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="PA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                        <div class="h-80"><canvas id="battingPA{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
-                    </div>
+                  {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                  <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="PA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                    <div class="h-80"><canvas id="battingPA{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                  </div>
                 {% endfor %}
             </div>
 
@@ -65,22 +65,38 @@ title: "MLB Projection Accuracy"
               <div class="mb-4 py-4">
                 <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Batters Faced (BF)</h4>
                 <div class="flex flex-wrap gap-4">
-                    <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                      {% for metric in metrics %}
-                      <option value="{{ metric.value }}">{{ metric.title }}</option>
-                      {% endfor %}
-                    </select>
+                  <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    {% for metric in metrics %}
+                    <option value="{{ metric.value }}">{{ metric.title }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
               </div>
 
-                {% for metric in metrics %}
-                    {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="BF" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                        <div class="h-80"><canvas id="pitchingBF{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
-                    </div>
-                {% endfor %}
+              {% for metric in metrics %}
+                {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+                <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="BF" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                  <div class="h-80"><canvas id="pitchingBF{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                </div>
+              {% endfor %}
             </div>
         </div>
+    </div>
+
+    <div class="flex items-center p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+      <svg class="shrink-0 inline size-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+      </svg>
+      <span class="sr-only">Info</span>
+      <div>
+        <p class="mb-2">
+          <span class="font-medium">Note:</span> ZiPS doesn't really forecast playing time—it's showing how players might perform if given a full season of MLB playing time.
+          <strong>Whiffs</strong> includes every player with at least one MLB plate appearance, which penalizes ZiPS's "what if" scenarios more heavily than other systems in playing time accuracy.
+        </p>
+        <p>
+          The Marcel projections, by contrast, do a little better in this analysis by simply "guessing low" for any player without previous MLB experience.
+        </p>
+      </div>
     </div>
 
     <!-- Overall Performance Section -->
