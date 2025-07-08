@@ -224,8 +224,8 @@ eleventyComputed:
                                                 {{ miss.player_name }}
                                             </a>
                                         </td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(1) }}</td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(1) }}</td>
+                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0) }}</td>
+                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0) }}</td>
                                         <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
                                     </tr>
                                     {% endfor %}
@@ -289,9 +289,9 @@ eleventyComputed:
                                                 {{ miss.player_name }}
                                             </a>
                                         </td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(1) }}</td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(1) }}</td>
-                                        <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(3) }}</td>
+                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(4) }}</td>
+                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(4) }}</td>
+                                        <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

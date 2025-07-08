@@ -59,6 +59,17 @@ OUTPUT_DIR: str = "src/_data"
 WOBA_CONSTANTS = pd.read_csv(Path(STATS_DIR) / "woba.csv")
 WOBA_CONSTANTS.set_index("Season", inplace=True)
 
+def _convert_ip_to_decimal(ip: float) -> float:
+    """Converts IP from fractional (e.g., 1.1, 1.2) to decimal (e.g., 1.33, 1.67)"""
+    integer_part = int(ip)
+    fractional_part = round(ip - integer_part, 1)
+    if fractional_part == 0.1:
+        return integer_part + (1 / 3)
+    elif fractional_part == 0.2:
+        return integer_part + (2 / 3)
+    return float(ip)
+
+
 def calculate_woba(df: pd.DataFrame, year: int, player_type: str = "batting") -> pd.Series:
     """Calculate wOBA for a dataframe using the constants for a given year"""
     if year not in WOBA_CONSTANTS.index:
@@ -273,6 +284,10 @@ def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
         return pd.DataFrame()
 
     df = pd.read_csv(file_path)
+
+    # Convert IP for pitching stats from fractional to decimal
+    if player_type == "pitching" and "IP" in df.columns:
+        df["IP"] = df["IP"].apply(_convert_ip_to_decimal)
 
     # Ensure playerId is string for consistent merging
     if "playerId" in df.columns:

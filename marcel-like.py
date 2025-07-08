@@ -2,6 +2,16 @@ import pandas as pd
 import os
 
 
+def _convert_ip_to_decimal(ip):
+    integer_part = int(ip)
+    fractional_part = round(ip - integer_part, 1)
+    if fractional_part == 0.1:
+        return integer_part + (1 / 3)
+    elif fractional_part == 0.2:
+        return integer_part + (2 / 3)
+    return ip
+
+
 def build_batting_projections(target_year, player_bio):
 
     hitters = player_bio[player_bio["primaryPosition"] != "P"].copy()
@@ -144,6 +154,7 @@ def build_pitching_projections(target_year, player_bio):
         filepath = f"stats/{year}_pit.csv"
         if os.path.exists(filepath):
             df = pd.read_csv(filepath)
+            df["IP"] = df["IP"].apply(_convert_ip_to_decimal)
             df["year"] = year
             all_stats_dfs.append(df)
 
@@ -218,15 +229,12 @@ def build_pitching_projections(target_year, player_bio):
     ip_ratio = (projections["projected_ip"] / projections["IP"]).fillna(0)
 
     final_projections = projections[["playerId"]].copy()
-    for col in stat_cols:
-        if col != "IP":
-            final_projections[col] = projections[col] * ip_ratio
+    for col in [c for c in stat_cols if c != "IP"]:
+        final_projections[col] = (projections[col] * ip_ratio).round()
 
     final_projections["IP"] = projections["projected_ip"]
 
     final_projections["IP"] = final_projections["IP"].round(1)
-    for col in [c for c in stat_cols if c != "IP"]:
-        final_projections[col] = final_projections[col].round()
 
     final_projections = final_projections.rename(columns={"playerId": "player_id"})
     # The list of columns to output

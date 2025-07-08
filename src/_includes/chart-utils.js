@@ -1,17 +1,19 @@
 
-let exclude2020 = true; // Default to exclude 2020
+let exclude2020 = true;
 
 const projectionSystemColors = {
-    'Marcel': 'rgba(239, 68, 68, 0.8)', // red-500
-    'Steamer': 'rgba(99, 102, 241, 0.8)', // indigo-500
-    'ZiPS': 'rgba(34, 197, 94, 0.8)', // green-500
+    'Marcel': '#e15759',
+    'Steamer': '#4e79a7',
+    'ZiPS': '#59a14f',
 };
 
 const projectionSystemBorderColors = {
-    'Marcel': 'rgba(239, 68, 68, 1)',
-    'Steamer': 'rgba(99, 102, 241, 1)',
-    'ZiPS': 'rgba(34, 197, 94, 1)',
+    'Marcel': '#e15759',
+    'Steamer': '#4e79a7',
+    'ZiPS': '#59a14f',
 };
+
+const defaultColor = '#030712';
 
 function filterYearsData(yearsData) {
     if (!exclude2020) {
@@ -101,8 +103,8 @@ function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projecti
         return {
             label: `${system} (League-Adjusted)`,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
@@ -126,8 +128,8 @@ function prepareStatMaeData(yearsData, stat, playerType, projectionSystems) {
         return {
             label: system,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
@@ -151,8 +153,8 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
         return {
             label: `${system} (League-Adjusted)`,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
@@ -175,8 +177,8 @@ function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
         return {
             label: system,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1
         };
     });
@@ -202,8 +204,8 @@ function prepareVolumeMaeData(yearData, playerType, projectionSystems) {
         return {
             label: system,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1
         };
     });
@@ -234,8 +236,8 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
     datasets.push({
         label: 'Actual',
         data: actualData,
-        backgroundColor: 'rgba(55, 65, 81, 0.8)', // gray-700
-        borderColor: 'rgba(55, 65, 81, 1)',
+        backgroundColor: defaultColor,
+        borderColor: defaultColor,
         borderWidth: 1,
         type: 'line',
         order: 0,
@@ -256,8 +258,8 @@ function preparePlayerStatChartData(playerYears, stat, playerType, projectionSys
         datasets.push({
             label: system,
             data: projData,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             type: 'bar',
             order: 1
@@ -292,8 +294,8 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
         return {
             label: `${system} Error`,
             data: errorData,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             fill: false,
             tension: 0.1
         };
@@ -327,8 +329,8 @@ function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projec
         return {
             label: `${system} Error`,
             data: errorData,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             fill: false,
             tension: 0.1
         };
@@ -367,8 +369,8 @@ function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerT
             label: system,
             data: data.map(e => (e !== null ? Math.abs(e) : null)),
             fill: false,
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
+            backgroundColor: projectionSystemColors[system] || defaultColor,
             tension: 0.1
         };
     });
@@ -405,8 +407,8 @@ function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, play
             label: system,
             data: data.map(e => (e !== null ? Math.abs(e) : null)),
             fill: false,
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
+            backgroundColor: projectionSystemColors[system] || defaultColor,
             tension: 0.1
         };
     });
@@ -429,8 +431,8 @@ function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, 
         return {
             label: `${system} (WLA)`,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
@@ -454,8 +456,8 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
         return {
             label: `${system} (WLA)`,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderColor: projectionSystemBorderColors[system] || defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
