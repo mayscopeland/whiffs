@@ -107,7 +107,7 @@ function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projecti
             return result && !isNaN(result.la_rmse) ? result.la_rmse : null;
         });
         return {
-            label: `${system} (League-Adjusted)`,
+            label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
@@ -157,7 +157,7 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
             return result && !isNaN(result.la_mae) ? result.la_mae : null;
         });
         return {
-            label: `${system} (League-Adjusted)`,
+            label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
@@ -314,10 +314,11 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
         });
 
         return {
-            label: `${system} Error`,
+            label: system,
             data: errorData,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
+            borderWidth: 1,
             fill: false,
             tension: 0.1
         };
@@ -349,10 +350,11 @@ function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projec
         });
 
         return {
-            label: `${system} Error`,
+            label: system,
             data: errorData,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
+            borderWidth: 1,
             fill: false,
             tension: 0.1
         };
@@ -393,6 +395,7 @@ function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerT
             fill: false,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
             backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderWidth: 1,
             tension: 0.1
         };
     });
@@ -431,6 +434,7 @@ function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, play
             fill: false,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
             backgroundColor: projectionSystemColors[system] || defaultColor,
+            borderWidth: 1,
             tension: 0.1
         };
     });
@@ -451,7 +455,7 @@ function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, 
             return result && !isNaN(result.wla_rmse) ? result.wla_rmse : null;
         });
         return {
-            label: `${system} (WLA)`,
+            label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
@@ -476,7 +480,7 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
             return result && !isNaN(result.wla_mae) ? result.wla_mae : null;
         });
         return {
-            label: `${system} (WLA)`,
+            label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
@@ -498,6 +502,50 @@ function createChart(canvasId, type, data, title, yAxisLabel = 'RMSE') {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'nearest',
+                intersect: false
+            },
+                        onHover: (event, activeElements, chart) => {
+                // Only apply hover effects for line charts
+                if (type === 'line') {
+                    const datasets = chart.data.datasets;
+
+                    if (activeElements.length > 0) {
+                        // Get the hovered dataset index
+                        const hoveredDatasetIndex = activeElements[0].datasetIndex;
+
+                                                                        // Update all datasets
+                        datasets.forEach((dataset, index) => {
+                            // Get the original color for this system
+                            const originalColor = projectionSystemColors[dataset.label] || defaultColor;
+
+                            if (index === hoveredDatasetIndex) {
+                                // Brighten the hovered line
+                                dataset.borderWidth = 2;
+                                dataset.backgroundColor = originalColor;
+                                dataset.borderColor = originalColor;
+                            } else {
+                                // Dim other lines by adding transparency
+                                dataset.borderWidth = 1;
+                                dataset.backgroundColor = originalColor + '4D'; // 30% opacity
+                                dataset.borderColor = originalColor + '4D';
+                            }
+                        });
+                    } else {
+                        // Reset all datasets to normal when not hovering
+                        datasets.forEach((dataset) => {
+                            dataset.borderWidth = 1;
+                            // Reset to original colors
+                            const originalColor = projectionSystemColors[dataset.label] || defaultColor;
+                            dataset.backgroundColor = originalColor;
+                            dataset.borderColor = originalColor;
+                        });
+                    }
+
+                    chart.update('none'); // Update without animation for smooth interaction
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: false,
