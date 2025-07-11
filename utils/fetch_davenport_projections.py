@@ -168,13 +168,32 @@ def build_howeid_to_mlbid_map():
             except StopIteration:
                 continue  # Skip empty files
 
-            # Batting files use 'IDNO', pitching files use 'HOWEID'
-            id_col_name = "IDNO" if "bat" in file_path.name else "HOWEID"
+            # Determine ID column - batting files can have either 'IDNO' or 'HOWEID', pitching files use 'HOWEID'
+            id_col_name = None
+            id_idx = -1
+
+            if "bat" in file_path.name:
+                # For batting files, check for both IDNO and HOWEID
+                if "IDNO" in header:
+                    id_col_name = "IDNO"
+                    id_idx = header.index("IDNO")
+                elif "HOWEID" in header:
+                    id_col_name = "HOWEID"
+                    id_idx = header.index("HOWEID")
+            else:
+                # For pitching files, use HOWEID
+                if "HOWEID" in header:
+                    id_col_name = "HOWEID"
+                    id_idx = header.index("HOWEID")
+
             try:
-                id_idx = header.index(id_col_name)
                 mlbid_idx = header.index("MLBID")
-            except ValueError as e:
-                print(f"    Warning: Missing required column in {file_path.name}: {e}")
+            except ValueError:
+                print(f"    Warning: Missing MLBID column in {file_path.name}")
+                continue
+
+            if id_col_name is None or id_idx == -1:
+                print(f"    Warning: No suitable ID column found in {file_path.name}")
                 continue
 
             for row in reader:
@@ -207,7 +226,7 @@ def add_mlbid_to_mlb_projections(howeid_map: dict):
     It replaces any existing MLBID values.
     """
     print("\nAdding/Updating MLBID in MLB projections...")
-    mlb_projection_files = sorted(PROJECTIONS_DIR.glob("davenport_mlb_*_*.csv"))
+    mlb_projection_files = sorted(PROJECTIONS_DIR.glob("davenport_*.csv"))
 
     for file_path in mlb_projection_files:
         print(f"  Processing for MLBID update: {file_path.name}")
@@ -226,12 +245,19 @@ def add_mlbid_to_mlb_projections(howeid_map: dict):
 
         header = rows[0]
 
-        # Determine the primary ID column name ('IDNO' or 'HOWEID')
-        id_col_name = "IDNO" if "bat" in file_path.name else "HOWEID"
-        try:
-            id_idx = header.index(id_col_name)
-        except ValueError:
-            print(f"    Warning: Cannot find ID column '{id_col_name}' in {file_path.name}. Skipping.")
+        # Determine the primary ID column name - batting files can have either 'IDNO' or 'HOWEID'
+        id_col_name = None
+        id_idx = -1
+
+        if "IDNO" in header:
+            id_col_name = "IDNO"
+            id_idx = header.index("IDNO")
+        elif "HOWEID" in header:
+            id_col_name = "HOWEID"
+            id_idx = header.index("HOWEID")
+
+        if id_col_name is None or id_idx == -1:
+            print(f"    Warning: No suitable ID column found in {file_path.name}. Skipping.")
             continue
 
         # Check for existing MLBID column

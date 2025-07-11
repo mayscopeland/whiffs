@@ -11,7 +11,7 @@ function initializeSeasonCharts(yearData, projectionSystems) {
         { name: 'Walk Rate', stat: 'BB/PA', isVolume: false },
         { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false },
         { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
-        { name: 'BABIP', stat: 'BABIP', isVolume: false },
+        { name: 'BABIP', stat: '(H-HR)/(BIP-HR)', isVolume: false },
         { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
         { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
         { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
@@ -29,7 +29,7 @@ function initializeSeasonCharts(yearData, projectionSystems) {
         { name: 'Walk Rate', stat: 'BB/BF', isVolume: false },
         { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false },
         { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
-        { name: 'BABIP', stat: 'BABIP', isVolume: false },
+        { name: 'BABIP', stat: '(H-HR)/(BIP-HR)', isVolume: false },
         { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
         { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
         { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
@@ -57,7 +57,7 @@ function initializeSeasonCharts(yearData, projectionSystems) {
 
         const datasets = projectionSystems.map(system => {
             const systemData = statData.find(result => result.system === system);
-            let value = 0;
+            let value = null;
 
             if (systemData) {
                 if (adjustment === 'league-adj') {
@@ -71,12 +71,16 @@ function initializeSeasonCharts(yearData, projectionSystems) {
 
             return {
                 label: system,
-                data: [value || 0],
-                backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-                borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
-                borderWidth: 1
+                data: [value],
+                backgroundColor: projectionSystemColors[system] ||  defaultColor,
+                borderColor: projectionSystemBorderColors[system] ||  defaultColor,
+                borderWidth: 1,
+                hasData: value !== null
             };
-        });
+        }).filter(dataset => dataset.hasData);
+
+        // Remove the hasData property before returning
+        datasets.forEach(dataset => delete dataset.hasData);
 
         return {
             labels: [stat],

@@ -6,7 +6,7 @@ function initializeIndexCharts(yearsData, projectionSystems) {
 
     const pitchingStats = [
         { stat: 'BF', baseName: 'pitchingBF', title: 'Batters Faced', isVolumestat: true },
-        { stat: 'wOBA', baseName: 'pitchingwOBA', title: 'wOBA', isVolumestat: false }
+        { stat: 'ERA', baseName: 'pitchingERA', title: 'ERA', isVolumestat: false }
     ];
 
     // Create batting charts

@@ -176,54 +176,35 @@ module.exports = {
             {% for year, yearData in player.years %}
             {% if yearData[player.primary_type] %}
 
-            <!-- Marcel Projections Row -->
-            {% if yearData[player.primary_type]['Marcel'] %}
-            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
-              <td class="px-4 py-3 text-red-600 dark:text-red-400">Marcel</td>
-              {% for stat in rawStats %}
-              <td class="px-4 py-3 text-right">
-                {% if yearData[player.primary_type]['Marcel'][stat] is defined and yearData[player.primary_type]['Marcel'][stat] is not none %}
-                <span class="font-mono">
-                  {%- if stat == 'IP' -%}
-                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(1) }}
-                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
-                    {{ yearData[player.primary_type]['Marcel'][stat] | round(0) }}
-                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
-                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(3) }}
-                  {%- elif stat in ['ERA', 'WHIP'] -%}
-                    {{ yearData[player.primary_type]['Marcel'][stat] | toFixed(2) }}
-                  {%- else -%}
-                    {{ yearData[player.primary_type]['Marcel'][stat] | round(1) }}
-                  {%- endif -%}
-                </span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-            {% endif %}
+            <!-- Dynamic Projection System Rows -->
+            {% set systemColors = {
+              'Marcel': 'text-amber-900 dark:text-amber-700',
+              'Steamer': 'text-indigo-600 dark:text-indigo-400',
+              'ZiPS': 'text-green-600 dark:text-green-400',
+              'Razzball': 'text-red-600 dark:text-red-400',
+              'Davenport (MLB)': 'text-purple-600 dark:text-purple-400',
+              'Davenport (Full)': 'text-purple-600 dark:text-purple-400'
+            } %}
 
-            <!-- Steamer Projections Row -->
-            {% if yearData[player.primary_type]['Steamer'] %}
+            {% for system in site.meta.projection_systems %}
+            {% if yearData[player.primary_type][system] %}
             <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
               <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
-              <td class="px-4 py-3 text-indigo-600 dark:text-indigo-400">Steamer</td>
+              <td class="px-4 py-3 {{ systemColors[system] or 'text-gray-600 dark:text-gray-400' }}">{{ system }}</td>
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
-                {% if yearData[player.primary_type]['Steamer'][stat] is defined and yearData[player.primary_type]['Steamer'][stat] is not none %}
+                {% if yearData[player.primary_type][system][stat] is defined and yearData[player.primary_type][system][stat] is not none %}
                 <span class="font-mono">
                   {%- if stat == 'IP' -%}
-                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(1) }}
+                    {{ yearData[player.primary_type][system][stat] | toFixed(1) }}
                   {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
-                    {{ yearData[player.primary_type]['Steamer'][stat] | round(0) }}
+                    {{ yearData[player.primary_type][system][stat] | round(0) }}
                   {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
-                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(3) }}
+                    {{ yearData[player.primary_type][system][stat] | toFixed(3) }}
                   {%- elif stat in ['ERA', 'WHIP'] -%}
-                    {{ yearData[player.primary_type]['Steamer'][stat] | toFixed(2) }}
+                    {{ yearData[player.primary_type][system][stat] | toFixed(2) }}
                   {%- else -%}
-                    {{ yearData[player.primary_type]['Steamer'][stat] | round(1) }}
+                    {{ yearData[player.primary_type][system][stat] | round(1) }}
                   {%- endif -%}
                 </span>
                 {% else %}
@@ -233,35 +214,7 @@ module.exports = {
               {% endfor %}
             </tr>
             {% endif %}
-
-            <!-- ZiPS Projections Row -->
-            {% if yearData[player.primary_type]['ZiPS'] %}
-            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
-              <td class="px-4 py-3 text-green-600 dark:text-green-400">ZiPS</td>
-              {% for stat in rawStats %}
-              <td class="px-4 py-3 text-right">
-                {% if yearData[player.primary_type]['ZiPS'][stat] is defined and yearData[player.primary_type]['ZiPS'][stat] is not none %}
-                <span class="font-mono">
-                  {%- if stat == 'IP' -%}
-                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(1) }}
-                  {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
-                    {{ yearData[player.primary_type]['ZiPS'][stat] | round(0) }}
-                  {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
-                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(3) }}
-                  {%- elif stat in ['ERA', 'WHIP'] -%}
-                    {{ yearData[player.primary_type]['ZiPS'][stat] | toFixed(2) }}
-                  {%- else -%}
-                    {{ yearData[player.primary_type]['ZiPS'][stat] | round(1) }}
-                  {%- endif -%}
-                </span>
-                {% else %}
-                -
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-            {% endif %}
+            {% endfor %}
 
             <!-- Actual Stats Row -->
             {% if yearData[player.primary_type]['Actual'] %}

@@ -2,18 +2,24 @@
 let exclude2020 = true;
 
 const projectionSystemColors = {
-    'Marcel': '#e15759',
-    'Steamer': '#4e79a7',
-    'ZiPS': '#59a14f',
+    'Marcel': '#8c564b',
+    'Steamer': '#1f77b4',
+    'ZiPS': '#2ca02c',
+    'Razzball': '#d62728',
+    //'Davenport (MLB)': '#9467bd',
+    //'Davenport (Full)': '#9467bd',
 };
 
 const projectionSystemBorderColors = {
-    'Marcel': '#e15759',
-    'Steamer': '#4e79a7',
-    'ZiPS': '#59a14f',
+    'Marcel': '#8c564b',
+    'Steamer': '#1f77b4',
+    'ZiPS': '#2ca02c',
+    'Razzball': '#d62728',
+    //'Davenport (MLB)': '#9467bd',
+    //'Davenport (Full)': '#9467bd',
 };
 
-const defaultColor = '#030712';
+const defaultColor = '#7f7f7f';
 
 function filterYearsData(yearsData) {
     if (!exclude2020) {
@@ -78,8 +84,8 @@ function prepareStatRmseData(yearsData, stat, playerType, projectionSystems) {
         return {
             label: system,
             data: data,
-            backgroundColor: projectionSystemColors[system] || 'rgba(156, 163, 175, 0.8)',
-            borderColor: projectionSystemBorderColors[system] || 'rgba(156, 163, 175, 1)',
+            backgroundColor: projectionSystemColors[system] ||  defaultColor,
+            borderColor: projectionSystemBorderColors[system] ||  defaultColor,
             borderWidth: 1,
             tension: 0.1
         };
@@ -172,16 +178,24 @@ function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
     const datasets = projectionSystems.map(system => {
         const data = stats.map(stat => {
             const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.rmse : 0;
+            return result ? result.rmse : null;
         });
+
+        // Check if this system has any data for any stat
+        const hasData = data.some(value => value !== null);
+
         return {
             label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
-            borderWidth: 1
+            borderWidth: 1,
+            hasData: hasData
         };
-    });
+    }).filter(dataset => dataset.hasData);
+
+    // Remove the hasData property before returning
+    datasets.forEach(dataset => delete dataset.hasData);
 
     return { labels: stats, datasets };
 }
@@ -199,16 +213,24 @@ function prepareVolumeMaeData(yearData, playerType, projectionSystems) {
     const datasets = projectionSystems.map(system => {
         const data = stats.map(stat => {
             const result = yearData[playerType].find(r => r.stat === stat && r.system === system);
-            return result ? result.mae : 0;
+            return result ? result.mae : null;
         });
+
+        // Check if this system has any data for any stat
+        const hasData = data.some(value => value !== null);
+
         return {
             label: system,
             data: data,
             backgroundColor: projectionSystemColors[system] || defaultColor,
             borderColor: projectionSystemBorderColors[system] || defaultColor,
-            borderWidth: 1
+            borderWidth: 1,
+            hasData: hasData
         };
-    });
+    }).filter(dataset => dataset.hasData);
+
+    // Remove the hasData property before returning
+    datasets.forEach(dataset => delete dataset.hasData);
 
     return { labels: stats, datasets };
 }

@@ -10,7 +10,7 @@ title: "MLB Projection Accuracy"
 
 {% set pitchingStats = [
   { name: 'Batters Faced', stat: 'BF', baseName: 'pitchingBF', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', baseName: 'pitchingwOBA', isVolume: false }
+  { name: 'ERA', stat: 'ERA', baseName: 'pitchingERA', isVolume: false }
 ] %}
 
 {% set metrics = [
@@ -136,7 +136,7 @@ title: "MLB Projection Accuracy"
 
             <div class="mb-4 py-4">
               <div class="mb-4 py-4">
-                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Pitcher wOBA</h4>
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Pitcher ERA</h4>
                 <div class="flex flex-wrap gap-4">
                     <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                       {% for metric in metrics %}
@@ -153,8 +153,8 @@ title: "MLB Projection Accuracy"
 
                 {% for metric in metrics %}
                     {% for adj in adjustments %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="wOBA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                        <div class="h-80"><canvas id="pitchingwOBA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="ERA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                        <div class="h-80"><canvas id="pitchingERA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
                     </div>
                     {% endfor %}
                 {% endfor %}

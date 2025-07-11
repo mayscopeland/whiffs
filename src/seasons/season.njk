@@ -9,6 +9,66 @@ eleventyComputed:
     title: "{{ year }} Projection Accuracy"
 ---
 
+{# Macro for displaying biggest misses for a specific stat #}
+{% macro renderBiggestMisses(yearData, playerType, stat, statName, showVolume=false) %}
+{% set proj_colors = {
+    'Marcel': 'text-amber-900 dark:text-amber-700',
+    'Steamer': 'text-indigo-600 dark:text-indigo-400',
+    'ZiPS': 'text-green-600 dark:text-green-400',
+    'Razzball': 'text-red-600 dark:text-red-400',
+    'Davenport (MLB)': 'text-purple-600 dark:text-purple-400',
+    'Davenport (Full)': 'text-purple-600 dark:text-purple-400'
+} %}
+<div class="mb-8">
+    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Biggest {{ statName }} Misses</h3>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% for system in site.meta.projection_systems %}
+        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <h4 class="text-lg font-medium {{ proj_colors[system] or 'text-gray-600 dark:text-gray-400' }} mb-4">{{ system }}</h4>
+            {% set statResults = null %}
+            {% for result in yearData[playerType] %}
+                {% if result.system == system and result.stat == stat %}
+                    {% set statResults = result %}
+                {% endif %}
+            {% endfor %}
+            {% if statResults and statResults.biggest_misses %}
+            <div class="relative overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-4 py-2">Rank</th>
+                            <th scope="col" class="px-4 py-2">Player</th>
+                            <th scope="col" class="px-4 py-2 text-right">Proj</th>
+                            <th scope="col" class="px-4 py-2 text-right">Actual</th>
+                            <th scope="col" class="px-4 py-2 text-right">Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for miss in statResults.biggest_misses.slice(0, 10) %}
+                        <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white font-mono">{{ loop.index }}</td>
+                            <td class="px-4 py-2">
+                                <a href="{{ ('/players/' + miss.player_id + '/') | url }}" class="text-blue-600 dark:text-blue-400 hover:underline">
+                                    {{ miss.player_name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(showVolume and 0 or 4) }}</td>
+                            <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(showVolume and 0 or 4) }}</td>
+                            <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400">No data available.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
 {% set battingStats = [
   { name: 'wOBA', stat: 'wOBA', isVolume: false },
   { name: 'Strikeout Rate', stat: 'SO/PA', isVolume: false },
@@ -85,6 +145,12 @@ eleventyComputed:
         </div>
       </div>
 
+      <!-- Batting PA Biggest Misses -->
+      {% set yearData = years[year] %}
+      {% if yearData %}
+        {{ renderBiggestMisses(yearData, 'batting', 'PA', 'Plate Appearances (PA)', true) }}
+      {% endif %}
+
       <!-- Individual Batting Rate Stats -->
       {% for statInfo in battingStats %}
       <div class="chart-section mb-8">
@@ -118,6 +184,11 @@ eleventyComputed:
           <div class="h-80"><canvas id="batting{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLARmseChart"></canvas></div>
         </div>
       </div>
+
+      <!-- Batting {{ statInfo.name }} Biggest Misses -->
+      {% if yearData %}
+        {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name + ' (' + statInfo.stat + ')') }}
+      {% endif %}
       {% endfor %}
     </div>
 
@@ -142,6 +213,11 @@ eleventyComputed:
           <div class="h-80"><canvas id="pitchingVolumeRmseChart"></canvas></div>
         </div>
       </div>
+
+      <!-- Pitching BF Biggest Misses -->
+      {% if yearData %}
+        {{ renderBiggestMisses(yearData, 'pitching', 'BF', 'Batters Faced (BF)', true) }}
+      {% endif %}
 
       <!-- Individual Pitching Rate Stats -->
       {% for statInfo in pitchingStats %}
@@ -176,138 +252,15 @@ eleventyComputed:
           <div class="h-80"><canvas id="pitching{{ statInfo.stat | replace("/", "") | replace("(", "") | replace(")", "") | replace("-", "") }}WLARmseChart"></canvas></div>
         </div>
       </div>
+
+      <!-- Pitching {{ statInfo.name }} Biggest Misses -->
+      {% if yearData %}
+        {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name + ' (' + statInfo.stat + ')') }}
+      {% endif %}
       {% endfor %}
     </div>
 
-    <!-- Biggest Misses Section -->
-    <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Biggest Misses - {{ year }}</h2>
 
-        {% set yearData = years[year] %}
-        {% if yearData %}
-            {% set proj_colors = {
-                'Marcel': 'text-red-600 dark:text-red-400',
-                'Steamer': 'text-indigo-600 dark:text-indigo-400',
-                'ZiPS': 'text-green-600 dark:text-green-400'
-            } %}
-            <!-- Batting Playing-Time Misses -->
-            <div class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Batting - Biggest PA Misses</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {% for system in site.meta.projection_systems %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <h4 class="text-lg font-medium {{ proj_colors[system] or 'text-gray-600 dark:text-gray-400' }} mb-4">{{ system }}</h4>
-                        {% set statResults = null %}
-                        {% for result in yearData.batting %}
-                            {% if result.system == system and result.stat == 'PA' %}
-                                {% set statResults = result %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if statResults and statResults.biggest_misses %}
-                        <div class="relative overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-2">Rank</th>
-                                        <th scope="col" class="px-4 py-2">Player</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Proj</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Actual</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for miss in statResults.biggest_misses.slice(0, 10) %}
-                                    <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <td class="px-4 py-2 font-medium text-gray-900 dark:text-white font-mono">{{ loop.index }}</td>
-                                        <td class="px-4 py-2">
-                                            <a href="{{ ('/players/' + miss.player_id + '/') | url }}" class="text-blue-600 dark:text-blue-400 hover:underline">
-                                                {{ miss.player_name }}
-                                            </a>
-                                        </td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0) }}</td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0) }}</td>
-                                        <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <p class="text-gray-500 dark:text-gray-400">No data available.</p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Rate Stats Misses -->
-            {% for playerType in ['batting', 'pitching'] %}
-            {% set rateStats = [
-                'wOBA',
-                'SO/PA', 'BB/PA', 'HBP/PA', 'HR/BIP',
-                'BABIP', '1B/(BIP-HR)', '2B/(BIP-HR)', '3B/(BIP-HR)',
-                'R/PA', 'RBI/PA', 'SB/TOF',
-                'AVG', 'OBP', 'SLG'
-            ] if playerType == 'batting' else [
-                'wOBA',
-                'SO/BF', 'BB/BF', 'HBP/BF', 'HR/BIP',
-                'BABIP', '1B/(BIP-HR)', '2B/(BIP-HR)', '3B/(BIP-HR)',
-                'R/BF', 'ER/BF', 'W/G', 'L/G', 'SV/G', 'HLD/G',
-                'ERA', 'WHIP'
-            ] %}
-            {% for stat in rateStats %}
-            <div class="mb-8">
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">{{ playerType | title }} - Biggest {{ stat }} Misses (weighted league-adjusted)</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {% for system in site.meta.projection_systems %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                        <h4 class="text-lg font-medium {{ proj_colors[system] or 'text-gray-600 dark:text-gray-400' }} mb-4">{{ system }}</h4>
-                        {% set statResults = null %}
-                        {% for result in yearData[playerType] %}
-                            {% if result.system == system and result.stat == stat %}
-                                {% set statResults = result %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if statResults and statResults.biggest_misses %}
-                        <div class="relative overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-2">Rank</th>
-                                        <th scope="col" class="px-4 py-2">Player</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Proj</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Actual</th>
-                                        <th scope="col" class="px-4 py-2 text-right">Error</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for miss in statResults.biggest_misses.slice(0, 10) %}
-                                    <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <td class="px-4 py-2 font-medium text-gray-900 dark:text-white font-mono">{{ loop.index }}</td>
-                                        <td class="px-4 py-2">
-                                            <a href="{{ ('/players/' + miss.player_id + '/') | url }}" class="text-blue-600 dark:text-blue-400 hover:underline">
-                                                {{ miss.player_name }}
-                                            </a>
-                                        </td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(4) }}</td>
-                                        <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(4) }}</td>
-                                        <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% else %}
-                        <p class="text-gray-500 dark:text-gray-400">No data available.</p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
-        {% endif %}
-    </div>
 
 </div>
 

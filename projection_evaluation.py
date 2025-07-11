@@ -48,7 +48,7 @@ PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS"]
+PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS", "Razzball", "Davenport (MLB)", "Davenport (Full)"]
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
 
 STATS_DIR: str = "stats"
@@ -132,6 +132,10 @@ def calculate_rate_stats(df: pd.DataFrame, player_type: str, year: Optional[int]
         else ["BF", "H", "BB", "SO", "HBP", "HR", "2B", "3B", "IP", "ER", "G"]
     )
 
+    # Ensure HBP exists (create with 0 if missing)
+    if "HBP" not in df.columns:
+        df["HBP"] = 0
+
     for col in required_cols:
         if col in df.columns:
             df[col] = df[col].fillna(0)
@@ -206,7 +210,22 @@ def calculate_rate_stats(df: pd.DataFrame, player_type: str, year: Optional[int]
                 df["TOF"] = df["BB"] + df["HBP"] + df["H"] - df["2B"] - df["3B"] - df["HR"]
                 df["SB/TOF"] = df.apply(lambda row: 0 if row["TOF"] == 0 else row["SB"] / row["TOF"], axis=1)
     else:  # pitching
+        # Handle K vs SO column naming for strikeouts
+        if "SO" not in df.columns and "K" in df.columns:
+            df["SO"] = df["K"]
+
         # Calculate BF when missing or empty: IP*3 + H + BB + HBP
+        # First, ensure HBP exists (fill with 0 if missing)
+        if "HBP" not in df.columns:
+            df["HBP"] = 0
+
+        # Calculate R and ER from RA and ERA if they're not available
+        if "R" not in df.columns and "RA" in df.columns and "IP" in df.columns:
+            df["R"] = df.apply(lambda row: 0 if row["IP"] == 0 else (row["RA"] * row["IP"]) / 9, axis=1)
+
+        if "ER" not in df.columns and "ERA" in df.columns and "IP" in df.columns:
+            df["ER"] = df.apply(lambda row: 0 if row["IP"] == 0 else (row["ERA"] * row["IP"]) / 9, axis=1)
+
         required_cols = ["IP", "H", "BB", "HBP"]
         should_calculate_bf = True
 
@@ -310,7 +329,15 @@ def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
 def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     """Load projections for a given year, system, and player type"""
     suffix = "bat" if player_type == "batting" else "pit"
-    file_path = Path(PROJECTIONS_DIR) / f"{system.lower()}_{year}_{suffix}.csv"
+
+    # Map display names to file names
+    system_name_map = {
+        "Davenport (MLB)": "davenport_mlb",
+        "Davenport (Full)": "davenport_full"
+    }
+
+    file_system_name = system_name_map.get(system, system.lower())
+    file_path = Path(PROJECTIONS_DIR) / f"{file_system_name}_{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
@@ -333,8 +360,17 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
         )
 
     # Marcel projections use 'player_id' for the MLBAM ID
-    if system.lower() == "marcel" and "player_id" in df.columns:
+    if file_system_name == "marcel" and "player_id" in df.columns:
         df = df.rename(columns={"player_id": "xMLBAMID"})
+        df["xMLBAMID"] = (
+            pd.to_numeric(df["xMLBAMID"], errors="coerce")
+            .fillna(0)
+            .astype(int)
+            .astype(str)
+        )
+
+    if "MLBID" in df.columns:
+        df = df.rename(columns={"MLBID": "xMLBAMID"})
         df["xMLBAMID"] = (
             pd.to_numeric(df["xMLBAMID"], errors="coerce")
             .fillna(0)
@@ -931,10 +967,10 @@ def process_year_system(
                 actual_league_avgs[stat]
             )
 
-    # Fill missing projections with 250 for playing-time stats
+    # Fill missing projections with 200 for playing-time stats
     for stat in volume_stats:
         if f"{stat}_y" in merged_df.columns:
-            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(250)
+            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(200)
 
     # 4. Calculate league averages for projected stats
     proj_league_avgs = {}
