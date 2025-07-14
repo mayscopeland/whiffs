@@ -978,10 +978,10 @@ def process_year_system(
                 actual_league_avgs[stat]
             )
 
-    # Fill missing projections with 200 for playing-time stats
+    # Fill missing projections with 1 for playing-time stats
     for stat in volume_stats:
         if f"{stat}_y" in merged_df.columns:
-            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(200)
+            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(1)
 
     # 4. Calculate league averages for projected stats
     proj_league_avgs = {}

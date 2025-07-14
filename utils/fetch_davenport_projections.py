@@ -1064,14 +1064,14 @@ def combine_projections_file(full_file: Path, base_file: Path, player_type: str,
                         new_row[col] = "FA"  # Free agent
                     elif col == "Pos" and not use_mlb:
                         new_row[col] = "P" if player_type == "pitching" else "DH"
-                    elif col == "ER" and not use_mlb:
-                        # Calculate ER from ERA and IP if available (team projections only)
+                    elif col == "ER":
+                        # Calculate ER from ERA and IP if available (for both team and full projections)
                         if "ERA" in new_row and "IP" in new_row:
                             try:
                                 era = float(new_row["ERA"])
                                 ip = float(new_row["IP"])
                                 er = (era / 9) * ip
-                                new_row[col] = round(er, 1)
+                                new_row[col] = er
                             except (ValueError, TypeError):
                                 new_row[col] = 0
                         else:
