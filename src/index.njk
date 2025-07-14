@@ -31,7 +31,7 @@ title: "MLB Projection Accuracy"
         <strong>Whiffs</strong> does the normal MAE and RMSE analysis you might find in other projection evaluations, then takes it to the next level. It scales projections to a consistent league average and weights errors by playing time. (Check out the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a> for details.)
       </p>
       <p class="mb-8 text-lg sm:text-xl">
-        It currently has accuracy data for Marcel, Steamer, and ZiPS projection from 2010-2024, with more to come.
+        It currently has accuracy data for Marcel, Steamer, ZiPS, Razzball/Steamer, and Davenport projections going back as far as 2010. (Got more? Email me at <a href="mailto:mayscopeland@gmail.com" class="text-blue-600 dark:text-blue-400 hover:underline">mayscopeland@gmail.com</a>.)
       </p>
     </div>
 
@@ -204,10 +204,10 @@ title: "MLB Projection Accuracy"
                 const chartStat = container.dataset.stat;
 
                 // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
-                const isVolumestat = chartStat === 'PA' || chartStat === 'BF';
+                const isVolume = chartStat === 'PA' || chartStat === 'BF';
 
                 const shouldShow = chartMetric === selectedMetric &&
-                    (isVolumestat || chartAdjustment === selectedAdjustment);
+                    (isVolume || chartAdjustment === selectedAdjustment);
 
                 container.style.display = shouldShow ? 'block' : 'none';
             });

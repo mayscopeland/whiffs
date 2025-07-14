@@ -16,8 +16,7 @@ eleventyComputed:
     'Steamer': 'text-indigo-600 dark:text-indigo-400',
     'ZiPS': 'text-green-600 dark:text-green-400',
     'Razzball': 'text-red-600 dark:text-red-400',
-    'Davenport (MLB)': 'text-purple-600 dark:text-purple-400',
-    'Davenport (Full)': 'text-purple-600 dark:text-purple-400'
+    'Davenport': 'text-purple-600 dark:text-purple-400'
 } %}
 <div class="mb-8">
     <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Biggest {{ statName }} Misses</h3>
@@ -52,8 +51,8 @@ eleventyComputed:
                                     {{ miss.player_name }}
                                 </a>
                             </td>
-                            <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(showVolume and 0 or 4) }}</td>
-                            <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(showVolume and 0 or 4) }}</td>
+                            <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0 if showVolume else 4) }}</td>
+                            <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
                             <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
                         </tr>
                         {% endfor %}
@@ -155,7 +154,7 @@ eleventyComputed:
       {% for statInfo in battingStats %}
       <div class="chart-section mb-8">
         <div class="mb-4 py-4">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }}</h4>
           <div class="flex flex-wrap gap-4">
             <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
@@ -187,7 +186,7 @@ eleventyComputed:
 
       <!-- Batting {{ statInfo.name }} Biggest Misses -->
       {% if yearData %}
-        {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name + ' (' + statInfo.stat + ')') }}
+        {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name) }}
       {% endif %}
       {% endfor %}
     </div>
@@ -223,7 +222,7 @@ eleventyComputed:
       {% for statInfo in pitchingStats %}
       <div class="chart-section mb-8">
         <div class="mb-4 py-4">
-          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }}</h4>
           <div class="flex flex-wrap gap-4">
             <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
@@ -255,7 +254,7 @@ eleventyComputed:
 
       <!-- Pitching {{ statInfo.name }} Biggest Misses -->
       {% if yearData %}
-        {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name + ' (' + statInfo.stat + ')') }}
+        {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name) }}
       {% endif %}
       {% endfor %}
     </div>

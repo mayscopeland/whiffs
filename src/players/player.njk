@@ -110,7 +110,7 @@ module.exports = {
       {% for statConfig in statsConfig %}
       <div class="mb-4 py-4">
         <div class="mb-4 py-4">
-          <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }} ({{ statConfig.stat }})</h4>
+          <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }}</h4>
           <div class="flex flex-wrap gap-4">
             <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
               {% for metric in metrics %}
@@ -182,8 +182,7 @@ module.exports = {
               'Steamer': 'text-indigo-600 dark:text-indigo-400',
               'ZiPS': 'text-green-600 dark:text-green-400',
               'Razzball': 'text-red-600 dark:text-red-400',
-              'Davenport (MLB)': 'text-purple-600 dark:text-purple-400',
-              'Davenport (Full)': 'text-purple-600 dark:text-purple-400'
+              'Davenport': 'text-purple-600 dark:text-purple-400'
             } %}
 
             {% for system in site.meta.projection_systems %}
@@ -289,10 +288,10 @@ module.exports = {
         const chartStat = container.dataset.stat;
 
         // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
-        const isVolumeStat = chartStat === 'PA' || chartStat === 'BF';
+        const isVolume = chartStat === 'PA' || chartStat === 'BF';
 
         const shouldShow = chartMetric === selectedMetric &&
-          (isVolumeStat || chartAdjustment === selectedAdjustment);
+          (isVolume || chartAdjustment === selectedAdjustment);
 
         container.style.display = shouldShow ? 'block' : 'none';
       });

@@ -68,7 +68,7 @@ title: "All-Time Projection Accuracy"
             {% for statInfo in battingStats %}
             <div class="mb-4 py-4">
               <div class="mb-4 py-4">
-                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }}</h4>
                 <div class="flex flex-wrap gap-4">
                     <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                       {% for metric in metrics %}
@@ -111,7 +111,7 @@ title: "All-Time Projection Accuracy"
             {% for statInfo in pitchingStats %}
             <div class="mb-4 py-4">
               <div class="mb-4 py-4">
-                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }} ({{ statInfo.stat }})</h4>
+                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statInfo.name }}</h4>
                 <div class="flex flex-wrap gap-4">
                   <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     {% for metric in metrics %}
@@ -182,10 +182,10 @@ title: "All-Time Projection Accuracy"
                 const chartStat = container.dataset.stat;
 
                 // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
-                const isVolumestat = chartStat === 'PA' || chartStat === 'BF';
+                const isVolume = chartStat === 'PA' || chartStat === 'BF';
 
                 const shouldShow = chartMetric === selectedMetric &&
-                    (isVolumestat || chartAdjustment === selectedAdjustment);
+                    (isVolume || chartAdjustment === selectedAdjustment);
 
                 container.style.display = shouldShow ? 'block' : 'none';
             });

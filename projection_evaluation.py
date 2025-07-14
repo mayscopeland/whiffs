@@ -48,7 +48,7 @@ PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS", "Razzball", "Davenport (MLB)", "Davenport (Full)"]
+PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS", "Razzball", "Davenport"]
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
 
 STATS_DIR: str = "stats"
@@ -330,14 +330,7 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     """Load projections for a given year, system, and player type"""
     suffix = "bat" if player_type == "batting" else "pit"
 
-    # Map display names to file names
-    system_name_map = {
-        "Davenport (MLB)": "davenport_mlb",
-        "Davenport (Full)": "davenport_full"
-    }
-
-    file_system_name = system_name_map.get(system, system.lower())
-    file_path = Path(PROJECTIONS_DIR) / f"{file_system_name}_{year}_{suffix}.csv"
+    file_path = Path(PROJECTIONS_DIR) / f"{system.lower()}_{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
@@ -360,7 +353,7 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
         )
 
     # Marcel projections use 'player_id' for the MLBAM ID
-    if file_system_name == "marcel" and "player_id" in df.columns:
+    if system.lower() == "marcel" and "player_id" in df.columns:
         df = df.rename(columns={"player_id": "xMLBAMID"})
         df["xMLBAMID"] = (
             pd.to_numeric(df["xMLBAMID"], errors="coerce")
@@ -377,6 +370,24 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
             .astype(int)
             .astype(str)
         )
+
+    # Handle missing columns for Davenport projections
+    if system.lower() == "davenport":
+        if player_type == "batting":
+            # Add missing PA column if not present
+            if "PA" not in df.columns and "AB" in df.columns and "BB" in df.columns:
+                # Estimate PA as AB + BB + HBP (if available) + SF (if available) + SH (if available)
+                df["PA"] = df["AB"] + df["BB"]
+                if "HBP" in df.columns:
+                    df["PA"] += df["HBP"]
+                if "SF" in df.columns:
+                    df["PA"] += df["SF"]
+                if "SH" in df.columns:
+                    df["PA"] += df["SH"]
+
+            # Add missing HBP column if not present
+            if "HBP" not in df.columns:
+                df["HBP"] = 0
 
     # Calculate all rate stats
     df = calculate_rate_stats(df, player_type, year)
@@ -1029,7 +1040,15 @@ def process_year_system(
         if len(actual_clean) == 0:
             continue
 
-        weights = merged_df[playing_time_col_x][mask].values
+        # Get the correct playing time column for weights
+        # Check if the _x suffix version exists, otherwise use the original column name
+        if playing_time_col_x in merged_df.columns:
+            weights = merged_df[playing_time_col_x][mask].values
+        elif playing_time_col in merged_df.columns:
+            weights = merged_df[playing_time_col][mask].values
+        else:
+            # If neither exists, use equal weights (all 1s)
+            weights = np.ones(len(actual_clean))
 
         # 5, 6, 7: Calculate all metric versions and find biggest misses
         if stat in rate_stats:
