@@ -477,7 +477,7 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
       data: data,
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
-      borderWidth: 1,
+      borderWidth: 2,
       tension: 0.1,
     };
   });
@@ -514,19 +514,19 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
               const originalColor = projectionSystemColors[dataset.label] || defaultColor;
 
               if (index === hoveredDatasetIndex) {
-                // Brighten the hovered line
+                // Brighten the hovered line and show data points
                 dataset.backgroundColor = originalColor;
                 dataset.borderColor = originalColor;
               } else {
                 // Dim other lines by adding transparency
-                dataset.backgroundColor = originalColor + "80"; // 50% opacity
-                dataset.borderColor = originalColor + "80";
+                dataset.backgroundColor = originalColor + "4D";
+                dataset.borderColor = originalColor + "4D";
               }
             });
           } else {
             // Reset all datasets to normal when not hovering
             datasets.forEach((dataset) => {
-              // Reset to original colors
+              // Reset to original colors and default point settings
               const originalColor = projectionSystemColors[dataset.label] || defaultColor;
               dataset.backgroundColor = originalColor;
               dataset.borderColor = originalColor;
@@ -547,7 +547,7 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
         x: {
           title: {
             display: true,
-            text: type === "bar" ? (title.includes("Over Time") ? "Year" : "Stat") : "Year",
+            text: type === "bar" ? (title.includes("Over Time") ? "Year" : "") : "Year",
           },
         },
       },
