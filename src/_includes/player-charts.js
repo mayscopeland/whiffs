@@ -40,13 +40,6 @@ function initializePlayerCharts(playerYears, playerType, projectionSystems) {
           { name: "WHIP", stat: "WHIP", isVolume: false },
         ];
 
-  // Create performance charts (actual vs projected)
-  statsConfig.forEach((statConfig) => {
-    const chartData = preparePlayerStatChartData(playerYears, statConfig.stat, playerType, projectionSystems);
-    if (chartData.datasets && chartData.datasets.length > 0) {
-      createChart(`rate${statConfig.stat}Chart`, "bar", chartData, `${statConfig.stat} Over Time`, statConfig.stat);
-    }
-  });
 
   // Create accuracy charts for all stats and metrics
   statsConfig.forEach((statConfig) => {

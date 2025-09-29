@@ -77,12 +77,24 @@ function initializeSeasonCharts(yearData, projectionSystems) {
           borderColor: projectionSystemBorderColors[system] || defaultColor,
           borderWidth: 1,
           hasData: value !== null,
+          errorValue: value, // Store the error value for sorting
         };
       })
-      .filter((dataset) => dataset.hasData);
+      .filter((dataset) => dataset.hasData)
+      .sort((a, b) => {
+        // Sort by error value in descending order (worst to best)
+        // Handle null values by putting them at the end
+        if (a.errorValue === null && b.errorValue === null) return 0;
+        if (a.errorValue === null) return 1;
+        if (b.errorValue === null) return -1;
+        return b.errorValue - a.errorValue;
+      });
 
-    // Remove the hasData property before returning
-    datasets.forEach((dataset) => delete dataset.hasData);
+    // Remove the hasData and errorValue properties before returning
+    datasets.forEach((dataset) => {
+      delete dataset.hasData;
+      delete dataset.errorValue;
+    });
 
     return {
       labels: [stat],

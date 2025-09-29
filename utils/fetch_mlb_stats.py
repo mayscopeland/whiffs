@@ -249,7 +249,7 @@ def main():
 
     unique_player_ids: Set[int] = set()
 
-    years = range(2007, 2025)
+    years = range(2007, 2026)
 
     for year in years:
         print(f"Fetching data for {year}...")

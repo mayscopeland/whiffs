@@ -64,61 +64,36 @@ module.exports = {
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="text-center mb-12">
-    <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ player.name | safe }}</h1>
+    <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ player.name | safe }}</h1>
     <div class="flex justify-center items-center space-x-4">
-      <span class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm font-medium rounded-full">
+      <span class="px-3 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400 text-sm font-medium rounded-full">
         {{ player.primary_type | title }}
       </span>
-      <span class="text-sm text-gray-500 dark:text-gray-400">ID: <span class="font-mono">{{ player.id }}</span></span>
+      <span class="text-sm text-slate-600 dark:text-slate-300">ID: <span class="font-mono">{{ player.id }}</span></span>
     </div>
 
     {% include "2020-toggle.njk" %}
   </div>
 
-  <!-- Performance Metrics Section -->
-  <div class="mb-12">
-    <div class="flex items-center mb-6">
-      <div class="mr-4 p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-        <svg class="size-6 text-blue-600 dark:text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15v4m6-6v6m6-4v4m6-6v6M3 11l6-5 6 5 5.5-5.5"/>
-        </svg>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Performance Metrics</h2>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {% for statConfig in statsConfig %}
-      <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ statConfig.stat }} Comparison</h3>
-        <div class="h-80"><canvas id="rate{{ statConfig.stat }}Chart"></canvas></div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-
   <!-- Projection Accuracy Section -->
   <div class="mb-12">
     <div class="flex items-center mb-6">
-      <div class="mr-4 p-2 bg-rose-100 dark:bg-rose-900 rounded-lg">
-        <svg class="size-6 text-rose-600 dark:text-rose-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v15a1 1 0 0 0 1 1h15M8 16l2.5-5.5 3 3L17.273 7 20 9.667"/>
-        </svg>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Projection Accuracy</h2>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Projection Accuracy</h2>
     </div>
 
     <div class="space-y-6">
       {% for statConfig in statsConfig %}
       <div class="mb-4 py-4">
         <div class="mb-4 py-4">
-          <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">{{ statConfig.name }}</h4>
+          <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statConfig.name }}</h4>
           <div class="flex flex-wrap gap-4">
-            <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+            <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
               {% for metric in metrics %}
               <option value="{{ metric.value }}">{{ metric.title }}</option>
               {% endfor %}
             </select>
             {% if not statConfig.isVolume %}
-              <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+              <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                 {% for adj in adjustments %}
                 <option value="{{ adj.value }}">{{ adj.name }}</option>
                 {% endfor %}
@@ -130,13 +105,13 @@ module.exports = {
         {% for metric in metrics %}
           {% if statConfig.isVolume %}
             {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-              <div class="h-80"><canvas id="accuracy{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
+            <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+              <div class="h-128"><canvas id="accuracy{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
             </div>
           {% else %}
             {% for adj in adjustments %}
-            <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-              <div class="h-80"><canvas id="accuracy{{ adj.chartSuffix }}{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
+            <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+              <div class="h-128"><canvas id="accuracy{{ adj.chartSuffix }}{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
             </div>
             {% endfor %}
           {% endif %}
@@ -149,20 +124,15 @@ module.exports = {
   <!-- Statistical Summary Tables -->
   <div class="mb-12">
     <div class="flex items-center mb-6">
-      <div class="mr-4 p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-        <svg class="size-6 text-green-600 dark:text-green-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" stroke-width="2" d="M3 11h18M3 15h18m-9-4v8m-8 0h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
-        </svg>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Statistical Summary</h2>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Stats</h2>
     </div>
 
     <!-- Yearly Performance Table -->
-    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Yearly Performance - {{ player.primary_type | title }}</h3>
+    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Yearly Performance - {{ player.primary_type | title }}</h3>
       <div class="relative overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-800 dark:text-slate-300">
             <tr>
               <th scope="col" class="px-4 py-3">Year</th>
               <th scope="col" class="px-4 py-3">System</th>
@@ -179,21 +149,25 @@ module.exports = {
             <!-- Dynamic Projection System Rows -->
             {% set systemColors = {
               'Marcel': 'text-amber-900 dark:text-amber-700',
-              'Steamer': 'text-indigo-600 dark:text-indigo-400',
+              'Steamer': 'text-blue-600 dark:text-blue-400',
               'ZiPS': 'text-green-600 dark:text-green-400',
               'Razzball': 'text-red-600 dark:text-red-400',
-              'Davenport': 'text-purple-600 dark:text-purple-400'
+              'Davenport': 'text-teal-600 dark:text-teal-400',
+              'ATC': 'text-orange-600 dark:text-orange-400',
+              'The BAT': 'text-purple-600 dark:text-purple-400',
+              'The BAT X': 'text-purple-600 dark:text-purple-400',
+              'OOPSY': 'text-pink-600 dark:text-pink-400'
             } %}
 
             {% for system in site.meta.projection_systems %}
             {% if yearData[player.primary_type][system] %}
-            <tr class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
-              <td class="px-4 py-3 {{ systemColors[system] or 'text-gray-600 dark:text-gray-400' }}">{{ system }}</td>
+            <tr class="bg-white border-b dark:bg-slate-900 dark:border-slate-700">
+              <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ year }}</td>
+              <td class="px-4 py-3 {{ systemColors[system] or 'text-slate-600 dark:text-slate-300' }}">{{ system }}</td>
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type][system][stat] is defined and yearData[player.primary_type][system][stat] is not none %}
-                <span class="font-mono">
+                <span class="font-mono text-slate-700 dark:text-slate-200">
                   {%- if stat == 'IP' -%}
                     {{ yearData[player.primary_type][system][stat] | toFixed(1) }}
                   {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
@@ -217,13 +191,13 @@ module.exports = {
 
             <!-- Actual Stats Row -->
             {% if yearData[player.primary_type]['Actual'] %}
-            <tr class="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-600">
-              <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ year }}</td>
-              <td class="px-4 py-3 text-gray-900 dark:text-white font-medium">Actual</td>
+            <tr class="bg-slate-100 border-b dark:bg-slate-800 dark:border-slate-600">
+              <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ year }}</td>
+              <td class="px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">Actual</td>
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type]['Actual'][stat] is defined and yearData[player.primary_type]['Actual'][stat] is not none %}
-                <span class="font-medium text-gray-900 dark:text-white font-mono">
+                <span class="font-medium text-slate-900 dark:text-slate-100 font-mono">
                   {%- if stat == 'IP' -%}
                     {{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}
                   {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}

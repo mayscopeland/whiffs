@@ -1,19 +1,27 @@
 let exclude2020 = true;
 
 const projectionSystemColors = {
-  Marcel: "#8c564b",
-  Steamer: "#1f77b4",
-  ZiPS: "#2ca02c",
-  Razzball: "#d62728",
-  Davenport: "#9467bd",
+  "ATC": "#ff7f0e",
+  "Davenport": "#17becf",
+  "Marcel": "#8c564b",
+  "OOPSY": "#e377c2",
+  "Razzball": "#d62728",
+  "Steamer": "#1f77b4",
+  "The BAT": "#9467bd",
+  "The BAT X": "#9467bd",
+  "ZiPS": "#2ca02c"
 };
 
 const projectionSystemBorderColors = {
-  Marcel: "#8c564b",
-  Steamer: "#1f77b4",
-  ZiPS: "#2ca02c",
-  Razzball: "#d62728",
-  Davenport: "#9467bd",
+  "ATC": "#ff7f0e",
+  "Davenport": "#17becf",
+  "Marcel": "#8c564b",
+  "OOPSY": "#e377c2",
+  "Razzball": "#d62728",
+  "Steamer": "#1f77b4",
+  "The BAT": "#9467bd",
+  "The BAT X": "#9467bd",
+  "ZiPS": "#2ca02c"
 };
 
 const defaultColor = "#7f7f7f";
@@ -186,12 +194,24 @@ function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
         borderColor: projectionSystemBorderColors[system] || defaultColor,
         borderWidth: 2,
         hasData: hasData,
+        errorValue: data[0], // Use the first (and only) stat's error value for sorting
       };
     })
-    .filter((dataset) => dataset.hasData);
+    .filter((dataset) => dataset.hasData)
+    .sort((a, b) => {
+      // Sort by error value in descending order (worst to best)
+      // Handle null values by putting them at the end
+      if (a.errorValue === null && b.errorValue === null) return 0;
+      if (a.errorValue === null) return 1;
+      if (b.errorValue === null) return -1;
+      return b.errorValue - a.errorValue;
+    });
 
-  // Remove the hasData property before returning
-  datasets.forEach((dataset) => delete dataset.hasData);
+  // Remove the hasData and errorValue properties before returning
+  datasets.forEach((dataset) => {
+    delete dataset.hasData;
+    delete dataset.errorValue;
+  });
 
   return { labels: stats, datasets };
 }
@@ -220,70 +240,28 @@ function prepareVolumeMaeData(yearData, playerType, projectionSystems) {
         borderColor: projectionSystemBorderColors[system] || defaultColor,
         borderWidth: 2,
         hasData: hasData,
+        errorValue: data[0], // Use the first (and only) stat's error value for sorting
       };
     })
-    .filter((dataset) => dataset.hasData);
+    .filter((dataset) => dataset.hasData)
+    .sort((a, b) => {
+      // Sort by error value in descending order (worst to best)
+      // Handle null values by putting them at the end
+      if (a.errorValue === null && b.errorValue === null) return 0;
+      if (a.errorValue === null) return 1;
+      if (b.errorValue === null) return -1;
+      return b.errorValue - a.errorValue;
+    });
 
-  // Remove the hasData property before returning
-  datasets.forEach((dataset) => delete dataset.hasData);
+  // Remove the hasData and errorValue properties before returning
+  datasets.forEach((dataset) => {
+    delete dataset.hasData;
+    delete dataset.errorValue;
+  });
 
   return { labels: stats, datasets };
 }
 
-function preparePlayerStatChartData(playerYears, stat, playerType, projectionSystems) {
-  if (!playerYears || typeof playerYears !== "object") {
-    return { labels: [], datasets: [] };
-  }
-  const filteredPlayerYears = filterPlayerYearsData(playerYears);
-  const years = Object.keys(filteredPlayerYears).sort();
-  const yearLabels = years.map((y) => y.toString());
-
-  const datasets = [];
-
-  // Create a dataset for actual performance
-  const actualData = years.map((year) => {
-    const yearData = filteredPlayerYears[year];
-    if (yearData && yearData[playerType] && yearData[playerType]["Actual"]) {
-      return yearData[playerType]["Actual"][stat] ?? null;
-    }
-    return null;
-  });
-
-  datasets.push({
-    label: "Actual",
-    data: actualData,
-    backgroundColor: defaultColor,
-    borderColor: defaultColor,
-    borderWidth: 2,
-    type: "line",
-    order: 0,
-    tension: 0.1,
-  });
-
-  // Create datasets for each projection system
-  const projSystems = projectionSystems.filter((s) => s !== "Actual");
-  projSystems.forEach((system) => {
-    const projData = years.map((year) => {
-      const yearData = filteredPlayerYears[year];
-      if (yearData && yearData[playerType] && yearData[playerType][system]) {
-        return yearData[playerType][system][stat] ?? null;
-      }
-      return null;
-    });
-
-    datasets.push({
-      label: system,
-      data: projData,
-      backgroundColor: projectionSystemColors[system] || defaultColor,
-      borderColor: projectionSystemBorderColors[system] || defaultColor,
-      borderWidth: 1,
-      type: "bar",
-      order: 1,
-    });
-  });
-
-  return { labels: yearLabels, datasets };
-}
 
 function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectionSystems) {
   if (!playerYears || typeof playerYears !== "object") {
@@ -492,6 +470,7 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
   const chart = new Chart(canvas.getContext("2d"), {
     type: type,
     data: data,
+    borderWidth: type == 'bar' ? 2 : 1,
     options: {
       responsive: true,
       maintainAspectRatio: false,

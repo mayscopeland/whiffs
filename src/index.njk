@@ -25,13 +25,13 @@ title: "MLB Projection Accuracy"
 ] %}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-    <div class="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-16">
-      <h1 class="text-center text-balance text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-8">An open-source framework for analyzing MLB player projection accuracy</h1>
+    <div class="text-lg text-slate-600 dark:text-slate-300 max-w-4xl mx-auto mb-16">
+      <h1 class="text-center text-balance text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-8">An open-source framework for analyzing MLB player projection accuracy</h1>
       <p class="mb-6 text-lg sm:text-xl">
         <strong>Whiffs</strong> does the normal MAE and RMSE analysis you might find in other projection evaluations, then takes it to the next level. It scales projections to a consistent league average and weights errors by playing time. (Check out the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a> for details.)
       </p>
       <p class="mb-8 text-lg sm:text-xl">
-        It currently has accuracy data for Marcel, Steamer, ZiPS, Razzball/Steamer, and Davenport projections going back as far as 2010. (Got more? Email me at <a href="mailto:mayscopeland@gmail.com" class="text-blue-600 dark:text-blue-400 hover:underline">mayscopeland@gmail.com</a>.)
+        It currently has accuracy data for projections going back as far as 2010, but with lots of gaps. (Got more? Email me at <a href="mailto:mayscopeland@gmail.com" class="text-blue-600 dark:text-blue-400 hover:underline">mayscopeland@gmail.com</a>.)
       </p>
     </div>
 
@@ -39,13 +39,13 @@ title: "MLB Projection Accuracy"
 
     <!-- Playing Time Section -->
     <div class="mb-12">
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">Playing Time Projection Accuracy</h2>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 text-center">Playing Time Projection Accuracy</h2>
       <div class="space-y-6">
           <div class="mb-4 py-4">
             <div class="mb-4 py-4">
-              <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Plate Appearances (PA)</h4>
+              <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Plate Appearances (PA)</h4>
               <div class="flex flex-wrap gap-4">
-                <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                   {% for metric in metrics %}
                   <option value="{{ metric.value }}">{{ metric.title }}</option>
                   {% endfor %}
@@ -55,17 +55,17 @@ title: "MLB Projection Accuracy"
 
             {% for metric in metrics %}
               {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
-              <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="PA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                <div class="h-80"><canvas id="battingPA{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+              <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="PA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                <div class="h-128"><canvas id="battingPA{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
               </div>
             {% endfor %}
           </div>
 
           <div class="mb-4 py-4">
             <div class="mb-4 py-4">
-              <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Batters Faced (BF)</h4>
+              <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Batters Faced (BF)</h4>
               <div class="flex flex-wrap gap-4">
-                <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                   {% for metric in metrics %}
                   <option value="{{ metric.value }}">{{ metric.title }}</option>
                   {% endfor %}
@@ -75,15 +75,15 @@ title: "MLB Projection Accuracy"
 
             {% for metric in metrics %}
               {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
-              <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="BF" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                <div class="h-80"><canvas id="pitchingBF{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+              <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="BF" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                <div class="h-128"><canvas id="pitchingBF{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
               </div>
             {% endfor %}
           </div>
       </div>
 
 
-      <div class="max-w-4xl mx-auto p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-900 dark:text-blue-400 dark:border-blue-800" role="alert">
+      <div class="max-w-4xl mx-auto p-4 mb-4 text-blue-600 border border-blue-200 rounded-lg bg-blue-50 dark:bg-slate-900 dark:text-blue-400 dark:border-blue-700" role="alert">
         <div class="flex items-center">
           <svg class="shrink-0 w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
@@ -103,18 +103,18 @@ title: "MLB Projection Accuracy"
 
     <!-- Overall Performance Section -->
     <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">Overall Performance Projection Accuracy</h2>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 text-center">Overall Performance Projection Accuracy</h2>
         <div class="space-y-6">
             <div class="mb-4 py-4">
               <div class="mb-4 py-4">
-                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Hitter wOBA</h4>
+                <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Hitter wOBA</h4>
                 <div class="flex flex-wrap gap-4">
-                    <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                       {% for metric in metrics %}
                       <option value="{{ metric.value }}">{{ metric.title }}</option>
                       {% endfor %}
                     </select>
-                    <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                       {% for adj in adjustments %}
                       <option value="{{ adj.value }}">{{ adj.name }}</option>
                       {% endfor %}
@@ -124,8 +124,8 @@ title: "MLB Projection Accuracy"
 
                 {% for metric in metrics %}
                     {% for adj in adjustments %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="wOBA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                        <div class="h-80"><canvas id="battingwOBA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="wOBA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                        <div class="h-128"><canvas id="battingwOBA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
                     </div>
                     {% endfor %}
                 {% endfor %}
@@ -133,14 +133,14 @@ title: "MLB Projection Accuracy"
 
             <div class="mb-4 py-4">
               <div class="mb-4 py-4">
-                <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Pitcher ERA</h4>
+                <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Pitcher ERA</h4>
                 <div class="flex flex-wrap gap-4">
-                    <select class="metric-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                       {% for metric in metrics %}
                       <option value="{{ metric.value }}">{{ metric.title }}</option>
                       {% endfor %}
                     </select>
-                    <select class="adjustment-select px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                    <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                       {% for adj in adjustments %}
                       <option value="{{ adj.value }}">{{ adj.name }}</option>
                       {% endfor %}
@@ -150,8 +150,8 @@ title: "MLB Projection Accuracy"
 
                 {% for metric in metrics %}
                     {% for adj in adjustments %}
-                    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 chart-container" data-stat="ERA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
-                        <div class="h-80"><canvas id="pitchingERA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+                    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="ERA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                        <div class="h-128"><canvas id="pitchingERA{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
                     </div>
                     {% endfor %}
                 {% endfor %}

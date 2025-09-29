@@ -6,7 +6,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime, UTC
 
-YEARS: List[int] = list(range(2010, 2025))
+YEARS: List[int] = list(range(2010, 2026))
 
 BATTING_VOLUME_STATS: List[str] = ["PA"]
 BATTING_RATE_STATS: List[str] = [
@@ -48,7 +48,26 @@ PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-PROJECTION_SYSTEMS: List[str] = ["Marcel", "Steamer", "ZiPS", "Razzball", "Davenport"]
+# Fantasy stats for players with significant playing time
+FAN_BATTING_VOLUME_STATS: List[str] = ["PA"]
+FAN_BATTING_RATE_STATS: List[str] = [
+    "HR/BIP",
+    "SB/TOF",
+    "R/PA",
+    "RBI/PA",
+    "AVG",
+]
+
+FAN_PITCHING_VOLUME_STATS: List[str] = ["BF"]
+FAN_PITCHING_RATE_STATS: List[str] = [
+    "SO/BF",
+    "W/G",
+    "SV/G",
+    "ERA",
+    "WHIP",
+]
+
+PROJECTION_SYSTEMS: List[str] = ["ATC", "Davenport", "Marcel", "OOPSY", "Razzball", "Steamer", "The BAT","The BAT X", "ZiPS",]
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
 
 STATS_DIR: str = "stats"
@@ -302,7 +321,23 @@ def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
         print(f"Warning: {file_path} not found")
         return pd.DataFrame()
 
-    df = pd.read_csv(file_path)
+    # Try different encodings to handle various file formats
+    encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+    df = pd.DataFrame()
+
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(file_path, encoding=encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            print(f"Error reading {file_path} with {encoding} encoding: {e}")
+            continue
+
+    if df.empty:
+        print(f"Error reading {file_path}: Could not decode with any supported encoding")
+        return pd.DataFrame()
 
     # Convert IP for pitching stats from fractional to decimal
     if player_type == "pitching" and "IP" in df.columns:
@@ -330,16 +365,28 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     """Load projections for a given year, system, and player type"""
     suffix = "bat" if player_type == "batting" else "pit"
 
-    file_path = Path(PROJECTIONS_DIR) / f"{system.lower()}_{year}_{suffix}.csv"
+    file_path = Path(PROJECTIONS_DIR) / f"{system.replace(' ', '').lower()}_{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
         return pd.DataFrame()
 
-    try:
-        df = pd.read_csv(file_path)
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+    # Try different encodings to handle various file formats
+    encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+    df = pd.DataFrame()
+
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(file_path, encoding=encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+        except Exception as e:
+            print(f"Error reading {file_path} with {encoding} encoding: {e}")
+            continue
+
+    if df.empty:
+        print(f"Error reading {file_path}: Could not decode with any supported encoding")
         return pd.DataFrame()
 
     # Fix xMLBAMID data type issues - convert float values to int to remove .0 decimals
@@ -351,9 +398,7 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
             .astype(int)
             .astype(str)
         )
-
-    # Marcel projections use 'player_id' for the MLBAM ID
-    if system.lower() == "marcel" and "player_id" in df.columns:
+    elif "player_id" in df.columns:
         df = df.rename(columns={"player_id": "xMLBAMID"})
         df["xMLBAMID"] = (
             pd.to_numeric(df["xMLBAMID"], errors="coerce")
@@ -371,23 +416,44 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
             .astype(str)
         )
 
-    # Handle missing columns for Davenport projections
-    if system.lower() == "davenport":
-        if player_type == "batting":
-            # Add missing PA column if not present
-            if "PA" not in df.columns and "AB" in df.columns and "BB" in df.columns:
-                # Estimate PA as AB + BB + HBP (if available) + SF (if available) + SH (if available)
-                df["PA"] = df["AB"] + df["BB"]
-                if "HBP" in df.columns:
-                    df["PA"] += df["HBP"]
-                if "SF" in df.columns:
-                    df["PA"] += df["SF"]
-                if "SH" in df.columns:
-                    df["PA"] += df["SH"]
+    # Handle missing columns
+    if player_type == "batting":
+        # Add missing PA column if not present
+        if "PA" not in df.columns and "AB" in df.columns and "BB" in df.columns:
+            # Estimate PA as AB + BB + HBP (if available) + SF (if available) + SH (if available)
+            df["PA"] = df["AB"] + df["BB"]
+            if "HBP" in df.columns:
+                df["PA"] += df["HBP"]
+            if "SF" in df.columns:
+                df["PA"] += df["SF"]
+            if "SH" in df.columns:
+                df["PA"] += df["SH"]
 
-            # Add missing HBP column if not present
-            if "HBP" not in df.columns:
-                df["HBP"] = 0
+        # Add missing AB column if not present
+        if "AB" not in df.columns and "PA" in df.columns and "BB" in df.columns:
+            df["AB"] = df["PA"] - df["BB"]
+            if "HBP" in df.columns:
+                df["AB"] -= df["HBP"]
+            if "SF" in df.columns:
+                df["AB"] -= df["SF"]
+            if "SH" in df.columns:
+                df["AB"] -= df["SH"]
+
+        if "H" not in df.columns and "1B" in df.columns and "2B" in df.columns and "3B" in df.columns and "HR" in df.columns:
+            df["H"] = df["1B"] + df["2B"] + df["3B"] + df["HR"]
+
+
+        # Add missing HBP column if not present
+        if "HBP" not in df.columns:
+            df["HBP"] = 0
+
+    # Drop duplicates based on xMLBAMID, keeping the first occurrence
+    if "xMLBAMID" in df.columns:
+        initial_count = len(df)
+        df = df.drop_duplicates(subset=["xMLBAMID"], keep="first")
+        final_count = len(df)
+        if initial_count != final_count:
+            print(f"  Dropped {initial_count - final_count} duplicate rows based on xMLBAMID")
 
     # Calculate all rate stats
     df = calculate_rate_stats(df, player_type, year)
@@ -454,7 +520,7 @@ def find_biggest_misses(
     stat: str,
     actual_col: str,
     proj_col: str,
-    n_misses: int = 10,
+    n_misses: int = 20,
     error_col: Optional[str] = None,
 ) -> List[Dict]:
     """Find the biggest projection misses for a stat"""
@@ -628,10 +694,24 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                                 if player_type == "batting"
                                 else PITCHING_RATE_STATS
                             )
+                            fan_rate_stats = (
+                                FAN_BATTING_RATE_STATS
+                                if player_type == "batting"
+                                else FAN_PITCHING_RATE_STATS
+                            )
                             all_stats = list(set(all_cols + rate_stats))
+                            all_fan_stats = [f"fan_{s}" for s in fan_rate_stats]
 
                             # Raw actual stats
                             for stat in all_stats:
+                                actual_col = (
+                                    f"{stat}_x" if f"{stat}_x" in player_row else stat
+                                )
+                                if actual_col in player_row:
+                                    val = player_row[actual_col]
+                                    actual_stats[stat] = None if pd.isna(val) else val
+
+                            for stat in all_fan_stats:
                                 actual_col = (
                                     f"{stat}_x" if f"{stat}_x" in player_row else stat
                                 )
@@ -703,10 +783,22 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                             if player_type == "batting"
                             else PITCHING_RATE_STATS
                         )
+                        fan_rate_stats = (
+                            FAN_BATTING_RATE_STATS
+                            if player_type == "batting"
+                            else FAN_PITCHING_RATE_STATS
+                        )
                         all_stats = list(set(all_cols + rate_stats))
+                        all_fan_stats = [f"fan_{s}" for s in fan_rate_stats]
 
                         # Raw projected stats
                         for stat in all_stats:
+                            proj_col = f"{stat}_y"
+                            if proj_col in player_row:
+                                val = player_row[proj_col]
+                                proj_stats[stat] = None if pd.isna(val) else val
+
+                        for stat in all_fan_stats:
                             proj_col = f"{stat}_y"
                             if proj_col in player_row:
                                 val = player_row[proj_col]
@@ -829,12 +921,99 @@ def run_evaluation():
             for player_type in PLAYER_TYPES:
                 current_combination += 1
                 print(f"\nProgress: {current_combination}/{total_combinations}")
+
+                # Process regular stats
                 results, merged_df = process_year_system(year, system, player_type)
                 all_results.extend(results)
                 if merged_df is not None:
                     merged_dataframes[(year, system, player_type)] = merged_df
 
+                # Process fantasy stats
+                fantasy_results = process_fantasy_stats(year, system, player_type)
+                all_results.extend(fantasy_results)
+
     print(f"\nCompleted evaluation. Total results: {len(all_results)}")
+
+    # Identify players missed by everyone
+    everybody_missed = {}  # (year, player_type, stat) -> list of misses
+    for year in YEARS:
+        for player_type in PLAYER_TYPES:
+            if player_type == "batting":
+                rate_stats = BATTING_RATE_STATS + [f"fan_{s}" for s in FAN_BATTING_RATE_STATS]
+                volume_stats = BATTING_VOLUME_STATS + [f"fan_{s}" for s in FAN_BATTING_VOLUME_STATS]
+            else:
+                rate_stats = PITCHING_RATE_STATS + [f"fan_{s}" for s in FAN_PITCHING_RATE_STATS]
+                volume_stats = PITCHING_VOLUME_STATS + [f"fan_{s}" for s in FAN_PITCHING_VOLUME_STATS]
+            all_stats_for_type = sorted(list(set(rate_stats + volume_stats)))
+
+            for stat in all_stats_for_type:
+                stat_results = [
+                    r
+                    for r in all_results
+                    if r.year == year
+                    and r.player_type == player_type
+                    and r.stat == stat
+                ]
+                if not stat_results:
+                    continue
+
+                # We need at least two systems to find a unanimous miss.
+                if len(stat_results) < 2:
+                    continue
+
+                # Get sets of player IDs from biggest misses for each system
+                miss_sets = [
+                    {miss["player_id"] for miss in r.biggest_misses}
+                    for r in stat_results
+                ]
+                if not miss_sets:
+                    continue
+
+                # Find the intersection of all sets
+                unanimous_miss_ids = set.intersection(*miss_sets)
+
+                if unanimous_miss_ids:
+                    unanimous_misses_details = []
+                    for player_id in unanimous_miss_ids:
+                        player_details = {
+                            "player_id": player_id,
+                            "player_name": None,
+                            "actual": None,
+                            "projections": {},
+                        }
+
+                        for r in stat_results:  # r is a ProjectionResult for a system
+                            # Find the miss data for this player in this system's misses
+                            miss_data = next(
+                                (
+                                    m
+                                    for m in r.biggest_misses
+                                    if m["player_id"] == player_id
+                                ),
+                                None,
+                            )
+                            if miss_data:
+                                if player_details["player_name"] is None:
+                                    player_details["player_name"] = miss_data["player_name"]
+                                if player_details["actual"] is None:
+                                    player_details["actual"] = miss_data["actual"]
+
+                                player_details["projections"][r.system] = {
+                                    "projected": miss_data["projected"],
+                                    "error": miss_data["error"],
+                                }
+                        unanimous_misses_details.append(player_details)
+
+                    if unanimous_misses_details:
+                        everybody_missed[(year, player_type, stat)] = unanimous_misses_details
+
+                    # Remove these players from individual biggest_misses lists
+                    for r in stat_results:
+                        r.biggest_misses = [
+                            m
+                            for m in r.biggest_misses
+                            if m["player_id"] not in unanimous_miss_ids
+                        ]
 
     # 8. Generate and save JSON files
     print("\nGenerating JSON data files...")
@@ -866,6 +1045,18 @@ def run_evaluation():
 
         batting_results = [r for r in year_results if r.player_type == "batting"]
         pitching_results = [r for r in year_results if r.player_type == "pitching"]
+
+        # Get everybody_missed data for this year
+        everybody_missed_batting = {
+            stat: misses
+            for (miss_year, player_type, stat), misses in everybody_missed.items()
+            if miss_year == year and player_type == "batting"
+        }
+        everybody_missed_pitching = {
+            stat: misses
+            for (miss_year, player_type, stat), misses in everybody_missed.items()
+            if miss_year == year and player_type == "pitching"
+        }
 
         # Convert to dictionaries
         batting_data = []
@@ -916,7 +1107,12 @@ def run_evaluation():
                 }
             )
 
-        years_data[str(year)] = {"batting": batting_data, "pitching": pitching_data}
+        years_data[str(year)] = {
+            "batting": batting_data,
+            "pitching": pitching_data,
+            "everybody_missed_batting": everybody_missed_batting,
+            "everybody_missed_pitching": everybody_missed_pitching,
+        }
 
     # Generate and save player data in chunks
     print("\nGenerating player data chunks...")
@@ -1114,6 +1310,135 @@ def process_year_system(
         )
 
     return results, merged_df
+
+
+def process_fantasy_stats(
+    year: int, system: str, player_type: str
+) -> List[ProjectionResult]:
+    """Process fantasy-relevant stats for a specific year/system/player_type combination"""
+    print(f"Processing fantasy stats for {system} {year} {player_type}...")
+
+    # 1. Load data
+    actual_df = load_actual_stats(year, player_type)
+    proj_df = load_projections(year, system, player_type)
+
+    if actual_df.empty or proj_df.empty:
+        return []
+
+    # 2. Filter for significant playing time
+    min_pa = 300
+    min_bf = 200
+    playing_time_col = "PA" if player_type == "batting" else "BF"
+
+    if player_type == "batting":
+        actual_df = actual_df[actual_df[playing_time_col] >= min_pa]
+    else:  # pitching
+        actual_df = actual_df[actual_df[playing_time_col] >= min_bf]
+
+    if actual_df.empty:
+        print(f"  Skipping - no players met the playing time threshold")
+        return []
+
+    # 3. Merge data
+    merged_df = actual_df.merge(
+        proj_df, left_on="playerId", right_on="xMLBAMID", how="inner"
+    )
+    if merged_df.empty:
+        return []
+
+    # 4. Define fantasy stats and playing time columns
+    if player_type == "batting":
+        volume_stats = FAN_BATTING_VOLUME_STATS
+        rate_stats = FAN_BATTING_RATE_STATS
+    else:
+        volume_stats = FAN_PITCHING_VOLUME_STATS
+        rate_stats = FAN_PITCHING_RATE_STATS
+    all_fan_stats = volume_stats + rate_stats
+    playing_time_col_x = f"{playing_time_col}_x"
+    playing_time_col_y = f"{playing_time_col}_y"
+
+    # 5. Calculate league averages for actual and projected stats
+    actual_league_avgs = {}
+    proj_league_avgs = {}
+    for stat in rate_stats:
+        actual_col = f"{stat}_x"
+        proj_col = f"{stat}_y"
+        if actual_col in merged_df.columns and playing_time_col_x in merged_df.columns:
+            weights = merged_df[playing_time_col_x]
+            actual_league_avgs[stat] = np.average(merged_df[actual_col], weights=weights)
+        if proj_col in merged_df.columns and playing_time_col_y in merged_df.columns:
+            weights = merged_df[playing_time_col_y]
+            proj_league_avgs[stat] = np.average(merged_df[proj_col], weights=weights)
+
+    # 6. Evaluate metrics for each stat
+    results = []
+    for stat in all_fan_stats:
+        actual_col = f"{stat}_x"
+        proj_col = f"{stat}_y"
+
+        if actual_col not in merged_df.columns or proj_col not in merged_df.columns:
+            continue
+
+        # Clean data by removing NaNs
+        mask = merged_df[[actual_col, proj_col]].notna().all(axis=1)
+        clean_df = merged_df[mask]
+
+        if clean_df.empty:
+            continue
+
+        actual_vals = clean_df[actual_col].values
+        proj_vals = clean_df[proj_col].values
+        weights = clean_df[playing_time_col_x].values
+
+        if stat in rate_stats:
+            # League-adjusted calculations
+            actual_la = actual_vals - actual_league_avgs.get(stat, 0)
+            proj_la = proj_vals - proj_league_avgs.get(stat, 0)
+
+            raw_metrics = calculate_metrics(actual_vals, proj_vals)
+            la_metrics = calculate_metrics(actual_la, proj_la)
+            wla_metrics = calculate_metrics(actual_la, proj_la, weights=weights)
+
+            miss_errors = np.abs(actual_la - proj_la) * weights
+        else:  # Volume stats
+            raw_metrics = calculate_metrics(actual_vals, proj_vals)
+            la_metrics = raw_metrics
+            wla_metrics = raw_metrics
+            miss_errors = np.abs(actual_vals - proj_vals)
+
+        # Find biggest misses
+        temp_df = clean_df.copy()
+        temp_df["miss_error"] = miss_errors
+        biggest_misses = find_biggest_misses(
+            temp_df, stat, actual_col, proj_col, error_col="miss_error"
+        )
+
+        result = ProjectionResult(
+            year=year,
+            system=system,
+            player_type=player_type,
+            stat=f"fan_{stat}",
+            rmse=raw_metrics["rmse"],
+            mae=raw_metrics["mae"],
+            bias=raw_metrics["bias"],
+            r_squared=raw_metrics["r_squared"],
+            la_rmse=la_metrics["rmse"],
+            la_mae=la_metrics["mae"],
+            la_bias=la_metrics["bias"],
+            la_r_squared=la_metrics["r_squared"],
+            wla_rmse=wla_metrics["rmse"],
+            wla_mae=wla_metrics["mae"],
+            wla_bias=wla_metrics["bias"],
+            wla_r_squared=wla_metrics["r_squared"],
+            n_players=len(clean_df),
+            biggest_misses=biggest_misses,
+        )
+        results.append(result)
+        print(
+            f"    fan_{stat}: RMSE={raw_metrics['rmse']:.4f}, LA-RMSE={la_metrics['rmse']:.4f}, WLA-RMSE={wla_metrics['rmse']:.4f}"
+        )
+
+    return results
 
 
 if __name__ == "__main__":

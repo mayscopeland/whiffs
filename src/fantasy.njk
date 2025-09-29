@@ -1,46 +1,24 @@
 ---
 layout: base.njk
-title: "All-Time Projection Accuracy"
+title: "Fantasy Leaderboards"
 ---
 
 {% set battingStats = [
-  { name: 'Plate Appearances', stat: 'PA', baseName: 'battingPA', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', baseName: 'battingwOBA', isVolume: false },
-  { name: 'Strikeout Rate', stat: 'SO/PA', baseName: 'battingSO', isVolume: false },
-  { name: 'Walk Rate', stat: 'BB/PA', baseName: 'battingBB', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', baseName: 'battingHBP', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/BIP', baseName: 'battingHR', isVolume: false },
-  { name: 'BABIP', stat: 'BABIP', baseName: 'battingBABIP', isVolume: false },
-  { name: 'Single Rate', stat: '1B/(BIP-HR)', baseName: 'batting1B', isVolume: false },
-  { name: 'Double Rate', stat: '2B/(BIP-HR)', baseName: 'batting2B', isVolume: false },
-  { name: 'Triple Rate', stat: '3B/(BIP-HR)', baseName: 'batting3B', isVolume: false },
-  { name: 'Run Rate', stat: 'R/PA', baseName: 'battingR', isVolume: false },
-  { name: 'RBI Rate', stat: 'RBI/PA', baseName: 'battingRBI', isVolume: false },
-  { name: 'Stolen Base Rate', stat: 'SB/TOF', baseName: 'battingSB', isVolume: false },
-  { name: 'Batting Average', stat: 'AVG', baseName: 'battingAVG', isVolume: false },
-  { name: 'On-Base Percentage', stat: 'OBP', baseName: 'battingOBP', isVolume: false },
-  { name: 'Slugging Percentage', stat: 'SLG', baseName: 'battingSLG', isVolume: false }
+  { name: 'Plate Appearances', stat: 'fan_PA', baseName: 'battingPA', isVolume: true },
+  { name: 'Home Run Rate', stat: 'fan_HR/BIP', baseName: 'battingHR', isVolume: false },
+  { name: 'Stolen Base Rate', stat: 'fan_SB/TOF', baseName: 'battingSB', isVolume: false },
+  { name: 'Run Rate', stat: 'fan_R/PA', baseName: 'battingR', isVolume: false },
+  { name: 'RBI Rate', stat: 'fan_RBI/PA', baseName: 'battingRBI', isVolume: false },
+  { name: 'Batting Average', stat: 'fan_AVG', baseName: 'battingAVG', isVolume: false }
 ] %}
 
 {% set pitchingStats = [
-  { name: 'Batters Faced', stat: 'BF', baseName: 'pitchingBF', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', baseName: 'pitchingwOBA', isVolume: false },
-  { name: 'Strikeout Rate', stat: 'SO/BF', baseName: 'pitchingSO', isVolume: false },
-  { name: 'Walk Rate', stat: 'BB/BF', baseName: 'pitchingBB', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', baseName: 'pitchingHBP', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/BIP', baseName: 'pitchingHR', isVolume: false },
-  { name: 'BABIP', stat: 'BABIP', baseName: 'pitchingBABIP', isVolume: false },
-  { name: 'Single Rate', stat: '1B/(BIP-HR)', baseName: 'pitching1B', isVolume: false },
-  { name: 'Double Rate', stat: '2B/(BIP-HR)', baseName: 'pitching2B', isVolume: false },
-  { name: 'Triple Rate', stat: '3B/(BIP-HR)', baseName: 'pitching3B', isVolume: false },
-  { name: 'Run Rate', stat: 'R/BF', baseName: 'pitchingR', isVolume: false },
-  { name: 'Earned Run Rate', stat: 'ER/BF', baseName: 'pitchingER', isVolume: false },
-  { name: 'Win Rate', stat: 'W/G', baseName: 'pitchingW', isVolume: false },
-  { name: 'Loss Rate', stat: 'L/G', baseName: 'pitchingL', isVolume: false },
-  { name: 'Save Rate', stat: 'SV/G', baseName: 'pitchingSV', isVolume: false },
-  { name: 'Hold Rate', stat: 'HLD/G', baseName: 'pitchingHLD', isVolume: false },
-  { name: 'ERA', stat: 'ERA', baseName: 'pitchingERA', isVolume: false },
-  { name: 'WHIP', stat: 'WHIP', baseName: 'pitchingWHIP', isVolume: false }
+  { name: 'Batters Faced', stat: 'fan_BF', baseName: 'pitchingBF', isVolume: true },
+  { name: 'Strikeout Rate', stat: 'fan_SO/BF', baseName: 'pitchingSO', isVolume: false },
+  { name: 'Win Rate', stat: 'fan_W/G', baseName: 'pitchingW', isVolume: false },
+  { name: 'Save Rate', stat: 'fan_SV/G', baseName: 'pitchingSV', isVolume: false },
+  { name: 'ERA', stat: 'fan_ERA', baseName: 'pitchingERA', isVolume: false },
+  { name: 'WHIP', stat: 'fan_WHIP', baseName: 'pitchingWHIP', isVolume: false }
 ] %}
 
 {% set metrics = [
@@ -56,9 +34,13 @@ title: "All-Time Projection Accuracy"
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">All-Time Projection Accuracy</h1>
-
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Fantasy Projection Accuracy</h1>
     {% include "2020-toggle.njk" %}
+  </div>
+
+  <div class="max-w-3xl mx-auto text-slate-700 dark:text-slate-300">
+    <p class="my-6 text-lg leading-8">How did projections do if you only care about fantasy baseball? This page excludes batters with fewer than 300 plate appearances and pitchers with fewer than 200 batters faced.</p>
+    <p class="my-6 text-lg leading-8">The charts here are limited to the 5x5 categories, but continue to split out playing time (PA/BF) and rates.</p>
   </div>
 
     <!-- Batting Statistics Section -->
@@ -182,7 +164,7 @@ title: "All-Time Projection Accuracy"
                 const chartStat = container.dataset.stat;
 
                 // Volume stats (PA, BF) only have raw adjustment, so ignore adjustment selection for them
-                const isVolume = chartStat === 'PA' || chartStat === 'BF';
+                const isVolume = chartStat === 'fan_PA' || chartStat === 'fan_BF';
 
                 const shouldShow = chartMetric === selectedMetric &&
                     (isVolume || chartAdjustment === selectedAdjustment);
@@ -227,8 +209,6 @@ title: "All-Time Projection Accuracy"
         // Initial visibility setup
         updateChartVisibility();
     }
-
-
 </script>
 {% endblock %}
 
