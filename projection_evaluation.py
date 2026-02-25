@@ -868,6 +868,46 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
 
     return player_chunks, player_manifest
 
+def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Path) -> None:
+    """Generate a spreadsheet summary of the evaluation results"""
+    print("\nGenerating summary spreadsheet...")
+
+    data = []
+    for r in results:
+        is_fantasy = r.stat.startswith("fan_")
+        stat_group = "Fantasy" if is_fantasy else "Standard"
+        stat_name = r.stat.replace("fan_", "") if is_fantasy else r.stat
+
+        data.append({
+            "Year": r.year,
+            "System": r.system,
+            "Player Type": r.player_type,
+            "Stat Group": stat_group,
+            "Stat": stat_name,
+            "RMSE": r.rmse,
+            "MAE": r.mae,
+            "Bias": r.bias,
+            "R2": r.r_squared,
+            "LA-RMSE": r.la_rmse,
+            "LA-MAE": r.la_mae,
+            "LA-Bias": r.la_bias,
+            "LA-R2": r.la_r_squared,
+            "WLA-RMSE": r.wla_rmse,
+            "WLA-MAE": r.wla_mae,
+            "WLA-Bias": r.wla_bias,
+            "WLA-R2": r.wla_r_squared,
+            "N Players": r.n_players
+        })
+
+    df = pd.DataFrame(data)
+
+    # Sort for better readability
+    df = df.sort_values(["Year", "Player Type", "Stat", "System"])
+
+    output_path = output_dir / "projection_summary.csv"
+    df.to_csv(output_path, index=False)
+    print(f"  Saved summary spreadsheet to {output_path}")
+
 def save_player_chunks(player_chunks: List[List[Dict]], player_manifest: Dict, data_dir: Path) -> None:
     """Save player data chunks and manifest to separate files"""
     players_dir = data_dir / "players"
@@ -1124,6 +1164,9 @@ def run_evaluation():
     save_json_file(years_data, data_dir / "years.json")
     save_player_chunks(player_chunks, player_manifest, data_dir)
 
+    # Generate spreadsheet
+    generate_summary_spreadsheet(all_results, data_dir)
+
     print(f"\nJSON generation complete!")
     print(f"  Site data: {len(site_data['years'])} years")
     print(f"  Years data: {len(years_data)} years with results")
@@ -1181,16 +1224,16 @@ def process_year_system(
 
     # 4. Calculate league averages for projected stats
     proj_league_avgs = {}
+    playing_time_col_x = f"{playing_time_col}_x"  # For actual data
     playing_time_col_y = f"{playing_time_col}_y"  # After merge, it becomes PA_y or BF_y
     for stat in rate_stats:
         proj_col = f"{stat}_y"
-        if proj_col in merged_df.columns and playing_time_col_y in merged_df.columns:
-            weights = merged_df[playing_time_col_y]
+        if proj_col in merged_df.columns and playing_time_col_x in merged_df.columns:
+            weights = merged_df[playing_time_col_x]
             proj_league_avgs[stat] = np.average(merged_df[proj_col], weights=weights)
 
     # Add league-adjusted columns to merged_df
     all_stats = rate_stats + volume_stats
-    playing_time_col_x = f"{playing_time_col}_x"  # For actual data
     for stat in rate_stats:
         actual_col = f"{stat}_x"
         proj_col = f"{stat}_y"
@@ -1339,14 +1382,7 @@ def process_fantasy_stats(
         print(f"  Skipping - no players met the playing time threshold")
         return []
 
-    # 3. Merge data
-    merged_df = actual_df.merge(
-        proj_df, left_on="playerId", right_on="xMLBAMID", how="inner"
-    )
-    if merged_df.empty:
-        return []
-
-    # 4. Define fantasy stats and playing time columns
+    # 3. Define fantasy stats and playing time columns
     if player_type == "batting":
         volume_stats = FAN_BATTING_VOLUME_STATS
         rate_stats = FAN_BATTING_RATE_STATS
@@ -1354,23 +1390,45 @@ def process_fantasy_stats(
         volume_stats = FAN_PITCHING_VOLUME_STATS
         rate_stats = FAN_PITCHING_RATE_STATS
     all_fan_stats = volume_stats + rate_stats
+
+    # 4. Calculate actual league averages before merge
+    actual_league_avgs = {}
+    for stat in rate_stats:
+        if stat in actual_df.columns and playing_time_col in actual_df.columns:
+            weights = actual_df[playing_time_col]
+            actual_league_avgs[stat] = np.average(actual_df[stat], weights=weights)
+
+    # 5. Merge data (left join to include all actual players)
+    merged_df = actual_df.merge(
+        proj_df, left_on="playerId", right_on="xMLBAMID", how="left"
+    )
+    if merged_df.empty:
+        return []
+
     playing_time_col_x = f"{playing_time_col}_x"
     playing_time_col_y = f"{playing_time_col}_y"
 
-    # 5. Calculate league averages for actual and projected stats
-    actual_league_avgs = {}
+    # 6. Fill missing projections with league averages for rate stats
+    for stat in rate_stats:
+        proj_col = f"{stat}_y"
+        if proj_col in merged_df.columns and stat in actual_league_avgs:
+            merged_df[proj_col] = merged_df[proj_col].fillna(actual_league_avgs[stat])
+
+    # Fill missing projections with 1 for volume stats
+    for stat in volume_stats:
+        proj_col = f"{stat}_y"
+        if proj_col in merged_df.columns:
+            merged_df[proj_col] = merged_df[proj_col].fillna(1)
+
+    # 7. Calculate projected league averages (weighted by actual PA)
     proj_league_avgs = {}
     for stat in rate_stats:
-        actual_col = f"{stat}_x"
         proj_col = f"{stat}_y"
-        if actual_col in merged_df.columns and playing_time_col_x in merged_df.columns:
+        if proj_col in merged_df.columns and playing_time_col_x in merged_df.columns:
             weights = merged_df[playing_time_col_x]
-            actual_league_avgs[stat] = np.average(merged_df[actual_col], weights=weights)
-        if proj_col in merged_df.columns and playing_time_col_y in merged_df.columns:
-            weights = merged_df[playing_time_col_y]
             proj_league_avgs[stat] = np.average(merged_df[proj_col], weights=weights)
 
-    # 6. Evaluate metrics for each stat
+    # 8. Evaluate metrics for each stat
     results = []
     for stat in all_fan_stats:
         actual_col = f"{stat}_x"
