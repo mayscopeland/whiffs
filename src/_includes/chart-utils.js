@@ -25,6 +25,25 @@ const projectionSystemBorderColors = {
 };
 
 const defaultColor = "#7f7f7f";
+const _allCharts = [];
+
+function isDarkMode() {
+  return document.documentElement.classList.contains('dark');
+}
+
+function applyThemeDefaults() {
+  const dark = isDarkMode();
+  Chart.defaults.color = dark ? '#e2e8f0' : '#64748b';                    // text: slate-200 vs slate-500
+  Chart.defaults.borderColor = dark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(0, 0, 0, 0.1)';  // grid lines
+}
+
+function getBarBorderColor() {
+  return isDarkMode() ? '#64748b' : '#0f172a';
+}
+
+// Apply theme defaults on load
+applyThemeDefaults();
+
 
 function filterYearsData(yearsData) {
   if (!exclude2020) {
@@ -91,7 +110,9 @@ function prepareStatRmseData(yearsData, stat, playerType, projectionSystems) {
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -116,7 +137,9 @@ function prepareStatLeagueAdjustedRmseData(yearsData, stat, playerType, projecti
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -141,7 +164,9 @@ function prepareStatMaeData(yearsData, stat, playerType, projectionSystems) {
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -166,7 +191,9 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -292,7 +319,9 @@ function preparePlayerAccuracyChartData(playerYears, stat, playerType, projectio
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
       fill: false,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -328,7 +357,9 @@ function preparePlayerAccuracyMaeChartData(playerYears, stat, playerType, projec
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
       fill: false,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -367,7 +398,9 @@ function preparePlayerLeagueAdjustedAccuracyChartData(playerYears, stat, playerT
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -406,7 +439,9 @@ function preparePlayerLeagueAdjustedAccuracyMaeChartData(playerYears, stat, play
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -431,7 +466,9 @@ function prepareStatWeightedLeagueAdjustedRmseData(yearsData, stat, playerType, 
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -456,7 +493,9 @@ function prepareStatWeightedLeagueAdjustedMaeData(yearsData, stat, playerType, p
       backgroundColor: projectionSystemColors[system] || defaultColor,
       borderColor: projectionSystemBorderColors[system] || defaultColor,
       borderWidth: 2,
-      tension: 0.1,
+      tension: 0.4,
+      pointRadius: 4,
+      pointHoverRadius: 6,
     };
   });
 
@@ -467,13 +506,28 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return null;
 
+  // Use scriptable borderColor for bar charts so it updates with theme
+  if (type === 'bar') {
+    data.datasets.forEach(dataset => {
+      dataset.borderColor = () => getBarBorderColor();
+      dataset.borderWidth = 2;
+    });
+  }
+
+  // Scriptable color functions — re-evaluated on each render
+  const gridColor = () => isDarkMode() ? 'rgba(148, 163, 184, 0.2)' : 'rgba(0, 0, 0, 0.1)';
+  const textColor = () => isDarkMode() ? '#e2e8f0' : '#1e293b';
+
   const chart = new Chart(canvas.getContext("2d"), {
     type: type,
     data: data,
-    borderWidth: type == 'bar' ? 2 : 1,
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart',
+      },
       interaction: {
         mode: "nearest",
         intersect: false,
@@ -518,15 +572,29 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
       scales: {
         y: {
           beginAtZero: false,
+          grid: {
+            color: gridColor,
+          },
+          ticks: {
+            color: textColor,
+          },
           title: {
             display: true,
             text: yAxisLabel,
+            color: textColor,
           },
         },
         x: {
+          grid: {
+            color: gridColor,
+          },
+          ticks: {
+            color: textColor,
+          },
           title: {
             display: true,
             text: type === "bar" ? (title.includes("Over Time") ? "Year" : "") : "Year",
+            color: textColor,
           },
         },
       },
@@ -534,10 +602,14 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
         title: {
           display: true,
           text: title,
+          color: textColor,
         },
         legend: {
           display: true,
           position: "top",
+          labels: {
+            color: textColor,
+          },
         },
       },
     },
@@ -548,5 +620,32 @@ function createChart(canvasId, type, data, title, yAxisLabel = "RMSE") {
     chartInstances[canvasId] = chart;
   }
 
+  // Also track in local registry for theme updates
+  _allCharts.push(chart);
+
   return chart;
 }
+
+// Update all chart instances when dark mode toggles
+function updateChartsTheme() {
+  applyThemeDefaults();
+
+  _allCharts.forEach(chart => {
+    if (!chart || !chart.canvas) return; // skip destroyed charts
+    chart.update('none');
+  });
+}
+
+// Watch for dark mode class changes on <html>
+const themeObserver = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+      requestAnimationFrame(() => updateChartsTheme());
+      break;
+    }
+  }
+});
+if (document.documentElement) {
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+}
+

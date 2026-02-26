@@ -9,9 +9,9 @@ eleventyComputed:
     title: "{{ year }} Projection Accuracy"
 ---
 
-{% macro renderEverybodyMissed(everybodyMissedData, stat, statName, showVolume=false) %}
-  {% if everybodyMissedData and everybodyMissedData[stat] %}
-    {% set misses = everybodyMissedData[stat] %}
+{% macro renderEverybodyMissed(everybodyMissedData, statName, showVolume=false) %}
+  {% if everybodyMissedData %}
+    {% set misses = everybodyMissedData %}
 
     {# Find which projection systems have data for this stat #}
     {% set systemsWithData = [] %}
@@ -66,7 +66,7 @@ eleventyComputed:
 {% endmacro %}
 
 {# Macro for displaying biggest misses for a specific stat #}
-{% macro renderBiggestMisses(yearData, playerType, stat, statName, showVolume=false) %}
+{% macro renderBiggestMisses(yearData, playerType, stat, statName, showVolume=false, missesData=null) %}
 {% set proj_colors = {
     'Marcel': 'text-amber-900 dark:text-amber-700',
     'Steamer': 'text-blue-600 dark:text-blue-400',
@@ -82,13 +82,19 @@ eleventyComputed:
     <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Individual Misses for {{ statName }}</h3>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {% for system in site.meta.projection_systems %}
-        {% set statResults = null %}
-        {% for result in yearData[playerType] %}
-          {% if result.system == system and result.stat == stat %}
-            {% set statResults = result %}
-          {% endif %}
-        {% endfor %}
-        {% if statResults and statResults.biggest_misses %}
+        {% set missesForSystem = null %}
+        {% set playerTypeMisses = missesData.batting_misses if playerType == "batting" else missesData.pitching_misses %}
+        {% set statMisses = playerTypeMisses[stat] if playerTypeMisses else null %}
+
+        {% if statMisses %}
+          {% for missResult in statMisses %}
+            {% if missResult.system == system %}
+              {% set missesForSystem = missResult.biggest_misses %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% if missesForSystem %}
         <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <h4 class="text-lg font-medium {{ proj_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
           <div class="relative overflow-x-auto">
@@ -103,7 +109,7 @@ eleventyComputed:
                 </tr>
               </thead>
               <tbody>
-                {% for miss in statResults.biggest_misses.slice(0, 10) %}
+                {% for miss in missesForSystem.slice(0, 10) %}
                 <tr class="bg-white border-b dark:bg-slate-900 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
                   <td class="px-4 py-2 font-medium text-slate-900 dark:text-slate-100 font-mono">{{ loop.index }}</td>
                   <td class="px-4 py-2">
@@ -203,10 +209,10 @@ eleventyComputed:
       </div>
 
       <!-- Batting PA Biggest Misses -->
-      {% set yearData = years[year] %}
-      {% if yearData %}
-        {{ renderEverybodyMissed(yearData.everybody_missed_batting, 'PA', 'Plate Appearances (PA)', true) }}
-        {{ renderBiggestMisses(yearData, 'batting', 'PA', 'Plate Appearances (PA)', true) }}
+      {% set yearMisses = misses[year] %}
+      {% if yearMisses %}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_batting['PA'], 'Plate Appearances (PA)', true) }}
+        {{ renderBiggestMisses(yearData, 'batting', 'PA', 'Plate Appearances (PA)', true, yearMisses) }}
       {% endif %}
 
       <!-- Individual Batting Rate Stats -->
@@ -244,9 +250,9 @@ eleventyComputed:
       </div>
 
       <!-- Batting {{ statInfo.name }} Biggest Misses -->
-      {% if yearData %}
-        {{ renderEverybodyMissed(yearData.everybody_missed_batting, statInfo.stat, statInfo.name) }}
-        {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name) }}
+      {% if yearMisses %}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_batting[statInfo.stat], statInfo.name) }}
+        {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name, false, yearMisses) }}
       {% endif %}
       {% endfor %}
     </div>
@@ -274,9 +280,9 @@ eleventyComputed:
       </div>
 
       <!-- Pitching BF Biggest Misses -->
-      {% if yearData %}
-        {{ renderEverybodyMissed(yearData.everybody_missed_pitching, 'BF', 'Batters Faced (BF)', true) }}
-        {{ renderBiggestMisses(yearData, 'pitching', 'BF', 'Batters Faced (BF)', true) }}
+      {% if yearMisses %}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_pitching['BF'], 'Batters Faced (BF)', true) }}
+        {{ renderBiggestMisses(yearData, 'pitching', 'BF', 'Batters Faced (BF)', true, yearMisses) }}
       {% endif %}
 
       <!-- Individual Pitching Rate Stats -->
@@ -314,9 +320,9 @@ eleventyComputed:
       </div>
 
       <!-- Pitching {{ statInfo.name }} Biggest Misses -->
-      {% if yearData %}
-        {{ renderEverybodyMissed(yearData.everybody_missed_pitching, statInfo.stat, statInfo.name) }}
-        {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name) }}
+      {% if yearMisses %}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_pitching[statInfo.stat], statInfo.name) }}
+        {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name, false, yearMisses) }}
       {% endif %}
       {% endfor %}
     </div>

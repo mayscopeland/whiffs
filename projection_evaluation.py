@@ -935,7 +935,7 @@ def save_json_file(data: Any, filepath: Path) -> None:
             elif isinstance(obj, np.floating):
                 if np.isnan(obj) or pd.isna(obj) or np.isinf(obj):
                     return None
-                return float(obj)
+                return round(float(obj), 6)
             elif isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif pd.isna(obj):
@@ -1154,6 +1154,40 @@ def run_evaluation():
             "everybody_missed_pitching": everybody_missed_pitching,
         }
 
+    # Extract misses data before saving years.json to reduce size
+    misses_data = {}
+    for year_str, data in years_data.items():
+        batting_misses = {}
+        for item in data.get("batting", []):
+            if "biggest_misses" in item:
+                stat = item["stat"]
+                system = item["system"]
+                if stat not in batting_misses:
+                    batting_misses[stat] = []
+                batting_misses[stat].append({
+                    "system": system,
+                    "biggest_misses": item.pop("biggest_misses")
+                })
+
+        pitching_misses = {}
+        for item in data.get("pitching", []):
+            if "biggest_misses" in item:
+                stat = item["stat"]
+                system = item["system"]
+                if stat not in pitching_misses:
+                    pitching_misses[stat] = []
+                pitching_misses[stat].append({
+                    "system": system,
+                    "biggest_misses": item.pop("biggest_misses")
+                })
+
+        misses_data[year_str] = {
+            "batting_misses": batting_misses,
+            "pitching_misses": pitching_misses,
+            "everybody_missed_batting": data.pop("everybody_missed_batting", {}),
+            "everybody_missed_pitching": data.pop("everybody_missed_pitching", {}),
+        }
+
     # Generate and save player data in chunks
     print("\nGenerating player data chunks...")
     player_chunks, player_manifest = generate_players_data_from_merged(merged_dataframes)
@@ -1162,6 +1196,7 @@ def run_evaluation():
     print("\nSaving JSON files...")
     save_json_file(site_data, data_dir / "site.json")
     save_json_file(years_data, data_dir / "years.json")
+    save_json_file(misses_data, data_dir / "misses.json")
     save_player_chunks(player_chunks, player_manifest, data_dir)
 
     # Generate spreadsheet
