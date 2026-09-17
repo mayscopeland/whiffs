@@ -2,15 +2,12 @@
   "name": "whiffs",
   "version": "1.0.0",
   "description": "",
-  "main": ".eleventy.js",
   "scripts": {
-    "build": "eleventy",
-    "watch": "eleventy --watch",
-    "serve": "eleventy --serve",
-    "debug": "DEBUG=* eleventy"
-  },
-  "devDependencies": {
-    "@11ty/eleventy": "^2.0.1"
+    "all": "npm run evals && npm run site && npm run css",
+    "evals": "uv run python projection_evaluation.py",
+    "site": "uv run python site_builder.py",
+    "css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./_site/assets/css/style.css",
+    "serve": "uv run python -m http.server 8080 --directory _site"
   },
   "author": "",
   "license": "AGPL-3.0",

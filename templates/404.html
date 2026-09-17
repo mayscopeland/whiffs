@@ -1,9 +1,7 @@
----
-layout: base.njk
-title: Page Not Found
-permalink: /404.html
----
+{% extends "base.html" %}
+{% set title = "Page Not Found" %}
 
+{% block content %}
 <section class="bg-white dark:bg-slate-900 min-h-screen flex items-center">
   <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 w-full">
     <div class="mx-auto max-w-screen-sm text-center">
@@ -21,3 +19,4 @@ permalink: /404.html
     </div>
   </div>
 </section>
+{% endblock %}

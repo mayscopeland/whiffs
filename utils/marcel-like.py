@@ -275,7 +275,7 @@ def main():
     player_bio = pd.read_csv("stats/player_bio.csv")
     player_bio["birthDate"] = pd.to_datetime(player_bio["birthDate"])
 
-    for year in range(2010, 2026):
+    for year in range(2010, 2027):
         print(f"Generating projections for {year}...")
 
         try:

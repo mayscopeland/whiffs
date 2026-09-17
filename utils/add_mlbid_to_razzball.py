@@ -36,6 +36,12 @@ def load_player_id_map(map_file_path):
 
         # Create a mapping dictionary
         mapping = dict(zip(map_df['RAZZBALLID'], map_df['MLBID']))
+
+        # Razzball uses a distinct ID for Shohei Ohtani as a hitter: mlbamid
+        # with a trailing 0 (6602710). Pitcher remains 660271. SFBB only lists
+        # 660271 for both roles, so add the hitter override explicitly.
+        mapping[6602710] = 660271
+
         print(f"Loaded {len(mapping)} player ID mappings")
         return mapping
 

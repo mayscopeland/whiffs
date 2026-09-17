@@ -1,9 +1,7 @@
----
-layout: base.njk
-title: Methodology
-permalink: /methodology/
----
+{% extends "base.html" %}
+{% set title = "Methodology" %}
 
+{% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="text-center mb-12">
     <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Methodology</h1>
@@ -45,3 +43,4 @@ permalink: /methodology/
     <p class="my-6 text-lg leading-8"><strong class="font-semibold">If a player is missing from a projection system, Whiffs assigns them 1 PA/BF for playing-time evaluation and league average for rate stats.</strong></p>
   </div>
 </div>
+{% endblock %}

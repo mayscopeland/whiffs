@@ -1,4 +1,3 @@
-import json
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -6,7 +5,7 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime, UTC
 
-YEARS: List[int] = list(range(2010, 2026))
+YEARS: List[int] = list(range(2010, 2027))
 
 BATTING_VOLUME_STATS: List[str] = ["PA"]
 BATTING_RATE_STATS: List[str] = [
@@ -67,12 +66,16 @@ FAN_PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-PROJECTION_SYSTEMS: List[str] = ["ATC", "Davenport", "Marcel", "OOPSY", "Razzball", "Steamer", "The BAT","The BAT X", "ZiPS",]
+PROJECTION_SYSTEMS: List[str] = ["ATC", "Depth Charts", "Marcel", "OOPSY", "Razzball", "Steamer", "The BAT","The BAT X", "ZiPS",]
+# Display name -> CSV file prefix when they differ (default: spaces removed, lowercased)
+PROJECTION_SYSTEM_FILES: Dict[str, str] = {
+    "Depth Charts": "fangraphsdc",
+}
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
 
 STATS_DIR: str = "stats"
 PROJECTIONS_DIR: str = "projections"
-OUTPUT_DIR: str = "src/_data"
+REPORTS_DIR: str = "reports"
 
 # Load wOBA constants
 WOBA_CONSTANTS = pd.read_csv(Path(STATS_DIR) / "woba.csv")
@@ -364,8 +367,9 @@ def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
 def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     """Load projections for a given year, system, and player type"""
     suffix = "bat" if player_type == "batting" else "pit"
+    file_prefix = PROJECTION_SYSTEM_FILES.get(system, system.replace(" ", "").lower())
 
-    file_path = Path(PROJECTIONS_DIR) / f"{system.replace(' ', '').lower()}_{year}_{suffix}.csv"
+    file_path = Path(PROJECTIONS_DIR) / f"{file_prefix}_{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
@@ -611,7 +615,7 @@ def calculate_summary_stats(results: List[ProjectionResult]) -> Dict:
 
 
 def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str, Any]]:
-    """Generate player data using already-processed merged dataframes and split into chunks"""
+    """Generate per-player page data using already-processed merged dataframes."""
     print("Generating player data from merged dataframes...")
 
     # Collect unique players
@@ -844,29 +848,9 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
             player_info["primary_type"] = primary_type
             players_list.append(player_info)
 
-    # Sort players by ID to ensure consistent chunking
     players_list.sort(key=lambda x: x["id"])
-
-    # Split players into chunks of approximately 100 players each
-    chunk_size = 100
-    player_chunks = [players_list[i:i + chunk_size] for i in range(0, len(players_list), chunk_size)]
-
-    # Create a manifest of all players and their chunk assignments
-    player_manifest = {
-        "total_players": len(players_list),
-        "chunk_size": chunk_size,
-        "total_chunks": len(player_chunks),
-        "players": {
-            player["id"]: {
-                "name": player["name"],
-                "primary_type": player["primary_type"],
-                "chunk": idx // chunk_size
-            }
-            for idx, player in enumerate(players_list)
-        }
-    }
-
-    return player_chunks, player_manifest
+    print(f"  Prepared {len(players_list)} players for site pages")
+    return players_list
 
 def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Path) -> None:
     """Generate a spreadsheet summary of the evaluation results"""
@@ -908,46 +892,8 @@ def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Pa
     df.to_csv(output_path, index=False)
     print(f"  Saved summary spreadsheet to {output_path}")
 
-def save_player_chunks(player_chunks: List[List[Dict]], player_manifest: Dict, data_dir: Path) -> None:
-    """Save player data chunks and manifest to separate files"""
-    players_dir = data_dir / "players"
-    players_dir.mkdir(parents=True, exist_ok=True)
-
-    # Save each chunk
-    for i, chunk in enumerate(player_chunks):
-        chunk_file = players_dir / f"chunk_{i}.json"
-        save_json_file(chunk, chunk_file)
-        print(f"  Saved player chunk {i} with {len(chunk)} players")
-
-    # Save the manifest
-    manifest_file = players_dir / "manifest.json"
-    save_json_file(player_manifest, manifest_file)
-    print(f"  Saved player manifest with {player_manifest['total_players']} total players")
-
-def save_json_file(data: Any, filepath: Path) -> None:
-    """Save data as JSON file with proper formatting"""
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-
-    class NumpyEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, np.integer):
-                return int(obj)
-            elif isinstance(obj, np.floating):
-                if np.isnan(obj) or pd.isna(obj) or np.isinf(obj):
-                    return None
-                return round(float(obj), 6)
-            elif isinstance(obj, np.ndarray):
-                return obj.tolist()
-            elif pd.isna(obj):
-                return None
-            return super().default(obj)
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False, cls=NumpyEncoder)
-
-
 def run_evaluation():
-    """Main function to run the complete evaluation and generate JSON files"""
+    """Run evaluation and render the static HTML site."""
     print("Starting projection evaluation...")
 
     # Process all year/system/player_type combinations
@@ -1055,14 +1001,9 @@ def run_evaluation():
                             if m["player_id"] not in unanimous_miss_ids
                         ]
 
-    # 8. Generate and save JSON files
-    print("\nGenerating JSON data files...")
+    # 8. Build site context and render HTML
+    print("\nPreparing site data...")
 
-    # Create output directory
-    data_dir = Path(OUTPUT_DIR)
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    # Generate site data
     years = sorted(set(r.year for r in all_results))
     summary = calculate_summary_stats(all_results)
 
@@ -1154,7 +1095,7 @@ def run_evaluation():
             "everybody_missed_pitching": everybody_missed_pitching,
         }
 
-    # Extract misses data before saving years.json to reduce size
+    # Extract misses data from years_data (same shape templates expect)
     misses_data = {}
     for year_str, data in years_data.items():
         batting_misses = {}
@@ -1188,25 +1129,28 @@ def run_evaluation():
             "everybody_missed_pitching": data.pop("everybody_missed_pitching", {}),
         }
 
-    # Generate and save player data in chunks
-    print("\nGenerating player data chunks...")
-    player_chunks, player_manifest = generate_players_data_from_merged(merged_dataframes)
+    print("\nGenerating player pages data...")
+    players_list = generate_players_data_from_merged(merged_dataframes)
 
-    # Save all files
-    print("\nSaving JSON files...")
-    save_json_file(site_data, data_dir / "site.json")
-    save_json_file(years_data, data_dir / "years.json")
-    save_json_file(misses_data, data_dir / "misses.json")
-    save_player_chunks(player_chunks, player_manifest, data_dir)
+    reports_dir = Path(REPORTS_DIR)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    generate_summary_spreadsheet(all_results, reports_dir)
 
-    # Generate spreadsheet
-    generate_summary_spreadsheet(all_results, data_dir)
+    from site_builder import sanitize, save_site_cache
 
-    print(f"\nJSON generation complete!")
-    print(f"  Site data: {len(site_data['years'])} years")
-    print(f"  Years data: {len(years_data)} years with results")
-    print(f"  Players data: {len(player_chunks)} chunks with {player_manifest['total_players']} total players")
-    print(f"  Files saved to: {data_dir}")
+    print("\nCaching site data for HTML builds...")
+    save_site_cache(
+        sanitize(site_data),
+        sanitize(years_data),
+        sanitize(misses_data),
+        sanitize(players_list),
+    )
+
+    print(f"\nEvaluation complete!")
+    print(f"  Years: {len(site_data['years'])}")
+    print(f"  Players: {len(players_list)}")
+    print(f"  Summary CSV: {reports_dir / 'projection_summary.csv'}")
+    print(f"  Site cache ready — run `npm run site` to render HTML")
 
 
 def process_year_system(

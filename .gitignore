@@ -52,10 +52,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Eleventy
+# Static site output
 _site/
 
 # Project data
 stats/
 projections/
-src/_data/**/*.json
+reports/

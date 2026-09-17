@@ -1,27 +1,26 @@
----
-layout: base.njk
-title: "MLB Projection Accuracy"
----
+{% extends "base.html" %}
+{% set title = "MLB Projection Accuracy" %}
 
+{% block content %}
 {% set battingStats = [
-  { name: 'Plate Appearances', stat: 'PA', baseName: 'battingPA', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', baseName: 'battingwOBA', isVolume: false }
+  { "name": 'Plate Appearances', "stat": 'PA', "baseName": 'battingPA', "isVolume": true },
+  { "name": 'wOBA', "stat": 'wOBA', "baseName": 'battingwOBA', "isVolume": false }
 ] %}
 
 {% set pitchingStats = [
-  { name: 'Batters Faced', stat: 'BF', baseName: 'pitchingBF', isVolume: true },
-  { name: 'ERA', stat: 'ERA', baseName: 'pitchingERA', isVolume: false }
+  { "name": 'Batters Faced', "stat": 'BF', "baseName": 'pitchingBF', "isVolume": true },
+  { "name": 'ERA', "stat": 'ERA', "baseName": 'pitchingERA', "isVolume": false }
 ] %}
 
 {% set metrics = [
-  { value: 'MAE', name: 'MAE', title: 'MAE' },
-  { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
 ] %}
 
 {% set adjustments = [
-  { value: 'weighted-league-adj', name: 'Weighted League-Adjusted', chartSuffix: 'WeightedLeagueAdj' },
-  { value: 'league-adj', name: 'League-Adjusted', chartSuffix: 'LeagueAdj' },
-  { value: 'raw', name: 'Raw', chartSuffix: '' }
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WeightedLeagueAdj' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
 ] %}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -35,7 +34,7 @@ title: "MLB Projection Accuracy"
       </p>
     </div>
 
-    {% include "2020-toggle.njk" %}
+    {% include "includes/2020-toggle.html" %}
 
     <!-- Playing Time Section -->
     <div class="mb-12">
@@ -54,7 +53,7 @@ title: "MLB Projection Accuracy"
             </div>
 
             {% for metric in metrics %}
-              {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+              {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
               <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="PA" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
                 <div class="h-128"><canvas id="battingPA{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
               </div>
@@ -74,7 +73,7 @@ title: "MLB Projection Accuracy"
             </div>
 
             {% for metric in metrics %}
-              {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+              {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
               <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="BF" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
                 <div class="h-128"><canvas id="pitchingBF{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
               </div>
@@ -166,15 +165,15 @@ title: "MLB Projection Accuracy"
         </a>
     </div>
 </div>
+{% endblock %}
 
 {% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/index-charts.js"></script>
 <script>
-    {% include "chart-utils.js" %}
-    {% include "index-charts.js" %}
-
-    // Global variables to store original data and chart instances
-    let originalYearsData = {{ years | dump | safe }};
-    let projectionSystems = {{ site.meta.projection_systems | dump | safe }};
+// Global variables to store original data and chart instances
+    let originalYearsData = {{ years | tojson }};
+    let projectionSystems = {{ site.meta.projection_systems | tojson }};
     let chartInstances = {};
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -246,9 +245,5 @@ title: "MLB Projection Accuracy"
         // Initial visibility setup
         updateChartVisibility();
     }
-
-
 </script>
 {% endblock %}
-
-

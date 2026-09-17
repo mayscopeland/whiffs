@@ -2,7 +2,7 @@ let exclude2020 = true;
 
 const projectionSystemColors = {
   "ATC": "#ff7f0e",
-  "Davenport": "#17becf",
+  "Depth Charts": "#17becf",
   "Marcel": "#8c564b",
   "OOPSY": "#e377c2",
   "Razzball": "#d62728",
@@ -14,7 +14,7 @@ const projectionSystemColors = {
 
 const projectionSystemBorderColors = {
   "ATC": "#ff7f0e",
-  "Davenport": "#17becf",
+  "Depth Charts": "#17becf",
   "Marcel": "#8c564b",
   "OOPSY": "#e377c2",
   "Razzball": "#d62728",
@@ -200,8 +200,8 @@ function prepareStatLeagueAdjustedMaeData(yearsData, stat, playerType, projectio
   return { labels: yearLabels, datasets };
 }
 
-function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
-  const volumeStats = playerType === "batting" ? ["PA"] : ["BF"];
+function prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat = null) {
+  const volumeStats = [volumeStat || (playerType === "batting" ? "PA" : "BF")];
   const stats = volumeStats.filter((stat) => yearData[playerType] && yearData[playerType].some((r) => r.stat === stat));
 
   const datasets = projectionSystems
@@ -246,8 +246,8 @@ function prepareVolumeRmseData(yearData, playerType, projectionSystems) {
 /**
  * Prepare volume MAE data for a specific year (for season pages)
  */
-function prepareVolumeMaeData(yearData, playerType, projectionSystems) {
-  const volumeStats = playerType === "batting" ? ["PA"] : ["BF"];
+function prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat = null) {
+  const volumeStats = [volumeStat || (playerType === "batting" ? "PA" : "BF")];
   const stats = volumeStats.filter((stat) => yearData[playerType] && yearData[playerType].some((r) => r.stat === stat));
 
   const datasets = projectionSystems

@@ -1,65 +1,53 @@
----js
-module.exports = {
-  layout: "base.njk",
-  pagination: {
-    data: "players.items",
-    size: 1,
-    alias: "player_id",
-  },
-  permalink: "/players/{{ player_id }}/",
-  eleventyComputed: {
-    player: (data) => data.players.getPlayer(data.player_id),
-    title: (data) => `${data.players.getPlayerName(data.player_id)} Projection Accuracy`,
-  },
-};
----
+{% extends "base.html" %}
+{% set title = player.name ~ ' Projection Accuracy' %}
 
+{% block content %}
 {% set statsConfig = [
-  { name: 'Plate Appearances', stat: 'PA', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', isVolume: false },
-  { name: 'Strikeout Rate', stat: 'SO/PA', isVolume: false },
-  { name: 'Walk Rate', stat: 'BB/PA', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/PA', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
-  { name: 'BABIP', stat: 'BABIP', isVolume: false },
-  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
-  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
-  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
-  { name: 'Run Rate', stat: 'R/PA', isVolume: false },
-  { name: 'RBI Rate', stat: 'RBI/PA', isVolume: false },
-  { name: 'Stolen Base Rate', stat: 'SB/TOF', isVolume: false },
-  { name: 'Batting Average', stat: 'AVG', isVolume: false },
-  { name: 'On-Base Percentage', stat: 'OBP', isVolume: false },
-  { name: 'Slugging Percentage', stat: 'SLG', isVolume: false }
+  { "name": 'Plate Appearances', "stat": 'PA', "isVolume": true },
+  { "name": 'wOBA', "stat": 'wOBA', "isVolume": false },
+  { "name": 'Strikeout Rate', "stat": 'SO/PA', "isVolume": false },
+  { "name": 'Walk Rate', "stat": 'BB/PA', "isVolume": false },
+  { "name": 'Hit By Pitch Rate', "stat": 'HBP/PA', "isVolume": false },
+  { "name": 'Home Run Rate', "stat": 'HR/BIP', "isVolume": false },
+  { "name": 'BABIP', "stat": 'BABIP', "isVolume": false },
+  { "name": 'Single Rate', "stat": '1B/(BIP-HR)', "isVolume": false },
+  { "name": 'Double Rate', "stat": '2B/(BIP-HR)', "isVolume": false },
+  { "name": 'Triple Rate', "stat": '3B/(BIP-HR)', "isVolume": false },
+  { "name": 'Run Rate', "stat": 'R/PA', "isVolume": false },
+  { "name": 'RBI Rate', "stat": 'RBI/PA', "isVolume": false },
+  { "name": 'Stolen Base Rate', "stat": 'SB/TOF', "isVolume": false },
+  { "name": 'Batting Average', "stat": 'AVG', "isVolume": false },
+  { "name": 'On-Base Percentage', "stat": 'OBP', "isVolume": false },
+  { "name": 'Slugging Percentage', "stat": 'SLG', "isVolume": false }
 ] if player.primary_type == 'batting' else [
-  { name: 'Batters Faced', stat: 'BF', isVolume: true },
-  { name: 'wOBA', stat: 'wOBA', isVolume: false },
-  { name: 'Strikeout Rate', stat: 'SO/BF', isVolume: false },
-  { name: 'Walk Rate', stat: 'BB/BF', isVolume: false },
-  { name: 'Hit By Pitch Rate', stat: 'HBP/BF', isVolume: false },
-  { name: 'Home Run Rate', stat: 'HR/BIP', isVolume: false },
-  { name: 'BABIP', stat: 'BABIP', isVolume: false },
-  { name: 'Single Rate', stat: '1B/(BIP-HR)', isVolume: false },
-  { name: 'Double Rate', stat: '2B/(BIP-HR)', isVolume: false },
-  { name: 'Triple Rate', stat: '3B/(BIP-HR)', isVolume: false },
-  { name: 'Run Rate', stat: 'R/BF', isVolume: false },
-  { name: 'Earned Run Rate', stat: 'ER/BF', isVolume: false },
-  { name: 'Win Rate', stat: 'W/G', isVolume: false },
-  { name: 'Loss Rate', stat: 'L/G', isVolume: false },
-  { name: 'Save Rate', stat: 'SV/G', isVolume: false },
-  { name: 'Hold Rate', stat: 'HLD/G', isVolume: false },
-  { name: 'ERA', stat: 'ERA', isVolume: false },
-  { name: 'WHIP', stat: 'WHIP', isVolume: false }
+  { "name": 'Batters Faced', "stat": 'BF', "isVolume": true },
+  { "name": 'wOBA', "stat": 'wOBA', "isVolume": false },
+  { "name": 'Strikeout Rate', "stat": 'SO/BF', "isVolume": false },
+  { "name": 'Walk Rate', "stat": 'BB/BF', "isVolume": false },
+  { "name": 'Hit By Pitch Rate', "stat": 'HBP/BF', "isVolume": false },
+  { "name": 'Home Run Rate', "stat": 'HR/BIP', "isVolume": false },
+  { "name": 'BABIP', "stat": 'BABIP', "isVolume": false },
+  { "name": 'Single Rate', "stat": '1B/(BIP-HR)', "isVolume": false },
+  { "name": 'Double Rate', "stat": '2B/(BIP-HR)', "isVolume": false },
+  { "name": 'Triple Rate', "stat": '3B/(BIP-HR)', "isVolume": false },
+  { "name": 'Run Rate', "stat": 'R/BF', "isVolume": false },
+  { "name": 'Earned Run Rate', "stat": 'ER/BF', "isVolume": false },
+  { "name": 'Win Rate', "stat": 'W/G', "isVolume": false },
+  { "name": 'Loss Rate', "stat": 'L/G', "isVolume": false },
+  { "name": 'Save Rate', "stat": 'SV/G', "isVolume": false },
+  { "name": 'Hold Rate', "stat": 'HLD/G', "isVolume": false },
+  { "name": 'ERA', "stat": 'ERA', "isVolume": false },
+  { "name": 'WHIP', "stat": 'WHIP', "isVolume": false }
 ] %}
 
 {% set metrics = [
-  { value: 'MAE', name: 'MAE', title: 'MAE' },
-  { value: 'RMSE', name: 'RMSE', title: 'RMSE'}
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
 ] %}
 
 {% set adjustments = [
-  { value: 'league-adj', name: 'League-Adjusted', chartSuffix: 'LA' },
-  { value: 'raw', name: 'Raw', chartSuffix: '' }
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LA' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
 ] %}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -72,7 +60,7 @@ module.exports = {
       <span class="text-sm text-slate-600 dark:text-slate-300">ID: <span class="font-mono">{{ player.id }}</span></span>
     </div>
 
-    {% include "2020-toggle.njk" %}
+    {% include "includes/2020-toggle.html" %}
   </div>
 
   <!-- Projection Accuracy Section -->
@@ -104,7 +92,7 @@ module.exports = {
 
         {% for metric in metrics %}
           {% if statConfig.isVolume %}
-            {% set adj = adjustments | selectattr("value", "equalto", "raw") | first %}
+            {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
             <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
               <div class="h-128"><canvas id="accuracy{{ statConfig.stat }}{{ metric.title }}Chart"></canvas></div>
             </div>
@@ -143,7 +131,7 @@ module.exports = {
             </tr>
           </thead>
           <tbody>
-            {% for year, yearData in player.years %}
+            {% for year, yearData in player.years.items() %}
             {% if yearData[player.primary_type] %}
 
             <!-- Dynamic Projection System Rows -->
@@ -152,8 +140,8 @@ module.exports = {
               'Steamer': 'text-blue-600 dark:text-blue-400',
               'ZiPS': 'text-green-600 dark:text-green-400',
               'Razzball': 'text-red-600 dark:text-red-400',
-              'Davenport': 'text-teal-600 dark:text-teal-400',
               'ATC': 'text-orange-600 dark:text-orange-400',
+              'Depth Charts': 'text-teal-600 dark:text-teal-400',
               'The BAT': 'text-purple-600 dark:text-purple-400',
               'The BAT X': 'text-purple-600 dark:text-purple-400',
               'OOPSY': 'text-pink-600 dark:text-pink-400'
@@ -171,13 +159,13 @@ module.exports = {
                   {%- if stat == 'IP' -%}
                     {{ yearData[player.primary_type][system][stat] | toFixed(1) }}
                   {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
-                    {{ yearData[player.primary_type][system][stat] | round(0) }}
+                    {{ yearData[player.primary_type][system][stat] | toFixed(0) }}
                   {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
                     {{ yearData[player.primary_type][system][stat] | toFixed(3) }}
                   {%- elif stat in ['ERA', 'WHIP'] -%}
                     {{ yearData[player.primary_type][system][stat] | toFixed(2) }}
                   {%- else -%}
-                    {{ yearData[player.primary_type][system][stat] | round(1) }}
+                    {{ yearData[player.primary_type][system][stat] | toFixed(1) }}
                   {%- endif -%}
                 </span>
                 {% else %}
@@ -201,13 +189,13 @@ module.exports = {
                   {%- if stat == 'IP' -%}
                     {{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}
                   {%- elif stat in ['PA', 'AB', 'H', 'HR', 'BB', 'SO', 'HBP', 'R', 'RBI', 'SB', 'BF', 'ER', 'W', 'L', 'SV'] -%}
-                    {{ yearData[player.primary_type]['Actual'][stat] | round(0) }}
+                    {{ yearData[player.primary_type]['Actual'][stat] | toFixed(0) }}
                   {%- elif stat in ['wOBA', 'AVG', 'OBP', 'SLG'] -%}
                     {{ yearData[player.primary_type]['Actual'][stat] | toFixed(3) }}
                   {%- elif stat in ['ERA', 'WHIP'] -%}
                     {{ yearData[player.primary_type]['Actual'][stat] | toFixed(2) }}
                   {%- else -%}
-                    {{ yearData[player.primary_type]['Actual'][stat] | round(1) }}
+                    {{ yearData[player.primary_type]['Actual'][stat] | toFixed(1) }}
                   {%- endif -%}
                 </span>
                 {% else %}
@@ -226,16 +214,16 @@ module.exports = {
     </div>
   </div>
 </div>
+{% endblock %}
 
 {% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/player-charts.js"></script>
 <script>
-  {% include "chart-utils.js" %}
-  {% include "player-charts.js" %}
-
-  // Global variables to store original data and chart instances
-  let originalPlayerYears = {{ player.years | dump | safe }};
+// Global variables to store original data and chart instances
+  let originalPlayerYears = {{ player.years | tojson }};
   let originalPlayerType = '{{ player.primary_type }}';
-  let projectionSystems = {{ site.meta.projection_systems | dump | safe }};
+  let projectionSystems = {{ site.meta.projection_systems | tojson }};
   let chartInstances = {};
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -309,4 +297,3 @@ module.exports = {
   }
 </script>
 {% endblock %}
-

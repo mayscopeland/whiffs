@@ -4,11 +4,11 @@
 
 The analysis follows Tom Tango's methodology for evaluating projection systems, adjusting for league averages and weighting errors by playing time to provide meaningful accuracy metrics.
 
-## 🔗 Live Site
+## Live Site
 
 Visit [Whiffs.org](https://whiffs.org) to explore the interactive charts and analysis.
 
-## 📊 Methodology
+## Methodology
 
 Whiffs implements three key principles from Tom Tango's posts on projection evaluations:
 
@@ -29,9 +29,9 @@ Whiffs implements three key principles from Tom Tango's posts on projection eval
 
 See more at [Whiffs Methodology](https://whiffs.org/methodology).
 
-## 🏗️ Build Process
+## Build Process
 
-**Whiffs** evaluations are built in Python. The resulting data is built into a static site using Eleventy.
+**Whiffs** evaluations and site are built in Python.
 
 ### Prerequisites
 
@@ -42,7 +42,7 @@ See more at [Whiffs Methodology](https://whiffs.org/methodology).
 uv sync
 ```
 
-**Node.js**: Install [Node.js](https://nodejs.org/) and then Eleventy dependencies:
+**Node.js**: Install [Node.js](https://nodejs.org/) for the Tailwind CLI, then:
 ```bash
 npm install
 ```
@@ -54,7 +54,7 @@ Projections and stats are not included in the repository, so you'll need to buil
 1. **Fetch MLB Stats Data**
 
    ```bash
-   python fetch_mlb_stats.py
+   python utils/fetch_mlb_stats.py
    ```
    First, you need the actual player stats. This will download actual player statistics from MLB's Stats API for 2007-2024 into the `/stats` directory. These are needed for building the Marcel projections and for assessing projection accuracy.
 
@@ -63,7 +63,7 @@ Projections and stats are not included in the repository, so you'll need to buil
 2. **Build Marcels**
 
     ```bash
-    python marcel-like.py
+    python utils/marcel-like.py
     ```
 
     Builds Marcel-like projections into `/projections` using the MLB data from Step 1.
@@ -76,30 +76,44 @@ Projections and stats are not included in the repository, so you'll need to buil
 
     Whiffs expects these to be in the `/projections` directory in a format like `steamer_2012_bat.csv`.
 
-### Run the evaluation
+### Build the site
 
-  Once you've got all your stats and projection data in place, you can run the projection evaluation:
+Once you've got all your stats and projection data in place:
 
-  ```bash
-  python projection_evaluation.py
-  ```
-  This will build some JSON files into `/src/_data` that will be processed by Eleventy in the next step.
+```bash
+npm run all
+```
 
-### Generate the website
+That runs evaluation, HTML rendering, and CSS in sequence. Individual steps:
 
-If you've got Node and Eleventy installed and built the JSON data files, you can now run Eleventy to build the site:
+```bash
+# Projection evaluation + write reports/site_cache/ (no HTML)
+npm run evals
 
-   ```bash
-   npx @11ty/eleventy --serve
-   ```
+# Re-render HTML from cache into _site/ (requires a prior evals)
+npm run site
+
+# Compile Tailwind CSS into _site/assets/css/style.css
+npm run css
+```
+
+Use `npm run all` (or at least `evals`) when projection/stats data changes. For template iteration, `npm run site` (and `npm run css` if you added new Tailwind classes). For theme-only tweaks to `input.css`, `npm run css` alone is enough.
+
+### Local preview
+
+```bash
+npm run serve
+```
+
+Then open http://localhost:8080
 
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License**.
 
 See the [LICENSE](LICENSE) file for full details.
 
-## 🤝 More projections
+## More projections
 
 I'm hoping to add more historical projections to the comparison set. If you've saved some, or if you are the creator of a projection system, contact me and I'll be happy to add them to the analysis.
