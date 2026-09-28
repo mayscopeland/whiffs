@@ -229,3 +229,155 @@ function initializeFantasySeasonCharts(yearData, projectionSystems) {
     pitchingVolumeLabel: "Fantasy Pitching BF",
   });
 }
+
+const SUMMARY_METRIC_FIELDS = {
+  MAE: { raw: "mae", "league-adj": "la_mae", "weighted-league-adj": "wla_mae" },
+  RMSE: { raw: "rmse", "league-adj": "la_rmse", "weighted-league-adj": "wla_rmse" },
+};
+
+function summaryMetricValue(record, metric, adjustment, isVolume) {
+  if (!record) return null;
+  const field = SUMMARY_METRIC_FIELDS[metric][isVolume ? "raw" : adjustment];
+  const value = record[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function formatSummaryError(value, isVolume) {
+  if (value == null) return "-";
+  if (isVolume) return value.toFixed(1);
+  if (Math.abs(value) >= 1) return value.toFixed(3);
+  return value.toFixed(4);
+}
+
+// Per column: best (lowest error) fades to 50% green, worst to 50% red, and the mean is uncolored.
+function summaryHeatStyles(values) {
+  const finite = values.filter((value) => value != null);
+  const blank = "";
+  if (finite.length === 0) return values.map(() => blank);
+
+  const mean = finite.reduce((sum, value) => sum + value, 0) / finite.length;
+  const min = Math.min(...finite);
+  const max = Math.max(...finite);
+  const good = [22, 163, 74];
+  const bad = [220, 38, 38];
+
+  return values.map((value) => {
+    if (value == null) return blank;
+
+    let t = 0;
+    let target = good;
+    if (value < mean && mean > min) {
+      t = (mean - value) / (mean - min);
+    } else if (value > mean && max > mean) {
+      t = (value - mean) / (max - mean);
+      target = bad;
+    }
+    if (t < 0.02) return blank;
+
+    const alpha = Math.min(0.5, t * 0.5);
+    return `rgba(${target[0]}, ${target[1]}, ${target[2]}, ${alpha})`;
+  });
+}
+
+// Lower error ranks first. Ties share the average of their positions. A missing category ranks last.
+function summaryAverageRanks(valueRows) {
+  const sums = valueRows.map(() => 0);
+
+  if (valueRows.length === 0) return sums;
+  const categoryCount = valueRows[0].length;
+
+  for (let category = 0; category < categoryCount; category++) {
+    const present = [];
+    valueRows.forEach((values, rowIndex) => {
+      const value = values[category];
+      if (value != null) present.push({ rowIndex, value });
+    });
+    present.sort((a, b) => a.value - b.value);
+
+    let start = 0;
+    while (start < present.length) {
+      let end = start + 1;
+      while (end < present.length && present[end].value === present[start].value) end++;
+      const rank = (start + 1 + end) / 2;
+      for (let i = start; i < end; i++) sums[present[i].rowIndex] += rank;
+      start = end;
+    }
+
+    const missingRank = present.length + 1;
+    valueRows.forEach((values, rowIndex) => {
+      if (values[category] == null) sums[rowIndex] += missingRank;
+    });
+  }
+
+  return sums.map((sum) => sum / categoryCount);
+}
+
+function initializeSummaryTable(yearData, rootId = "fantasy-summary") {
+  const root = document.getElementById(rootId);
+  if (!root || !yearData) return;
+
+  const metricSelect = root.querySelector(".summary-metric-select");
+  const adjustmentSelect = root.querySelector(".summary-adjustment-select");
+  const index = new Map();
+
+  for (const playerType of ["batting", "pitching"]) {
+    for (const record of yearData[playerType] || []) {
+      index.set(`${playerType}|${record.system}|${record.stat}`, record);
+    }
+  }
+
+  function render() {
+    const metric = metricSelect.value;
+    const adjustment = adjustmentSelect.value;
+    const showRawTag = adjustment !== "raw";
+    root.querySelectorAll(".summary-raw-tag").forEach((tag) => {
+      tag.classList.toggle("hidden", !showRawTag);
+    });
+
+    root.querySelectorAll("table").forEach((table) => {
+      const tbody = table.querySelector("tbody");
+      const rows = [...tbody.querySelectorAll("tr")];
+      const entries = rows.map((row) => {
+        const cells = [...row.querySelectorAll(".summary-cell")];
+        const values = cells.map((cell) => {
+          const record = index.get(`${cell.dataset.playerType}|${row.dataset.system}|${cell.dataset.stat}`);
+          return summaryMetricValue(record, metric, adjustment, cell.dataset.volume === "true");
+        });
+        return { row, cells, values };
+      });
+
+      const categoryCount = entries[0]?.values.length ?? 0;
+      const bestRing = isDarkMode() ? "inset 0 0 0 2px #f8fafc" : "inset 0 0 0 2px #0f172a";
+      for (let category = 0; category < categoryCount; category++) {
+        const columnValues = entries.map((entry) => entry.values[category]);
+        const backgrounds = summaryHeatStyles(columnValues);
+        const finite = columnValues.filter((value) => value != null);
+        const best = finite.length ? Math.min(...finite) : null;
+        entries.forEach((entry, rowIndex) => {
+          const cell = entry.cells[category];
+          cell.textContent = formatSummaryError(entry.values[category], cell.dataset.volume === "true");
+          cell.style.backgroundColor = backgrounds[rowIndex];
+          cell.style.color = "";
+          cell.style.boxShadow = entry.values[category] != null && entry.values[category] === best ? bestRing : "";
+        });
+      }
+
+      const averageRanks = summaryAverageRanks(entries.map((entry) => entry.values));
+      entries
+        .map((entry, rowIndex) => ({ ...entry, averageRank: averageRanks[rowIndex] }))
+        .sort((a, b) => a.averageRank - b.averageRank || Number(a.row.dataset.order) - Number(b.row.dataset.order))
+        .forEach((entry) => {
+          entry.row.hidden = entry.values.every((value) => value == null);
+          tbody.appendChild(entry.row);
+        });
+    });
+  }
+
+  metricSelect.addEventListener("change", render);
+  adjustmentSelect.addEventListener("change", render);
+  new MutationObserver(render).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  render();
+}

@@ -2,6 +2,7 @@ let exclude2020 = true;
 
 const projectionSystemColors = {
   "ATC": "#ff7f0e",
+  "Aggregate": "#7f7f7f",
   "Depth Charts": "#17becf",
   "Marcel": "#8c564b",
   "OOPSY": "#e377c2",
@@ -14,6 +15,7 @@ const projectionSystemColors = {
 
 const projectionSystemBorderColors = {
   "ATC": "#ff7f0e",
+  "Aggregate": "#7f7f7f",
   "Depth Charts": "#17becf",
   "Marcel": "#8c564b",
   "OOPSY": "#e377c2",

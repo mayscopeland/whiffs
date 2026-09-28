@@ -53,22 +53,11 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="text-center mb-12">
     <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ player.name | safe }}</h1>
-    <div class="flex justify-center items-center space-x-4">
-      <span class="px-3 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400 text-sm font-medium rounded-full">
-        {{ player.primary_type | title }}
-      </span>
-      <span class="text-sm text-slate-600 dark:text-slate-300">ID: <span class="font-mono">{{ player.id }}</span></span>
-    </div>
 
     {% include "includes/2020-toggle.html" %}
   </div>
 
-  <!-- Projection Accuracy Section -->
   <div class="mb-12">
-    <div class="flex items-center mb-6">
-      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Projection Accuracy</h2>
-    </div>
-
     <div class="space-y-6">
       {% for statConfig in statsConfig %}
       <div class="mb-4 py-4">
@@ -135,23 +124,11 @@
             {% if yearData[player.primary_type] %}
 
             <!-- Dynamic Projection System Rows -->
-            {% set systemColors = {
-              'Marcel': 'text-amber-900 dark:text-amber-700',
-              'Steamer': 'text-blue-600 dark:text-blue-400',
-              'ZiPS': 'text-green-600 dark:text-green-400',
-              'Razzball': 'text-red-600 dark:text-red-400',
-              'ATC': 'text-orange-600 dark:text-orange-400',
-              'Depth Charts': 'text-teal-600 dark:text-teal-400',
-              'The BAT': 'text-purple-600 dark:text-purple-400',
-              'The BAT X': 'text-purple-600 dark:text-purple-400',
-              'OOPSY': 'text-pink-600 dark:text-pink-400'
-            } %}
-
             {% for system in site.meta.projection_systems %}
             {% if yearData[player.primary_type][system] %}
             <tr class="bg-white border-b dark:bg-slate-900 dark:border-slate-700">
               <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{{ year }}</td>
-              <td class="px-4 py-3 {{ systemColors[system] or 'text-slate-600 dark:text-slate-300' }}">{{ system }}</td>
+              <td class="px-4 py-3 {{ system_colors[system] or 'text-slate-600 dark:text-slate-300' }}">{{ system }}</td>
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">
                 {% if yearData[player.primary_type][system][stat] is defined and yearData[player.primary_type][system][stat] is not none %}

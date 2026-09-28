@@ -2,7 +2,7 @@
    Expects battingNavStats and pitchingNavStats: lists of dicts with a "stat" key. #}
 <nav class="mb-8 text-sm text-slate-600 dark:text-slate-400 space-y-1" aria-label="Stat categories">
   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-    <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Hitting:</span>
+    <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Batting:</span>
     {% for s in battingNavStats %}
       {% set label = s.stat | replace('fan_', '') %}
       {% set sid = 'batting-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '')) %}

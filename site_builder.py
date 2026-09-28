@@ -21,6 +21,20 @@ REPORTS_DIR = ROOT / "reports"
 CACHE_DIR = REPORTS_DIR / "site_cache"
 CACHE_FILES = ("site.json", "years.json", "misses.json", "players.json")
 
+# Tailwind classes for projection-system labels. Aggregate is gray.
+SYSTEM_COLORS = {
+    "ATC": "text-orange-600 dark:text-orange-400",
+    "Aggregate": "text-gray-500 dark:text-gray-400",
+    "Depth Charts": "text-teal-600 dark:text-teal-400",
+    "Marcel": "text-amber-900 dark:text-amber-700",
+    "OOPSY": "text-pink-600 dark:text-pink-400",
+    "Razzball": "text-red-600 dark:text-red-400",
+    "Steamer": "text-blue-600 dark:text-blue-400",
+    "The BAT": "text-purple-600 dark:text-purple-400",
+    "The BAT X": "text-purple-600 dark:text-purple-400",
+    "ZiPS": "text-green-600 dark:text-green-400",
+}
+
 
 def to_fixed(value: Any, decimals: int = 2) -> str:
     """Format a number to fixed decimals; nullish/NaN values become '-'."""
@@ -225,7 +239,12 @@ def build_site(
     print(f"  Wrote {index_path.relative_to(site_dir)} ({len(players)} players)")
 
     env = create_env()
-    base_ctx = {"site": site, "years": years, "misses": misses}
+    base_ctx = {
+        "site": site,
+        "years": years,
+        "misses": misses,
+        "system_colors": SYSTEM_COLORS,
+    }
 
     pages = [
         ("index.html", "index.html", "/", {"title": "MLB Projection Accuracy"}),

@@ -66,7 +66,7 @@ FAN_PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-PROJECTION_SYSTEMS: List[str] = ["ATC", "Depth Charts", "Marcel", "OOPSY", "Razzball", "Steamer", "The BAT","The BAT X", "ZiPS",]
+PROJECTION_SYSTEMS: List[str] = ["ATC", "Aggregate", "Depth Charts", "Marcel", "OOPSY", "Razzball", "Steamer", "The BAT", "The BAT X", "ZiPS"]
 # Display name -> CSV file prefix when they differ (default: spaces removed, lowercased)
 PROJECTION_SYSTEM_FILES: Dict[str, str] = {
     "Depth Charts": "fangraphsdc",
@@ -76,6 +76,9 @@ PLAYER_TYPES: List[str] = ["batting", "pitching"]
 STATS_DIR: str = "stats"
 PROJECTIONS_DIR: str = "projections"
 REPORTS_DIR: str = "reports"
+
+# PA or BF assigned when a player is missing from a projection.
+MISSING_PLAYING_TIME = 100
 
 # Load wOBA constants
 WOBA_CONSTANTS = pd.read_csv(Path(STATS_DIR) / "woba.csv")
@@ -1196,10 +1199,10 @@ def process_year_system(
                 actual_league_avgs[stat]
             )
 
-    # Fill missing projections with 1 for playing-time stats
+    # Fill missing projections for playing-time stats
     for stat in volume_stats:
         if f"{stat}_y" in merged_df.columns:
-            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(1)
+            merged_df[f"{stat}_y"] = merged_df[f"{stat}_y"].fillna(MISSING_PLAYING_TIME)
 
     # 4. Calculate league averages for projected stats
     proj_league_avgs = {}
@@ -1393,11 +1396,11 @@ def process_fantasy_stats(
         if proj_col in merged_df.columns and stat in actual_league_avgs:
             merged_df[proj_col] = merged_df[proj_col].fillna(actual_league_avgs[stat])
 
-    # Fill missing projections with 1 for volume stats
+    # Fill missing projections for volume stats
     for stat in volume_stats:
         proj_col = f"{stat}_y"
         if proj_col in merged_df.columns:
-            merged_df[proj_col] = merged_df[proj_col].fillna(1)
+            merged_df[proj_col] = merged_df[proj_col].fillna(MISSING_PLAYING_TIME)
 
     # 7. Calculate projected league averages (weighted by actual PA)
     proj_league_avgs = {}

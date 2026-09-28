@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../site_builder.py";
 
 @custom-variant dark (&:where(.dark, .dark *));
 @theme {

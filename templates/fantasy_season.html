@@ -62,17 +62,6 @@
 
 {# Macro for displaying biggest misses for a specific stat #}
 {% macro renderBiggestMisses(yearData, playerType, stat, statName, showVolume=false, missesData=none) %}
-{% set proj_colors = {
-    'Marcel': 'text-amber-900 dark:text-amber-700',
-    'Steamer': 'text-blue-600 dark:text-blue-400',
-    'ZiPS': 'text-green-600 dark:text-green-400',
-    'Razzball': 'text-red-600 dark:text-red-400',
-    'ATC': 'text-orange-600 dark:text-orange-400',
-    'Depth Charts': 'text-teal-600 dark:text-teal-400',
-    'The BAT': 'text-purple-600 dark:text-purple-400',
-    'The BAT X': 'text-purple-600 dark:text-purple-400',
-    'OOPSY': 'text-pink-600 dark:text-pink-400'
-} %}
 <div class="mb-8">
     <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Individual Misses for {{ statName }}</h3>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -92,7 +81,7 @@
         {% set missesForSystem = miss_ns.missesForSystem %}
         {% if missesForSystem %}
         <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-          <h4 class="text-lg font-medium {{ proj_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
+          <h4 class="text-lg font-medium {{ system_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
           <div class="relative overflow-x-auto">
             <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
               <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-800 dark:text-slate-300">
@@ -155,6 +144,24 @@
   { "value": 'raw', "name": 'Raw' }
 ] %}
 
+{% set hittingSummary = [
+  { "label": "PA", "title": "Plate appearances", "stat": "fan_PA", "playerType": "batting", "isVolume": true, "anchor": "batting-PA" },
+  { "label": "HR", "title": "Home run rate (HR/BIP)", "stat": "fan_HR/BIP", "playerType": "batting", "anchor": "batting-HR-BIP" },
+  { "label": "SB", "title": "Stolen base rate (SB/TOF)", "stat": "fan_SB/TOF", "playerType": "batting", "anchor": "batting-SB-TOF" },
+  { "label": "R", "title": "Run rate (R/PA)", "stat": "fan_R/PA", "playerType": "batting", "anchor": "batting-R-PA" },
+  { "label": "RBI", "title": "RBI rate (RBI/PA)", "stat": "fan_RBI/PA", "playerType": "batting", "anchor": "batting-RBI-PA" },
+  { "label": "AVG", "title": "Batting average", "stat": "fan_AVG", "playerType": "batting", "anchor": "batting-AVG" }
+] %}
+
+{% set pitchingSummary = [
+  { "label": "BF", "title": "Batters faced", "stat": "fan_BF", "playerType": "pitching", "isVolume": true, "anchor": "pitching-BF" },
+  { "label": "SO", "title": "Strikeout rate (SO/BF)", "stat": "fan_SO/BF", "playerType": "pitching", "anchor": "pitching-SO-BF" },
+  { "label": "W", "title": "Win rate (W/G)", "stat": "fan_W/G", "playerType": "pitching", "anchor": "pitching-W-G" },
+  { "label": "SV", "title": "Save rate (SV/G)", "stat": "fan_SV/G", "playerType": "pitching", "anchor": "pitching-SV-G" },
+  { "label": "ERA", "title": "ERA", "stat": "fan_ERA", "playerType": "pitching", "anchor": "pitching-ERA" },
+  { "label": "WHIP", "title": "WHIP", "stat": "fan_WHIP", "playerType": "pitching", "anchor": "pitching-WHIP" }
+] %}
+
 {% set battingNavStats = [{"stat": "PA"}] + battingStats %}
 {% set pitchingNavStats = [{"stat": "BF"}] + pitchingStats %}
 
@@ -162,6 +169,55 @@
     <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ year }} Fantasy Projection Evaluation</h1>
         <p class="max-w-3xl mx-auto text-lg text-slate-700 dark:text-slate-300">Fantasy-relevant accuracy for {{ year }}, excluding batters with fewer than 300 PA and pitchers with fewer than 200 BF. Limited to 5x5 categories, with playing time (PA/BF) split out from rates.</p>
+    </div>
+
+    <div id="fantasy-summary" class="mb-12">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Summary</h2>
+        <div class="flex flex-wrap gap-4">
+          <select class="summary-metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Error metric">
+            {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+          </select>
+          <select class="summary-adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Adjustment">
+            {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {% for summary in [
+          { "title": "Batting", "columns": hittingSummary },
+          { "title": "Pitching", "columns": pitchingSummary }
+        ] %}
+        <div>
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300 mb-2">{{ summary.title }}</h3>
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
+            <table class="w-full text-sm text-slate-700 dark:text-slate-300">
+              <thead class="text-xs uppercase text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
+                <tr>
+                  <th scope="col" class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left">System</th>
+                  {% for col in summary.columns %}
+                  <th scope="col" class="px-2 py-2 text-center font-medium whitespace-nowrap" title="{{ col.title }}">
+                    <a href="#{{ col.anchor }}" class="hover:underline">{{ col.label }}</a>
+                    {% if col.isVolume %}<span class="summary-raw-tag hidden font-normal normal-case text-slate-500 dark:text-slate-400"> raw</span>{% endif %}
+                  </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for system in site.meta.projection_systems %}
+                <tr class="border-t border-slate-200 dark:border-slate-700" data-system="{{ system }}" data-order="{{ loop.index0 }}">
+                  <th scope="row" class="sticky left-0 z-10 bg-white dark:bg-slate-900 px-3 py-1.5 text-left font-medium whitespace-nowrap text-slate-900 dark:text-slate-100">{{ system }}</th>
+                  {% for col in summary.columns %}
+                  <td class="summary-cell px-2 py-1.5 text-center font-mono tabular-nums" data-player-type="{{ col.playerType }}" data-stat="{{ col.stat }}"{% if col.isVolume %} data-volume="true"{% endif %}></td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
 
     {% include "includes/stat-nav.html" %}
@@ -317,7 +373,9 @@
 <script src="/assets/js/season-charts.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-        initializeFantasySeasonCharts({{ years[year_key] | tojson }}, {{ site.meta.projection_systems | tojson }});
+        const yearData = {{ years[year_key] | tojson }};
+        initializeFantasySeasonCharts(yearData, {{ site.meta.projection_systems | tojson }});
+        initializeSummaryTable(yearData);
         initializeChartFilters();
     });
 
