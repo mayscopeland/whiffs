@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, UTC
 
 YEARS: List[int] = list(range(2010, 2027))
+AGGREGATE_SYSTEM = "Aggregate"
 
 BATTING_VOLUME_STATS: List[str] = ["PA"]
 BATTING_RATE_STATS: List[str] = [
@@ -492,6 +493,9 @@ class ProjectionResult:
     wla_r_squared: float
     n_players: int
     biggest_misses: List[Dict]
+    unique_misses: List[Dict] = field(default_factory=list)
+    # Full per-player miss rows used to score uniqueness; cleared before cache write.
+    all_misses: List[Dict] = field(default_factory=list, repr=False)
 
 
 def calculate_metrics(
@@ -522,6 +526,38 @@ def calculate_metrics(
     return {"rmse": rmse, "mae": mae, "bias": bias, "r_squared": max(0, r_squared)}
 
 
+def collect_player_misses(
+    df: pd.DataFrame,
+    actual_col: str,
+    proj_col: str,
+    error_col: Optional[str] = None,
+) -> List[Dict]:
+    """Collect per-player miss rows for a stat (all players with valid errors)."""
+    if actual_col not in df.columns or proj_col not in df.columns:
+        return []
+
+    if error_col and error_col in df.columns:
+        errors = df[error_col]
+    else:
+        errors = np.abs(df[proj_col] - df[actual_col])
+
+    misses = []
+    for idx in df.index:
+        err = errors.loc[idx]
+        if pd.isna(err):
+            continue
+        misses.append(
+            {
+                "player_name": df.loc[idx, "playerName"],
+                "actual": float(df.loc[idx, actual_col]),
+                "projected": float(df.loc[idx, proj_col]),
+                "error": float(err),
+                "player_id": df.loc[idx, "playerId"],
+            }
+        )
+    return misses
+
+
 def find_biggest_misses(
     df: pd.DataFrame,
     stat: str,
@@ -529,35 +565,78 @@ def find_biggest_misses(
     proj_col: str,
     n_misses: int = 20,
     error_col: Optional[str] = None,
+    player_misses: Optional[List[Dict]] = None,
 ) -> List[Dict]:
     """Find the biggest projection misses for a stat"""
-    if actual_col not in df.columns or proj_col not in df.columns:
+    misses = player_misses
+    if misses is None:
+        misses = collect_player_misses(df, actual_col, proj_col, error_col=error_col)
+    if not misses:
         return []
 
-    if error_col and error_col in df.columns:
-        # Use the pre-calculated error column if provided
-        errors = df[error_col]
-    else:
-        # Otherwise, calculate absolute error from actual and projected columns
-        errors = np.abs(df[proj_col] - df[actual_col])
+    ranked = sorted(misses, key=lambda m: m["error"], reverse=True)
+    return ranked[: min(n_misses, len(ranked))]
 
-    # Handle cases where there are fewer players than n_misses
-    if len(errors) < n_misses:
-        n_misses = len(errors)
 
-    biggest_indices = errors.nlargest(n_misses).index
+def find_unique_misses(
+    system_misses: List[Dict],
+    aggregate_by_id: Dict[Any, Dict],
+    n_misses: int = 20,
+) -> List[Dict]:
+    """Rank misses by how much worse this system was than Aggregate."""
+    scored = []
+    for miss in system_misses:
+        agg = aggregate_by_id.get(miss["player_id"])
+        if not agg:
+            continue
+        unique_score = miss["error"] - agg["error"]
+        if unique_score <= 0:
+            continue
+        scored.append(
+            {
+                "player_name": miss["player_name"],
+                "actual": miss["actual"],
+                "projected": miss["projected"],
+                "error": miss["error"],
+                "player_id": miss["player_id"],
+                "aggregate_projected": agg["projected"],
+                "aggregate_error": agg["error"],
+                "unique_score": unique_score,
+            }
+        )
 
-    misses = []
-    for idx in biggest_indices:
-        miss_data = {
-            "player_name": df.loc[idx, "playerName"],
-            "actual": float(df.loc[idx, actual_col]),
-            "projected": float(df.loc[idx, proj_col]),
-            "error": float(errors.loc[idx]),
-            "player_id": df.loc[idx, "playerId"],
-        }
-        misses.append(miss_data)
-    return misses
+    scored.sort(key=lambda m: m["unique_score"], reverse=True)
+    return scored[: min(n_misses, len(scored))]
+
+
+def assign_unique_misses(results: List[ProjectionResult], n_misses: int = 20) -> None:
+    """Attach unique_misses using Aggregate error as the consensus baseline."""
+    by_key: Dict[tuple, List[ProjectionResult]] = {}
+    for result in results:
+        key = (result.year, result.player_type, result.stat)
+        by_key.setdefault(key, []).append(result)
+
+    for group in by_key.values():
+        aggregate = next((r for r in group if r.system == AGGREGATE_SYSTEM), None)
+        if aggregate is None or not aggregate.all_misses:
+            for result in group:
+                result.unique_misses = []
+            continue
+
+        aggregate_by_id = {m["player_id"]: m for m in aggregate.all_misses}
+        for result in group:
+            if result.system == AGGREGATE_SYSTEM:
+                result.unique_misses = []
+            else:
+                result.unique_misses = find_unique_misses(
+                    result.all_misses, aggregate_by_id, n_misses=n_misses
+                )
+
+
+def clear_all_misses(results: List[ProjectionResult]) -> None:
+    """Drop full miss inventories after unique scoring to keep the cache lean."""
+    for result in results:
+        result.all_misses = []
 
 
 def calculate_summary_stats(results: List[ProjectionResult]) -> Dict:
@@ -896,7 +975,7 @@ def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Pa
     print(f"  Saved summary spreadsheet to {output_path}")
 
 def run_evaluation():
-    """Run evaluation and render the static HTML site."""
+    """Run evaluation and cache site data for HTML builds."""
     print("Starting projection evaluation...")
 
     # Process all year/system/player_type combinations
@@ -1004,6 +1083,10 @@ def run_evaluation():
                             if m["player_id"] not in unanimous_miss_ids
                         ]
 
+    print("\nIdentifying most unique misses vs Aggregate...")
+    assign_unique_misses(all_results)
+    clear_all_misses(all_results)
+
     # 8. Build site context and render HTML
     print("\nPreparing site data...")
 
@@ -1064,6 +1147,7 @@ def run_evaluation():
                     "wla_r_squared": result.wla_r_squared,
                     "n_players": result.n_players,
                     "biggest_misses": result.biggest_misses,
+                    "unique_misses": result.unique_misses,
                 }
             )
 
@@ -1088,6 +1172,7 @@ def run_evaluation():
                     "wla_r_squared": result.wla_r_squared,
                     "n_players": result.n_players,
                     "biggest_misses": result.biggest_misses,
+                    "unique_misses": result.unique_misses,
                 }
             )
 
@@ -1103,26 +1188,28 @@ def run_evaluation():
     for year_str, data in years_data.items():
         batting_misses = {}
         for item in data.get("batting", []):
-            if "biggest_misses" in item:
+            if "biggest_misses" in item or "unique_misses" in item:
                 stat = item["stat"]
                 system = item["system"]
                 if stat not in batting_misses:
                     batting_misses[stat] = []
                 batting_misses[stat].append({
                     "system": system,
-                    "biggest_misses": item.pop("biggest_misses")
+                    "biggest_misses": item.pop("biggest_misses", []),
+                    "unique_misses": item.pop("unique_misses", []),
                 })
 
         pitching_misses = {}
         for item in data.get("pitching", []):
-            if "biggest_misses" in item:
+            if "biggest_misses" in item or "unique_misses" in item:
                 stat = item["stat"]
                 system = item["system"]
                 if stat not in pitching_misses:
                     pitching_misses[stat] = []
                 pitching_misses[stat].append({
                     "system": system,
-                    "biggest_misses": item.pop("biggest_misses")
+                    "biggest_misses": item.pop("biggest_misses", []),
+                    "unique_misses": item.pop("unique_misses", []),
                 })
 
         misses_data[year_str] = {
@@ -1300,12 +1387,19 @@ def process_year_system(
         temp_df["actual_for_misses"] = actual_clean
         temp_df["proj_for_misses"] = proj_clean
 
+        all_misses = collect_player_misses(
+            temp_df,
+            "actual_for_misses",
+            "proj_for_misses",
+            error_col="miss_error",
+        )
         biggest_misses = find_biggest_misses(
             temp_df,
             stat,
             "actual_for_misses",
             "proj_for_misses",
             error_col="miss_error",
+            player_misses=all_misses,
         )
 
         result = ProjectionResult(
@@ -1327,6 +1421,7 @@ def process_year_system(
             wla_r_squared=wla_metrics["r_squared"],
             n_players=len(actual_clean),
             biggest_misses=biggest_misses,
+            all_misses=all_misses,
         )
 
         results.append(result)
@@ -1349,6 +1444,10 @@ def process_fantasy_stats(
 
     if actual_df.empty or proj_df.empty:
         return []
+
+    # Ensure consistent data types (same as process_year_system)
+    actual_df["playerId"] = actual_df["playerId"].astype(str)
+    proj_df["xMLBAMID"] = proj_df["xMLBAMID"].astype(str)
 
     # 2. Filter for significant playing time
     min_pa = 300
@@ -1446,11 +1545,19 @@ def process_fantasy_stats(
             wla_metrics = raw_metrics
             miss_errors = np.abs(actual_vals - proj_vals)
 
-        # Find biggest misses
+        # Find biggest / unique-miss inputs
         temp_df = clean_df.copy()
         temp_df["miss_error"] = miss_errors
+        all_misses = collect_player_misses(
+            temp_df, actual_col, proj_col, error_col="miss_error"
+        )
         biggest_misses = find_biggest_misses(
-            temp_df, stat, actual_col, proj_col, error_col="miss_error"
+            temp_df,
+            stat,
+            actual_col,
+            proj_col,
+            error_col="miss_error",
+            player_misses=all_misses,
         )
 
         result = ProjectionResult(
@@ -1472,6 +1579,7 @@ def process_fantasy_stats(
             wla_r_squared=wla_metrics["r_squared"],
             n_players=len(clean_df),
             biggest_misses=biggest_misses,
+            all_misses=all_misses,
         )
         results.append(result)
         print(

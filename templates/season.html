@@ -117,6 +117,72 @@
 </div>
 {% endmacro %}
 
+{# Macro for displaying unique misses vs Aggregate for a specific stat #}
+{% macro renderUniqueMisses(yearData, playerType, stat, statName, showVolume=false, missesData=none) %}
+<div class="mb-8">
+    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Most Unique Misses for {{ statName }}</h3>
+    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Players where this system’s error exceeded Aggregate’s error by the largest margin.</p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% for system in site.meta.projection_systems %}
+        {% if system != 'Aggregate' %}
+        {% set miss_ns = namespace(missesForSystem=none) %}
+        {% set playerTypeMisses = missesData.batting_misses if playerType == "batting" else missesData.pitching_misses %}
+        {% set statMisses = playerTypeMisses[stat] if playerTypeMisses else none %}
+
+        {% if statMisses %}
+          {% for missResult in statMisses %}
+            {% if missResult.system == system %}
+              {% set miss_ns.missesForSystem = missResult.unique_misses %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% set missesForSystem = miss_ns.missesForSystem %}
+        {% if missesForSystem %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+          <h4 class="text-lg font-medium {{ system_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
+          <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+              <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-800 dark:text-slate-300">
+                <tr>
+                  <th scope="col" class="px-4 py-2">Rank</th>
+                  <th scope="col" class="px-4 py-2">Player</th>
+                  <th scope="col" class="px-4 py-2 text-right">Proj</th>
+                  <th scope="col" class="px-4 py-2 text-right">Agg</th>
+                  <th scope="col" class="px-4 py-2 text-right">Actual</th>
+                  <th scope="col" class="px-4 py-2 text-right">Error</th>
+                  <th scope="col" class="px-4 py-2 text-right">Agg Err</th>
+                  <th scope="col" class="px-4 py-2 text-right">Unique</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for miss in missesForSystem[:10] %}
+                <tr class="bg-white border-b dark:bg-slate-900 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <td class="px-4 py-2 font-medium text-slate-900 dark:text-slate-100 font-mono">{{ loop.index }}</td>
+                  <td class="px-4 py-2">
+                    <a href="{{ '/players/' ~ miss.player_id ~ '/' }}" class="text-blue-600 dark:text-blue-400 hover:underline">
+                      {{ miss.player_name }}
+                    </a>
+                  </td>
+                  <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0 if showVolume else 4) }}</td>
+                  <td class="px-4 py-2 font-mono text-right">{{ miss.aggregate_projected | toFixed(0 if showVolume else 4) }}</td>
+                  <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
+                  <td class="px-4 py-2 font-semibold text-red-600 dark:text-red-400 font-mono text-right">{{ miss.error | toFixed(1) }}</td>
+                  <td class="px-4 py-2 font-mono text-right">{{ miss.aggregate_error | toFixed(1) }}</td>
+                  <td class="px-4 py-2 font-semibold text-amber-700 dark:text-amber-400 font-mono text-right">{{ miss.unique_score | toFixed(1) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
 {% set battingStats = [
   { "name": 'wOBA', "stat": 'wOBA', "isVolume": false },
   { "name": 'Strikeout Rate', "stat": 'SO/PA', "isVolume": false },
@@ -190,7 +256,8 @@
   { "label": "W", "title": "Win rate (W/G)", "stat": "W/G", "playerType": "pitching", "anchor": "pitching-W-G" },
   { "label": "L", "title": "Loss rate (L/G)", "stat": "L/G", "playerType": "pitching", "anchor": "pitching-L-G" },
   { "label": "SV", "title": "Save rate (SV/G)", "stat": "SV/G", "playerType": "pitching", "anchor": "pitching-SV-G" },
-  { "label": "HLD", "title": "Hold rate (HLD/G)", "stat": "HLD/G", "playerType": "pitching", "anchor": "pitching-HLD-G" }
+  { "label": "HLD", "title": "Hold rate (HLD/G)", "stat": "HLD/G", "playerType": "pitching", "anchor": "pitching-HLD-G" },
+  { "label": "BABIP", "title": "BABIP", "stat": "BABIP", "playerType": "pitching", "anchor": "pitching-BABIP" }
 ] %}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -276,6 +343,7 @@
       {% if yearMisses %}
         {{ renderEverybodyMissed(yearMisses.everybody_missed_batting['PA'], 'Plate Appearances (PA)', true) }}
         {{ renderBiggestMisses(yearData, 'batting', 'PA', 'Plate Appearances (PA)', true, yearMisses) }}
+        {{ renderUniqueMisses(yearData, 'batting', 'PA', 'Plate Appearances (PA)', true, yearMisses) }}
       {% endif %}
 
       <!-- Individual Batting Rate Stats -->
@@ -316,6 +384,7 @@
       {% if yearMisses %}
         {{ renderEverybodyMissed(yearMisses.everybody_missed_batting[statInfo.stat], statInfo.name) }}
         {{ renderBiggestMisses(yearData, 'batting', statInfo.stat, statInfo.name, false, yearMisses) }}
+        {{ renderUniqueMisses(yearData, 'batting', statInfo.stat, statInfo.name, false, yearMisses) }}
       {% endif %}
       {% endfor %}
     </div>
@@ -346,6 +415,7 @@
       {% if yearMisses %}
         {{ renderEverybodyMissed(yearMisses.everybody_missed_pitching['BF'], 'Batters Faced (BF)', true) }}
         {{ renderBiggestMisses(yearData, 'pitching', 'BF', 'Batters Faced (BF)', true, yearMisses) }}
+        {{ renderUniqueMisses(yearData, 'pitching', 'BF', 'Batters Faced (BF)', true, yearMisses) }}
       {% endif %}
 
       <!-- Individual Pitching Rate Stats -->
@@ -386,6 +456,7 @@
       {% if yearMisses %}
         {{ renderEverybodyMissed(yearMisses.everybody_missed_pitching[statInfo.stat], statInfo.name) }}
         {{ renderBiggestMisses(yearData, 'pitching', statInfo.stat, statInfo.name, false, yearMisses) }}
+        {{ renderUniqueMisses(yearData, 'pitching', statInfo.stat, statInfo.name, false, yearMisses) }}
       {% endif %}
       {% endfor %}
     </div>
