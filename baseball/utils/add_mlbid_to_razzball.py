@@ -8,10 +8,13 @@ For each razzball_* CSV file:
 """
 
 import pandas as pd
-import os
-import glob
 import re
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+PROJECTIONS_DIR = ROOT / "projections"
+
 
 def load_player_id_map(map_file_path):
     """Load the SFBB Player ID Map."""
@@ -132,14 +135,11 @@ def process_razzball_csv(file_path, player_id_mapping):
 def main():
     """Main function to process all razzball CSV files."""
 
-    # Path to the projections directory
-    projections_dir = "projections"
-
     # Path to the SFBB Player ID Map
-    map_file_path = os.path.join(projections_dir, "SFBB Player ID Map - PLAYERIDMAP.csv")
+    map_file_path = PROJECTIONS_DIR / "SFBB Player ID Map - PLAYERIDMAP.csv"
 
     # Check if the map file exists
-    if not os.path.exists(map_file_path):
+    if not map_file_path.exists():
         print(f"Error: Player ID map file not found at {map_file_path}")
         sys.exit(1)
 
@@ -150,8 +150,7 @@ def main():
         sys.exit(1)
 
     # Find all razzball CSV files
-    pattern = os.path.join(projections_dir, "razzball_*.csv")
-    razzball_files = glob.glob(pattern)
+    razzball_files = sorted(str(p) for p in PROJECTIONS_DIR.glob("razzball_*.csv"))
 
     if not razzball_files:
         print("No razzball CSV files found!")

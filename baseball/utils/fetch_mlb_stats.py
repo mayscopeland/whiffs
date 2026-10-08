@@ -1,8 +1,11 @@
 import requests
 import pandas as pd
-import os
 import time
+from pathlib import Path
 from typing import Dict, List, Any, Set
+
+ROOT = Path(__file__).resolve().parent.parent
+STATS_DIR = ROOT / "stats"
 
 
 def get_mlb_stats(season: int, group: str) -> List[Dict[str, Any]]:
@@ -209,7 +212,7 @@ def fetch_all_player_bios(unique_player_ids: Set[int]) -> None:
         f"\nFetching biographical data for {len(unique_player_ids)} unique players..."
     )
 
-    os.makedirs("csv", exist_ok=True)
+    STATS_DIR.mkdir(exist_ok=True)
 
     player_ids_list = list(unique_player_ids)
     all_bio_records = []
@@ -236,7 +239,7 @@ def fetch_all_player_bios(unique_player_ids: Set[int]) -> None:
 
     if all_bio_records:
         df_bio = pd.DataFrame(all_bio_records)
-        bio_file = "stats/player_bio.csv"
+        bio_file = STATS_DIR / "player_bio.csv"
         df_bio.to_csv(bio_file, index=False)
         print(f"\nSaved {len(all_bio_records)} player bio records to {bio_file}")
     else:
@@ -245,7 +248,7 @@ def fetch_all_player_bios(unique_player_ids: Set[int]) -> None:
 
 def main():
 
-    os.makedirs("stats", exist_ok=True)
+    STATS_DIR.mkdir(exist_ok=True)
 
     unique_player_ids: Set[int] = set()
 
@@ -266,7 +269,7 @@ def main():
                         unique_player_ids.add(record["playerId"])
 
                 df_pitching = pd.DataFrame(pitching_records)
-                pitching_file = f"stats/{year}_pit.csv"
+                pitching_file = STATS_DIR / f"{year}_pit.csv"
                 df_pitching.to_csv(pitching_file, index=False)
                 print(
                     f"    Saved {len(pitching_records)} pitching records to {pitching_file}"
@@ -286,7 +289,7 @@ def main():
                         unique_player_ids.add(record["playerId"])
 
                 df_hitting = pd.DataFrame(hitting_records)
-                hitting_file = f"stats/{year}_bat.csv"
+                hitting_file = STATS_DIR / f"{year}_bat.csv"
                 df_hitting.to_csv(hitting_file, index=False)
                 print(
                     f"    Saved {len(hitting_records)} hitting records to {hitting_file}"

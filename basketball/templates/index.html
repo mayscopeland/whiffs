@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% set title = "NBA Projection Accuracy" %}
+
+{% block content %}
+{% set overviewStats = [
+  { "name": 'Minutes', "stat": 'MIN', "baseName": 'playerMIN', "isVolume": true },
+  { "name": 'PTS/MIN', "stat": 'PTS/MIN', "baseName": 'playerPTSMIN', "isVolume": false },
+  { "name": 'FG%', "stat": 'FGM/FGA', "baseName": 'playerFGPct', "isVolume": false }
+] %}
+
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WeightedLeagueAdj' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+    <div class="text-lg text-slate-600 dark:text-slate-300 max-w-4xl mx-auto mb-16">
+      <h1 class="text-center text-balance text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-8">An open-source framework for analyzing NBA player projection accuracy</h1>
+      <p class="mb-6 text-lg sm:text-xl">
+        <strong>Bricks</strong> applies the same Tango-style evaluation used by Whiffs: separate playing time from rates, adjust for league average, and weight errors by minutes. (See the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a>.)
+      </p>
+      <p class="mb-8 text-lg sm:text-xl">
+        It currently evaluates the Marcel-like <strong>Baseline</strong> projection system. More systems welcome.
+      </p>
+    </div>
+
+    {% include "includes/2020-toggle.html" %}
+
+    <div class="mb-12">
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 text-center">Projection Accuracy Overview</h2>
+      <div class="space-y-6">
+        {% for statInfo in overviewStats %}
+        <div class="mb-4 py-4">
+          <div class="mb-4 py-4">
+            <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+            <div class="flex flex-wrap gap-4">
+              <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                {% for metric in metrics %}
+                <option value="{{ metric.value }}">{{ metric.title }}</option>
+                {% endfor %}
+              </select>
+              {% if not statInfo.isVolume %}
+              <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                {% for adj in adjustments %}
+                <option value="{{ adj.value }}">{{ adj.name }}</option>
+                {% endfor %}
+              </select>
+              {% endif %}
+            </div>
+          </div>
+
+          {% for metric in metrics %}
+            {% if statInfo.isVolume %}
+              {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
+              <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+              </div>
+            {% else %}
+              {% for adj in adjustments %}
+              <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+                <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+              </div>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="text-center mb-12">
+        <a href="/stats/" class="text-lg text-blue-600 dark:text-blue-400 hover:underline">
+            View all-time stats for all metrics →
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/index-charts.js"></script>
+<script>
+    let originalYearsData = {{ years | tojson }};
+    let projectionSystems = {{ site.meta.projection_systems | tojson }};
+    let chartInstances = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeIndexCharts(originalYearsData, projectionSystems);
+        initializeChartFilters();
+        initialize2020Toggle();
+    });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            const selectedMetric = metricSelects[0].value;
+            const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
+            document.querySelectorAll('.chart-container').forEach(container => {
+                const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                const shouldShow = container.dataset.metric === selectedMetric &&
+                    (isVolume || container.dataset.adjustment === selectedAdjustment);
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            const selects = selectType === 'metric' ? metricSelects : adjustmentSelects;
+            selects.forEach(select => {
+                if (select !== changedSelect) select.value = changedSelect.value;
+            });
+            updateChartVisibility();
+        }
+
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'metric'); });
+        });
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'adjustment'); });
+        });
+        updateChartVisibility();
+    }
+</script>
+{% endblock %}

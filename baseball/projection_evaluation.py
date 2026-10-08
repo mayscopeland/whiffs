@@ -74,15 +74,16 @@ PROJECTION_SYSTEM_FILES: Dict[str, str] = {
 }
 PLAYER_TYPES: List[str] = ["batting", "pitching"]
 
-STATS_DIR: str = "stats"
-PROJECTIONS_DIR: str = "projections"
-REPORTS_DIR: str = "reports"
+ROOT = Path(__file__).resolve().parent
+STATS_DIR = ROOT / "stats"
+PROJECTIONS_DIR = ROOT / "projections"
+REPORTS_DIR = ROOT / "reports"
 
 # PA or BF assigned when a player is missing from a projection.
 MISSING_PLAYING_TIME = 100
 
 # Load wOBA constants
-WOBA_CONSTANTS = pd.read_csv(Path(STATS_DIR) / "woba.csv")
+WOBA_CONSTANTS = pd.read_csv(STATS_DIR / "woba.csv")
 WOBA_CONSTANTS.set_index("Season", inplace=True)
 
 def _convert_ip_to_decimal(ip: float) -> float:
@@ -322,7 +323,7 @@ def calculate_rate_stats(df: pd.DataFrame, player_type: str, year: Optional[int]
 def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
     """Load actual stats for a given year and player type"""
     suffix = "bat" if player_type == "batting" else "pit"
-    file_path = Path(STATS_DIR) / f"{year}_{suffix}.csv"
+    file_path = STATS_DIR / f"{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
@@ -373,7 +374,7 @@ def load_projections(year: int, system: str, player_type: str) -> pd.DataFrame:
     suffix = "bat" if player_type == "batting" else "pit"
     file_prefix = PROJECTION_SYSTEM_FILES.get(system, system.replace(" ", "").lower())
 
-    file_path = Path(PROJECTIONS_DIR) / f"{file_prefix}_{year}_{suffix}.csv"
+    file_path = PROJECTIONS_DIR / f"{file_prefix}_{year}_{suffix}.csv"
 
     if not file_path.exists():
         print(f"Warning: {file_path} not found")
@@ -1222,7 +1223,7 @@ def run_evaluation():
     print("\nGenerating player pages data...")
     players_list = generate_players_data_from_merged(merged_dataframes)
 
-    reports_dir = Path(REPORTS_DIR)
+    reports_dir = REPORTS_DIR
     reports_dir.mkdir(parents=True, exist_ok=True)
     generate_summary_spreadsheet(all_results, reports_dir)
 

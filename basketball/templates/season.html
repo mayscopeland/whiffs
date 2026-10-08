@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% set title = (season or (year | season)) ~ " Projection Accuracy" %}
+
+{% block content %}
+{% set rateStats = [
+  { "name": 'PTS/MIN', "stat": 'PTS/MIN' },
+  { "name": 'OREB/MIN', "stat": 'OREB/MIN' },
+  { "name": 'DREB/MIN', "stat": 'DREB/MIN' },
+  { "name": 'STL/MIN', "stat": 'STL/MIN' },
+  { "name": 'AST/MIN', "stat": 'AST/MIN' },
+  { "name": 'BLK/MIN', "stat": 'BLK/MIN' },
+  { "name": 'FTA/MIN', "stat": 'FTA/MIN' },
+  { "name": 'FGA/MIN', "stat": 'FGA/MIN' },
+  { "name": '3PA/MIN', "stat": 'FG3A/MIN' },
+  { "name": 'TOV/MIN', "stat": 'TOV/MIN' },
+  { "name": 'FT%', "stat": 'FTM/FTA' },
+  { "name": 'FG%', "stat": 'FGM/FGA' },
+  { "name": '3P%', "stat": 'FG3M/FG3A' },
+  { "name": '3PA/FGA', "stat": 'FG3A/FGA' },
+  { "name": 'MIN/G', "stat": 'MIN/G' }
+] %}
+
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WLA' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ season or (year | season) }} Projection Accuracy</h1>
+  </div>
+
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Playing Time</h2>
+    <div class="flex flex-wrap gap-4 mb-4">
+      <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {% for metric in metrics %}
+        <option value="{{ metric.value }}">{{ metric.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% for metric in metrics %}
+    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="MIN" data-metric="{{ metric.value }}" data-adjustment="raw">
+      <div class="h-80"><canvas id="playerVolume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="G" data-metric="{{ metric.value }}" data-adjustment="raw">
+      <div class="h-80"><canvas id="playerG{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-12 space-y-8">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Rate Stats</h2>
+    <div class="flex flex-wrap gap-4 mb-4">
+      <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {% for metric in metrics %}
+        <option value="{{ metric.value }}">{{ metric.title }}</option>
+        {% endfor %}
+      </select>
+      <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {% for adj in adjustments %}
+        <option value="{{ adj.value }}">{{ adj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% for statInfo in rateStats %}
+    {% set clean = statInfo.stat | replace('/', '') | replace('-', '') %}
+    <div class="mb-6">
+      <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+      {% for metric in metrics %}
+        {% for adj in adjustments %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+          <div class="h-80"><canvas id="player{{ clean }}{{ adj.chartSuffix }}{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% set year_misses = misses.get(year_key, {}) %}
+  {% set player_misses = year_misses.get('player_misses', {}) %}
+  {% if player_misses %}
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Biggest Misses</h2>
+    {% for stat, systems in player_misses.items() %}
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ stat }}</h3>
+      {% for system_block in systems %}
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4 mb-4 overflow-x-auto">
+        <h4 class="font-medium {{ system_colors.get(system_block.system, '') }} mb-2">{{ system_block.system }}</h4>
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="px-3 py-2">Player</th>
+              <th class="px-3 py-2 text-right">Actual</th>
+              <th class="px-3 py-2 text-right">Projected</th>
+              <th class="px-3 py-2 text-right">Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for miss in system_block.biggest_misses[:10] %}
+            <tr class="border-t border-slate-200 dark:border-slate-700">
+              <td class="px-3 py-2"><a class="text-blue-600 dark:text-blue-400 hover:underline" href="/players/{{ miss.player_id }}/">{{ miss.player_name }}</a></td>
+              <td class="px-3 py-2 text-right">{{ miss.actual | toFixed(3) }}</td>
+              <td class="px-3 py-2 text-right">{{ miss.projected | toFixed(3) }}</td>
+              <td class="px-3 py-2 text-right">{{ miss.error | toFixed(3) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/season-charts.js"></script>
+<script>
+    let yearData = {{ yearData | tojson }};
+    let projectionSystems = {{ site.meta.projection_systems | tojson }};
+    let chartInstances = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSeasonCharts(yearData, projectionSystems);
+        initializeChartFilters();
+    });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            const selectedMetric = metricSelects[0] ? metricSelects[0].value : 'MAE';
+            const selectedAdjustment = adjustmentSelects[0] ? adjustmentSelects[0].value : 'raw';
+            document.querySelectorAll('.chart-container').forEach(container => {
+                const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                const shouldShow = container.dataset.metric === selectedMetric &&
+                    (isVolume || container.dataset.adjustment === selectedAdjustment);
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            const selects = selectType === 'metric' ? metricSelects : adjustmentSelects;
+            selects.forEach(select => {
+                if (select !== changedSelect) select.value = changedSelect.value;
+            });
+            updateChartVisibility();
+        }
+
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'metric'); });
+        });
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'adjustment'); });
+        });
+        updateChartVisibility();
+    }
+</script>
+{% endblock %}

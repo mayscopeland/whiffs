@@ -1,5 +1,9 @@
 import pandas as pd
-import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+STATS_DIR = ROOT / "stats"
+PROJECTIONS_DIR = ROOT / "projections"
 
 
 def _convert_ip_to_decimal(ip):
@@ -40,8 +44,8 @@ def build_batting_projections(target_year, player_bio):
 
     all_stats_dfs = []
     for year in year_weights.keys():
-        filepath = f"stats/{year}_bat.csv"
-        if os.path.exists(filepath):
+        filepath = STATS_DIR / f"{year}_bat.csv"
+        if filepath.exists():
             df = pd.read_csv(filepath)
             df["year"] = year
             all_stats_dfs.append(df)
@@ -151,8 +155,8 @@ def build_pitching_projections(target_year, player_bio):
 
     all_stats_dfs = []
     for year in year_weights.keys():
-        filepath = f"stats/{year}_pit.csv"
-        if os.path.exists(filepath):
+        filepath = STATS_DIR / f"{year}_pit.csv"
+        if filepath.exists():
             df = pd.read_csv(filepath)
             df["IP"] = df["IP"].apply(_convert_ip_to_decimal)
             df["year"] = year
@@ -270,9 +274,9 @@ def build_pitching_projections(target_year, player_bio):
 
 def main():
 
-    os.makedirs("projections", exist_ok=True)
+    PROJECTIONS_DIR.mkdir(exist_ok=True)
 
-    player_bio = pd.read_csv("stats/player_bio.csv")
+    player_bio = pd.read_csv(STATS_DIR / "player_bio.csv")
     player_bio["birthDate"] = pd.to_datetime(player_bio["birthDate"])
 
     for year in range(2010, 2027):
@@ -282,7 +286,7 @@ def main():
             batting_projections = build_batting_projections(year, player_bio)
             if batting_projections:
                 batting_df = pd.DataFrame(batting_projections)
-                batting_filename = f"projections/marcel_{year}_bat.csv"
+                batting_filename = PROJECTIONS_DIR / f"marcel_{year}_bat.csv"
                 batting_df.to_csv(batting_filename, index=False)
                 print(
                     f"    Saved {len(batting_projections)} batting projections to {batting_filename}"
@@ -293,7 +297,7 @@ def main():
             pitching_projections = build_pitching_projections(year, player_bio)
             if pitching_projections:
                 pitching_df = pd.DataFrame(pitching_projections)
-                pitching_filename = f"projections/marcel_{year}_pit.csv"
+                pitching_filename = PROJECTIONS_DIR / f"marcel_{year}_pit.csv"
                 pitching_df.to_csv(pitching_filename, index=False)
                 print(
                     f"    Saved {len(pitching_projections)} pitching projections to {pitching_filename}"

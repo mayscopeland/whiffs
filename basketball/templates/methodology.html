@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set title = "Methodology" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Methodology</h1>
+  </div>
+
+  <div class="text-slate-700 dark:text-slate-300">
+    <p class="my-6 text-lg leading-8">Bricks is the NBA counterpart to <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a>, applying Tom Tango's projection-evaluation principles to basketball.</p>
+
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Separate playing time from rate stats</h2>
+    <p class="my-6 text-lg leading-8">Playing time is measured in <strong class="font-semibold">minutes</strong> (and games). Scoring, rebounding, playmaking, and other outcomes are evaluated as rates—most often per minute, with shooting percentages and 3PA/FGA kept as their own rates.</p>
+
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Adjust for league context</h2>
+    <p class="my-6 text-lg leading-8">League scoring environments change. Bricks subtracts the minutes-weighted league average from each projected and actual rate before measuring error, then reports raw, league-adjusted, and minutes-weighted league-adjusted MAE/RMSE.</p>
+
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Weight by minutes</h2>
+    <p class="my-6 text-lg leading-8">An error for a 200-minute player matters less than the same error for a 2,500-minute player. Weighted league-adjusted metrics use actual minutes as weights.</p>
+
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Include unprojected players at league average</h2>
+    <p class="my-6 text-lg leading-8">If a player appears in actuals but not in a projection system, Bricks assigns <strong class="font-semibold">500 minutes</strong> for playing-time evaluation and league average for rate stats.</p>
+
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Baseline</h2>
+    <p class="my-6 text-lg leading-8">Baseline is a Marcel-like projection: last three seasons weighted 5/4/3, regression toward league average by a fixed minutes amount, a minutes prior plus aging, then scale counting stats to projected minutes.</p>
+  </div>
+</div>
+{% endblock %}

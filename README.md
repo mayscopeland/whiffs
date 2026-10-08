@@ -1,112 +1,135 @@
-# Whiffs: MLB Projection Accuracy Evaluation
+# Whiffs and Bricks
 
-**Whiffs** is a comprehensive evaluation of MLB projection system accuracy, comparing Marcel, Steamer, and ZiPS projections against actual player performance from 2010-2024.
+This repository holds two peer projection-evaluation pipelines:
 
-The analysis follows Tom Tango's methodology for evaluating projection systems, adjusting for league averages and weighting errors by playing time to provide meaningful accuracy metrics.
+- **Whiffs** ([whiffs.org](https://whiffs.org)) — MLB projection accuracy (Marcel, Steamer, ZiPS, and others)
+- **Bricks** — NBA projection accuracy (Baseline)
 
-## Live Site
+Baseball code and data live under [`baseball/`](baseball/). Basketball code and data live under [`basketball/`](basketball/). Root scripts always name the sport.
 
-Visit [Whiffs.org](https://whiffs.org) to explore the interactive charts and analysis.
-
-## Methodology
-
-Whiffs implements three key principles from Tom Tango's posts on projection evaluations:
-
-### 1. Separate Playing Time from Rate Stats
-- Playing time (PA/BF) is evaluated independently from rate statistics
-- Prevents misleading assessments where playing time and rate errors cancel out
-- Rate stats are normalized per plate appearance (PA) or batters faced (BF)
-
-### 2. Adjust for League Average
-- Errors are calculated after adjusting for projected vs actual league averages
-- Ensures projections are evaluated on their ability to predict player performance relative to league context
-- A player performing at league average should be projected as league average, regardless of raw numbers
-
-### 3. Weight by Playing Time
-- Errors are weighted by actual playing time (PA/BF) to reflect real-world impact
-- A projection error for a 600 PA player matters more than the same error for a 100 PA player
-- Prevents systems from being equally penalized for mistakes on marginal vs regular players
-
-See more at [Whiffs Methodology](https://whiffs.org/methodology).
-
-## Build Process
-
-**Whiffs** evaluations and site are built in Python.
-
-### Prerequisites
+## Prerequisites
 
 **Python**: Install Python from [python.org](https://www.python.org/downloads/) or your package manager.
 
-**uv**: [Install uv](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already and then collect dependencies with:
+**uv**: [Install uv](https://docs.astral.sh/uv/getting-started/installation/) if you haven't already, then:
+
 ```bash
 uv sync
 ```
 
 **Node.js**: Install [Node.js](https://nodejs.org/) for the Tailwind CLI, then:
+
 ```bash
 npm install
 ```
 
+## Baseball (Whiffs)
+
+Whiffs compares Marcel, Steamer, ZiPS, and other MLB projection systems against actual player performance from 2010–2024, following Tom Tango's methodology: separate playing time from rate stats, adjust for league average, and weight errors by playing time.
+
+See [Whiffs Methodology](https://whiffs.org/methodology).
+
 ### Collect projections
 
-Projections and stats are not included in the repository, so you'll need to build or find those first.
+Projections and stats are not included in the repository.
 
 1. **Fetch MLB Stats Data**
 
    ```bash
-   python utils/fetch_mlb_stats.py
+   npm run baseball:stats
    ```
-   First, you need the actual player stats. This will download actual player statistics from MLB's Stats API for 2007-2024 into the `/stats` directory. These are needed for building the Marcel projections and for assessing projection accuracy.
 
-   This will also collect some biographical data, as birthdates are needed for building Marcels.
+   Downloads actual player statistics from MLB's Stats API for 2007–2024 into `baseball/stats/`, plus biographical data needed for Marcels.
 
 2. **Build Marcels**
 
-    ```bash
-    python utils/marcel-like.py
-    ```
+   ```bash
+   npm run baseball:marcel
+   ```
 
-    Builds Marcel-like projections into `/projections` using the MLB data from Step 1.
+   Builds Marcel-like projections into `baseball/projections/`.
 
-    *Note: these differ somewhat from the [official Marcel projections](https://www.tangotiger.net/marcel/). If you can improve my code, please go for it!*
+   *These differ somewhat from the [official Marcel projections](https://www.tangotiger.net/marcel/). Improvements welcome.*
 
 3. **Add historical Steamer and ZiPS from FanGraphs**
 
-    [Historical Steamer and ZiPS projections](https://www.fangraphs.com/projections) are available on FanGraphs for members.
-
-    Whiffs expects these to be in the `/projections` directory in a format like `steamer_2012_bat.csv`.
+   [Historical Steamer and ZiPS projections](https://www.fangraphs.com/projections) are available on FanGraphs for members. Place them in `baseball/projections/` in a format like `steamer_2012_bat.csv`.
 
 ### Build the site
 
-Once you've got all your stats and projection data in place:
-
 ```bash
-npm run all
+npm run baseball
 ```
 
 That runs evaluation, HTML rendering, and CSS in sequence. Individual steps:
 
 ```bash
-# Projection evaluation + write reports/site_cache/ (no HTML)
-npm run evals
+# Projection evaluation + write baseball/reports/site_cache/ (no HTML)
+npm run baseball:evals
 
-# Re-render HTML from cache into _site/ (requires a prior evals)
-npm run site
+# Re-render HTML from cache into baseball/_site/ (requires a prior evals)
+npm run baseball:site
 
-# Compile Tailwind CSS into _site/assets/css/style.css
-npm run css
+# Compile Tailwind CSS into baseball/_site/assets/css/style.css
+npm run baseball:css
 ```
 
-Use `npm run all` (or at least `evals`) when projection/stats data changes. For template iteration, `npm run site` (and `npm run css` if you added new Tailwind classes). For theme-only tweaks to `input.css`, `npm run css` alone is enough.
+Use `npm run baseball` (or at least `baseball:evals`) when projection/stats data changes. For template iteration, `npm run baseball:site` (and `baseball:css` if you added new Tailwind classes). For theme-only tweaks to `input.css`, `baseball:css` alone is enough.
 
 ### Local preview
 
 ```bash
-npm run serve
+npm run baseball:serve
 ```
 
 Then open http://localhost:8080
 
+### Deploy
+
+Build first (`npm run baseball`), then upload to the Whiffs Cloudflare Pages project:
+
+```bash
+npm run baseball:deploy
+```
+
+## Basketball (Bricks)
+
+Bricks is the NBA counterpart to Whiffs: Tango-style projection evaluation with minutes-weighted, league-adjusted rate errors. Season files use NBA calendar-overlap labels (`basketball/stats/2023-24.csv`). Baseline writes `basketball/projections/baseline_2009-10.csv` through `baseline_2026-27.csv`.
+
+### Collect stats and build Baseline
+
+```bash
+# Regular-season player totals + bios into basketball/stats/
+npm run basketball:stats
+
+# Marcel-like Baseline projections into basketball/projections/
+npm run basketball:baseline
+```
+
+### Build the site
+
+```bash
+npm run basketball
+```
+
+Individual steps:
+
+```bash
+npm run basketball:evals   # evaluation + basketball/reports/site_cache/
+npm run basketball:site    # HTML into basketball/_site/
+npm run basketball:css     # Tailwind CSS
+npm run basketball:serve   # http://localhost:8081
+```
+
+### Deploy
+
+Build first (`npm run basketball`), then upload to the Bricks Cloudflare Pages project:
+
+```bash
+npm run basketball:deploy
+```
+
+Create the `bricks` Pages project once (`npx wrangler pages project create bricks`) before the first deploy.
 
 ## License
 

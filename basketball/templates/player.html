@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% set title = player.name ~ ' Projection Accuracy' %}
+
+{% block content %}
+{% set statsConfig = [
+  { "name": 'Minutes', "stat": 'MIN', "isVolume": true },
+  { "name": 'Games', "stat": 'G', "isVolume": true },
+  { "name": 'PTS/MIN', "stat": 'PTS/MIN', "isVolume": false },
+  { "name": 'OREB/MIN', "stat": 'OREB/MIN', "isVolume": false },
+  { "name": 'DREB/MIN', "stat": 'DREB/MIN', "isVolume": false },
+  { "name": 'STL/MIN', "stat": 'STL/MIN', "isVolume": false },
+  { "name": 'AST/MIN', "stat": 'AST/MIN', "isVolume": false },
+  { "name": 'BLK/MIN', "stat": 'BLK/MIN', "isVolume": false },
+  { "name": 'FTA/MIN', "stat": 'FTA/MIN', "isVolume": false },
+  { "name": 'FGA/MIN', "stat": 'FGA/MIN', "isVolume": false },
+  { "name": '3PA/MIN', "stat": 'FG3A/MIN', "isVolume": false },
+  { "name": 'TOV/MIN', "stat": 'TOV/MIN', "isVolume": false },
+  { "name": 'FT%', "stat": 'FTM/FTA', "isVolume": false },
+  { "name": 'FG%', "stat": 'FGM/FGA', "isVolume": false },
+  { "name": '3P%', "stat": 'FG3M/FG3A', "isVolume": false },
+  { "name": '3PA/FGA', "stat": 'FG3A/FGA', "isVolume": false },
+  { "name": 'MIN/G', "stat": 'MIN/G', "isVolume": false }
+] %}
+
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LA' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+
+{% set rawStats = ['G', 'MIN', 'PTS', 'FGM', 'FGA', 'FG3M', 'FG3A', 'FTM', 'FTA', 'OREB', 'DREB', 'AST', 'STL', 'BLK', 'TOV'] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ player.name | safe }}</h1>
+    {% include "includes/2020-toggle.html" %}
+  </div>
+
+  <div class="mb-12 space-y-6">
+    {% for statConfig in statsConfig %}
+    {% set clean = statConfig.stat | replace('/', '') | replace('-', '') %}
+    <div class="mb-4 py-4">
+      <div class="mb-4 py-4">
+        <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statConfig.name }}</h4>
+        <div class="flex flex-wrap gap-4">
+          <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for metric in metrics %}
+            <option value="{{ metric.value }}">{{ metric.title }}</option>
+            {% endfor %}
+          </select>
+          {% if not statConfig.isVolume %}
+          <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for adj in adjustments %}
+            <option value="{{ adj.value }}">{{ adj.name }}</option>
+            {% endfor %}
+          </select>
+          {% endif %}
+        </div>
+      </div>
+
+      {% for metric in metrics %}
+        {% if statConfig.isVolume %}
+          {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-128"><canvas id="accuracy{{ clean }}{{ metric.title }}Chart"></canvas></div>
+          </div>
+        {% else %}
+          {% for adj in adjustments %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statConfig.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-128"><canvas id="accuracy{{ adj.chartSuffix }}{{ clean }}{{ metric.title }}Chart"></canvas></div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Stats</h2>
+    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 overflow-x-auto">
+      <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+        <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+          <tr>
+            <th class="px-4 py-3">Season</th>
+            <th class="px-4 py-3">System</th>
+            {% for stat in rawStats %}
+            <th class="px-4 py-3 text-right">{{ stat }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for year, year_data in player.years.items() %}
+            {% set typed = year_data.get('player', {}) %}
+            {% for system, stats in typed.items() %}
+            <tr class="border-t border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-3 whitespace-nowrap">{{ year | season }}</td>
+              <td class="px-4 py-3 {{ system_colors.get(system, '') if system != 'Actual' else '' }}">{{ system }}</td>
+              {% for stat in rawStats %}
+              <td class="px-4 py-3 text-right">{% if stat == 'MIN' %}{{ stats.get(stat) | toFixed(1) }}{% else %}{{ stats.get(stat) | toFixed(0) }}{% endif %}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/player-charts.js"></script>
+<script>
+    let originalPlayerYears = {{ player.years | tojson }};
+    let originalPlayerType = "player";
+    let projectionSystems = {{ site.meta.projection_systems | tojson }};
+    let chartInstances = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializePlayerCharts(originalPlayerYears, originalPlayerType, projectionSystems);
+        initializeChartFilters();
+        initialize2020Toggle();
+    });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            const selectedMetric = metricSelects[0].value;
+            const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
+            document.querySelectorAll('.chart-container').forEach(container => {
+                const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                const shouldShow = container.dataset.metric === selectedMetric &&
+                    (isVolume || container.dataset.adjustment === selectedAdjustment);
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            const selects = selectType === 'metric' ? metricSelects : adjustmentSelects;
+            selects.forEach(select => {
+                if (select !== changedSelect) select.value = changedSelect.value;
+            });
+            updateChartVisibility();
+        }
+
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'metric'); });
+        });
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'adjustment'); });
+        });
+        updateChartVisibility();
+    }
+</script>
+{% endblock %}

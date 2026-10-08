@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% set title = "All-Time Projection Accuracy" %}
+
+{% block content %}
+{% set playerStats = [
+  { "name": 'Minutes', "stat": 'MIN', "baseName": 'playerMIN', "isVolume": true },
+  { "name": 'Games', "stat": 'G', "baseName": 'playerG', "isVolume": true },
+  { "name": 'PTS/MIN', "stat": 'PTS/MIN', "baseName": 'playerPTSMIN', "isVolume": false },
+  { "name": 'OREB/MIN', "stat": 'OREB/MIN', "baseName": 'playerOREBMIN', "isVolume": false },
+  { "name": 'DREB/MIN', "stat": 'DREB/MIN', "baseName": 'playerDREBMIN', "isVolume": false },
+  { "name": 'STL/MIN', "stat": 'STL/MIN', "baseName": 'playerSTLMIN', "isVolume": false },
+  { "name": 'AST/MIN', "stat": 'AST/MIN', "baseName": 'playerASTMIN', "isVolume": false },
+  { "name": 'BLK/MIN', "stat": 'BLK/MIN', "baseName": 'playerBLKMIN', "isVolume": false },
+  { "name": 'FTA/MIN', "stat": 'FTA/MIN', "baseName": 'playerFTAMIN', "isVolume": false },
+  { "name": 'FGA/MIN', "stat": 'FGA/MIN', "baseName": 'playerFGAMIN', "isVolume": false },
+  { "name": '3PA/MIN', "stat": 'FG3A/MIN', "baseName": 'playerFG3AMIN', "isVolume": false },
+  { "name": 'TOV/MIN', "stat": 'TOV/MIN', "baseName": 'playerTOVMIN', "isVolume": false },
+  { "name": 'FT%', "stat": 'FTM/FTA', "baseName": 'playerFTPct', "isVolume": false },
+  { "name": 'FG%', "stat": 'FGM/FGA', "baseName": 'playerFGPct', "isVolume": false },
+  { "name": '3P%', "stat": 'FG3M/FG3A', "baseName": 'playerFG3Pct', "isVolume": false },
+  { "name": '3PA/FGA', "stat": 'FG3A/FGA', "baseName": 'playerFG3Rate', "isVolume": false },
+  { "name": 'MIN/G', "stat": 'MIN/G', "baseName": 'playerMING', "isVolume": false }
+] %}
+
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WeightedLeagueAdj' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">All-Time Projection Accuracy</h1>
+    {% include "includes/2020-toggle.html" %}
+  </div>
+
+  <div class="mb-8 flex flex-wrap gap-2 justify-center">
+    {% for statInfo in playerStats %}
+    <a href="#stat-{{ statInfo.stat | replace('/', '-') }}" class="px-3 py-1 text-sm rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">{{ statInfo.name }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="space-y-6">
+    {% for statInfo in playerStats %}
+    <div id="stat-{{ statInfo.stat | replace('/', '-') }}" class="mb-4 py-4 scroll-mt-4">
+      <div class="mb-4 py-4">
+        <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+        <div class="flex flex-wrap gap-4">
+          <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for metric in metrics %}
+            <option value="{{ metric.value }}">{{ metric.title }}</option>
+            {% endfor %}
+          </select>
+          {% if not statInfo.isVolume %}
+          <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for adj in adjustments %}
+            <option value="{{ adj.value }}">{{ adj.name }}</option>
+            {% endfor %}
+          </select>
+          {% endif %}
+        </div>
+      </div>
+
+      {% for metric in metrics %}
+        {% if statInfo.isVolume %}
+          {% set adj = {"value": "raw", "name": "Raw", "chartSuffix": ""} %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+          </div>
+        {% else %}
+          {% for adj in adjustments %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-stat="{{ statInfo.stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/stats-charts.js"></script>
+<script>
+    let originalYearsData = {{ years | tojson }};
+    let projectionSystems = {{ site.meta.projection_systems | tojson }};
+    let chartInstances = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeStatsCharts(originalYearsData, projectionSystems);
+        initializeChartFilters();
+        initialize2020Toggle();
+    });
+
+    function initializeChartFilters() {
+        const metricSelects = document.querySelectorAll('.metric-select');
+        const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+
+        function updateChartVisibility() {
+            const selectedMetric = metricSelects[0].value;
+            const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
+            document.querySelectorAll('.chart-container').forEach(container => {
+                const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                const shouldShow = container.dataset.metric === selectedMetric &&
+                    (isVolume || container.dataset.adjustment === selectedAdjustment);
+                container.style.display = shouldShow ? 'block' : 'none';
+            });
+        }
+
+        function syncDropdowns(changedSelect, selectType) {
+            const selects = selectType === 'metric' ? metricSelects : adjustmentSelects;
+            selects.forEach(select => {
+                if (select !== changedSelect) select.value = changedSelect.value;
+            });
+            updateChartVisibility();
+        }
+
+        metricSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'metric'); });
+        });
+        adjustmentSelects.forEach(select => {
+            select.addEventListener('change', function() { syncDropdowns(this, 'adjustment'); });
+        });
+        updateChartVisibility();
+    }
+</script>
+{% endblock %}

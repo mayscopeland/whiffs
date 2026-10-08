@@ -57,9 +57,13 @@ yarn-error.log*
 .dev.vars
 
 # Static site output
-_site/
+baseball/_site/
+basketball/_site/
 
 # Project data
-stats/
-projections/
-reports/
+baseball/stats/
+baseball/projections/
+baseball/reports/
+basketball/stats/
+basketball/projections/
+basketball/reports/

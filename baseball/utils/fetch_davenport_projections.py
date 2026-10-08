@@ -10,7 +10,8 @@ from bs4 import BeautifulSoup
 
 # Define base URL and directories
 BASE_URL = "https://claydavenport.com/projections"
-PROJECTIONS_DIR = Path("projections")
+ROOT = Path(__file__).resolve().parent.parent
+PROJECTIONS_DIR = ROOT / "projections"
 
 # Define default headers for text files that might be missing them
 DEFAULT_BATTING_HEADER = [
