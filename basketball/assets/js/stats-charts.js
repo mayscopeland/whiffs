@@ -4,6 +4,7 @@ const DEFAULT_PLAYER_STATS = [
   { stat: "PTS/MIN", baseName: "playerPTSMIN", name: "PTS/MIN", isVolume: false },
   { stat: "OREB/MIN", baseName: "playerOREBMIN", name: "OREB/MIN", isVolume: false },
   { stat: "DREB/MIN", baseName: "playerDREBMIN", name: "DREB/MIN", isVolume: false },
+  { stat: "REB/MIN", baseName: "playerREBMIN", name: "REB/MIN", isVolume: false },
   { stat: "STL/MIN", baseName: "playerSTLMIN", name: "STL/MIN", isVolume: false },
   { stat: "AST/MIN", baseName: "playerASTMIN", name: "AST/MIN", isVolume: false },
   { stat: "BLK/MIN", baseName: "playerBLKMIN", name: "BLK/MIN", isVolume: false },

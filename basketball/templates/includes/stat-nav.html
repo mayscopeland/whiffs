@@ -1,0 +1,16 @@
+{# Compact jump links for stat sections.
+   Expects navStats: list of dicts with name/label and optional anchor/stat. #}
+<nav class="mb-8 text-sm text-slate-600 dark:text-slate-400" aria-label="Stat categories">
+  <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+    <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Stats:</span>
+    {% for s in navStats %}
+      {% set label = s.label if s.label is defined else (s.name if s.name is defined else s.stat) %}
+      {% if s.anchor is defined %}
+        {% set sid = s.anchor %}
+      {% else %}
+        {% set sid = 'player-' ~ (s.stat | replace('fan_', '') | replace('/', '-')) %}
+      {% endif %}
+      <a href="#{{ sid }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ label }}</a>
+    {% endfor %}
+  </div>
+</nav>

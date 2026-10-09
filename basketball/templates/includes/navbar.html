@@ -110,6 +110,27 @@
           </div>
         </li>
         <li>
+          {% set fantasy_active = page_url.startswith('/fantasy/') %}
+          <button id="dropdownFantasyLink" data-dropdown-toggle="dropdownFantasy" class="{% if fantasy_active %}flex items-center justify-between w-full py-2 px-3 text-white bg-blue-600 rounded md:bg-transparent md:text-blue-600 md:p-0 md:w-auto{% else %}flex items-center justify-between w-full py-2 px-3 text-slate-100 rounded hover:bg-slate-800 md:hover:bg-transparent md:border-0 md:hover:text-blue-600 md:p-0 md:w-auto{% endif %}">
+            Fantasy
+            <svg class="w-2.5 h-2.5 ms-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div id="dropdownFantasy" class="z-10 hidden font-normal bg-slate-900 divide-y divide-slate-700 rounded-lg shadow w-44">
+            <ul class="py-2 text-sm text-slate-400">
+              <li>
+                <a href="/fantasy/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' %} text-blue-500{% endif %}">All-Time</a>
+              </li>
+              {% for year in site.years | reverse %}
+              <li>
+                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year | season }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </li>
+        <li>
           <a href="/methodology/" class="{% if page_url == '/methodology/' %}block py-2 px-3 text-white bg-blue-600 rounded md:bg-transparent md:text-blue-600 md:p-0{% else %}block py-2 px-3 text-slate-100 rounded hover:bg-slate-800 md:hover:bg-transparent md:border-0 md:hover:text-blue-600 md:p-0{% endif %}">
             Methodology
           </a>

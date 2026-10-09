@@ -1,28 +1,21 @@
 {% extends "base.html" %}
-{% set title = "All-Time Projection Accuracy" %}
-
-{% block content %}
+{% set title = "Fantasy Leaderboards" %}
 {% set playerStats = [
-  { "name": 'Minutes', "stat": 'MIN', "baseName": 'playerMIN', "isVolume": true },
-  { "name": 'Games', "stat": 'G', "baseName": 'playerG', "isVolume": true },
-  { "name": 'PTS/MIN', "stat": 'PTS/MIN', "baseName": 'playerPTSMIN', "isVolume": false },
-  { "name": 'OREB/MIN', "stat": 'OREB/MIN', "baseName": 'playerOREBMIN', "isVolume": false },
-  { "name": 'DREB/MIN', "stat": 'DREB/MIN', "baseName": 'playerDREBMIN', "isVolume": false },
-  { "name": 'REB/MIN', "stat": 'REB/MIN', "baseName": 'playerREBMIN', "isVolume": false },
-  { "name": 'STL/MIN', "stat": 'STL/MIN', "baseName": 'playerSTLMIN', "isVolume": false },
-  { "name": 'AST/MIN', "stat": 'AST/MIN', "baseName": 'playerASTMIN', "isVolume": false },
-  { "name": 'BLK/MIN', "stat": 'BLK/MIN', "baseName": 'playerBLKMIN', "isVolume": false },
-  { "name": 'FTA/MIN', "stat": 'FTA/MIN', "baseName": 'playerFTAMIN', "isVolume": false },
-  { "name": 'FGA/MIN', "stat": 'FGA/MIN', "baseName": 'playerFGAMIN', "isVolume": false },
-  { "name": '3PA/MIN', "stat": 'FG3A/MIN', "baseName": 'playerFG3AMIN', "isVolume": false },
-  { "name": 'TOV/MIN', "stat": 'TOV/MIN', "baseName": 'playerTOVMIN', "isVolume": false },
-  { "name": 'FT%', "stat": 'FTM/FTA', "baseName": 'playerFTPct', "isVolume": false },
-  { "name": 'FG%', "stat": 'FGM/FGA', "baseName": 'playerFGPct', "isVolume": false },
-  { "name": '3P%', "stat": 'FG3M/FG3A', "baseName": 'playerFG3Pct', "isVolume": false },
-  { "name": '3PA/FGA', "stat": 'FG3A/FGA', "baseName": 'playerFG3Rate', "isVolume": false },
-  { "name": 'MIN/G', "stat": 'MIN/G', "baseName": 'playerMING', "isVolume": false }
+  { "name": 'Minutes', "stat": 'fan_MIN', "baseName": 'playerMIN', "isVolume": true },
+  { "name": 'Games', "stat": 'fan_G', "baseName": 'playerG', "isVolume": true },
+  { "name": 'MIN/G', "stat": 'fan_MIN/G', "baseName": 'playerMING', "isVolume": false },
+  { "name": 'PTS/MIN', "stat": 'fan_PTS/MIN', "baseName": 'playerPTSMIN', "isVolume": false },
+  { "name": 'REB/MIN', "stat": 'fan_REB/MIN', "baseName": 'playerREBMIN', "isVolume": false },
+  { "name": 'AST/MIN', "stat": 'fan_AST/MIN', "baseName": 'playerASTMIN', "isVolume": false },
+  { "name": 'STL/MIN', "stat": 'fan_STL/MIN', "baseName": 'playerSTLMIN', "isVolume": false },
+  { "name": 'BLK/MIN', "stat": 'fan_BLK/MIN', "baseName": 'playerBLKMIN', "isVolume": false },
+  { "name": 'TOV/MIN', "stat": 'fan_TOV/MIN', "baseName": 'playerTOVMIN', "isVolume": false },
+  { "name": '3PM/MIN', "stat": 'fan_FG3M/MIN', "baseName": 'playerFG3MMIN', "isVolume": false },
+  { "name": 'FG%', "stat": 'fan_FGM/FGA', "baseName": 'playerFGPct', "isVolume": false },
+  { "name": 'FT%', "stat": 'fan_FTM/FTA', "baseName": 'playerFTPct', "isVolume": false }
 ] %}
 
+{% block content %}
 {% set metrics = [
   { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
   { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
@@ -34,37 +27,37 @@
   { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
 ] %}
 
+{% set navStats = [
+  { "name": 'Minutes', "stat": 'fan_MIN', "anchor": 'stat-MIN' },
+  { "name": 'Games', "stat": 'fan_G', "anchor": 'stat-G' },
+  { "name": 'MIN/G', "stat": 'fan_MIN/G', "anchor": 'stat-MIN-G' },
+  { "name": 'PTS/MIN', "stat": 'fan_PTS/MIN', "anchor": 'stat-PTS-MIN' },
+  { "name": 'REB/MIN', "stat": 'fan_REB/MIN', "anchor": 'stat-REB-MIN' },
+  { "name": 'AST/MIN', "stat": 'fan_AST/MIN', "anchor": 'stat-AST-MIN' },
+  { "name": 'STL/MIN', "stat": 'fan_STL/MIN', "anchor": 'stat-STL-MIN' },
+  { "name": 'BLK/MIN', "stat": 'fan_BLK/MIN', "anchor": 'stat-BLK-MIN' },
+  { "name": 'TOV/MIN', "stat": 'fan_TOV/MIN', "anchor": 'stat-TOV-MIN' },
+  { "name": '3PM/MIN', "stat": 'fan_FG3M/MIN', "anchor": 'stat-FG3M-MIN' },
+  { "name": 'FG%', "stat": 'fan_FGM/FGA', "anchor": 'stat-FGM-FGA' },
+  { "name": 'FT%', "stat": 'fan_FTM/FTA', "anchor": 'stat-FTM-FTA' }
+] %}
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">All-Time Projection Accuracy</h1>
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">Fantasy Projection Accuracy</h1>
     {% include "includes/2020-toggle.html" %}
   </div>
 
-  {% set navStats = [
-    { "name": 'Minutes', "stat": 'MIN', "anchor": 'stat-MIN' },
-    { "name": 'Games', "stat": 'G', "anchor": 'stat-G' },
-    { "name": 'PTS/MIN', "stat": 'PTS/MIN', "anchor": 'stat-PTS-MIN' },
-    { "name": 'OREB/MIN', "stat": 'OREB/MIN', "anchor": 'stat-OREB-MIN' },
-    { "name": 'DREB/MIN', "stat": 'DREB/MIN', "anchor": 'stat-DREB-MIN' },
-    { "name": 'REB/MIN', "stat": 'REB/MIN', "anchor": 'stat-REB-MIN' },
-    { "name": 'STL/MIN', "stat": 'STL/MIN', "anchor": 'stat-STL-MIN' },
-    { "name": 'AST/MIN', "stat": 'AST/MIN', "anchor": 'stat-AST-MIN' },
-    { "name": 'BLK/MIN', "stat": 'BLK/MIN', "anchor": 'stat-BLK-MIN' },
-    { "name": 'FTA/MIN', "stat": 'FTA/MIN', "anchor": 'stat-FTA-MIN' },
-    { "name": 'FGA/MIN', "stat": 'FGA/MIN', "anchor": 'stat-FGA-MIN' },
-    { "name": '3PA/MIN', "stat": 'FG3A/MIN', "anchor": 'stat-FG3A-MIN' },
-    { "name": 'TOV/MIN', "stat": 'TOV/MIN', "anchor": 'stat-TOV-MIN' },
-    { "name": 'FT%', "stat": 'FTM/FTA', "anchor": 'stat-FTM-FTA' },
-    { "name": 'FG%', "stat": 'FGM/FGA', "anchor": 'stat-FGM-FGA' },
-    { "name": '3P%', "stat": 'FG3M/FG3A', "anchor": 'stat-FG3M-FG3A' },
-    { "name": '3PA/FGA', "stat": 'FG3A/FGA', "anchor": 'stat-FG3A-FGA' },
-    { "name": 'MIN/G', "stat": 'MIN/G', "anchor": 'stat-MIN-G' }
-  ] %}
+  <div class="max-w-3xl mx-auto text-slate-700 dark:text-slate-300">
+    <p class="my-6 text-lg leading-8">How did projections do if you only care about fantasy basketball? This page excludes players with fewer than 1,500 minutes.</p>
+    <p class="my-6 text-lg leading-8">The charts here cover minutes, games, minutes per game, and the standard 9-cat rates (points, rebounds, assists, steals, blocks, turnovers, threes, FG%, and FT%), still splitting playing time from rates.</p>
+  </div>
+
   {% include "includes/stat-nav.html" %}
 
   <div class="space-y-6">
     {% for statInfo in playerStats %}
-    <div id="stat-{{ statInfo.stat | replace('/', '-') }}" class="mb-4 py-4 scroll-mt-4">
+    <div id="stat-{{ statInfo.stat | replace('fan_', '') | replace('/', '-') }}" class="mb-4 py-4 scroll-mt-4">
       <div class="mb-4 py-4">
         <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
         <div class="flex flex-wrap gap-4">
@@ -111,8 +104,10 @@
     let projectionSystems = {{ site.meta.projection_systems | tojson }};
     let chartInstances = {};
 
+    const fantasyPlayerStats = {{ playerStats | tojson }};
+
     document.addEventListener('DOMContentLoaded', function() {
-        initializeStatsCharts(originalYearsData, projectionSystems);
+        initializeStatsCharts(originalYearsData, projectionSystems, { playerStats: fantasyPlayerStats });
         initializeChartFilters();
         initialize2020Toggle();
     });
@@ -125,7 +120,7 @@
             const selectedMetric = metricSelects[0].value;
             const selectedAdjustment = adjustmentSelects.length > 0 ? adjustmentSelects[0].value : 'raw';
             document.querySelectorAll('.chart-container').forEach(container => {
-                const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                const isVolume = container.dataset.stat === 'fan_MIN' || container.dataset.stat === 'fan_G';
                 const shouldShow = container.dataset.metric === selectedMetric &&
                     (isVolume || container.dataset.adjustment === selectedAdjustment);
                 container.style.display = shouldShow ? 'block' : 'none';

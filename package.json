@@ -8,7 +8,7 @@
     "baseball:site": "uv run python baseball/site_builder.py",
     "baseball:css": "npx @tailwindcss/cli -i ./baseball/assets/css/input.css -o ./baseball/_site/assets/css/style.css",
     "baseball:serve": "uv run python -m http.server 8080 --directory baseball/_site",
-    "baseball:deploy": "npx wrangler pages deploy --config baseball/wrangler.toml",
+    "baseball:deploy": "npx wrangler pages deploy --cwd baseball",
     "baseball:stats": "uv run python baseball/utils/fetch_mlb_stats.py",
     "baseball:marcel": "uv run python baseball/utils/marcel-like.py",
     "basketball": "npm run basketball:evals && npm run basketball:site && npm run basketball:css",
@@ -16,10 +16,11 @@
     "basketball:site": "uv run python basketball/site_builder.py",
     "basketball:css": "npx @tailwindcss/cli -i ./basketball/assets/css/input.css -o ./basketball/_site/assets/css/style.css",
     "basketball:serve": "uv run python -m http.server 8081 --directory basketball/_site",
-    "basketball:deploy": "npx wrangler pages deploy --config basketball/wrangler.toml",
+    "basketball:deploy": "npx wrangler pages deploy --cwd basketball",
     "basketball:stats": "uv run python basketball/utils/fetch_nba_stats.py",
-    "basketball:baseline": "uv run python basketball/utils/baseline.py",
-    "basketball:darko": "uv run python basketball/utils/fetch_darko.py"
+    "basketball:sps": "uv run python basketball/utils/sps.py",
+    "basketball:darko": "uv run python basketball/utils/fetch_darko.py",
+    "basketball:espn": "uv run python basketball/utils/fetch_espn.py"
   },
   "author": "",
   "license": "AGPL-3.0",

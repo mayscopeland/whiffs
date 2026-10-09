@@ -1,11 +1,13 @@
 let exclude2020 = true;
 
 const projectionSystemColors = {
-  "Baseline": "#8c564b",
+  "SPS": "#8c564b",
+  "ESPN": "#d62728",
 };
 
 const projectionSystemBorderColors = {
-  "Baseline": "#8c564b",
+  "SPS": "#8c564b",
+  "ESPN": "#d62728",
 };
 
 function endYearToSeason(endYear) {

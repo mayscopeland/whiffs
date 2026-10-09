@@ -3,7 +3,7 @@
 This repository holds two peer projection-evaluation pipelines:
 
 - **Whiffs** ([whiffs.org](https://whiffs.org)) — MLB projection accuracy (Marcel, Steamer, ZiPS, and others)
-- **Bricks** — NBA projection accuracy (Baseline)
+- **Bricks** — NBA projection accuracy (SPS and ESPN so far)
 
 Baseball code and data live under [`baseball/`](baseball/). Basketball code and data live under [`basketball/`](basketball/). Root scripts always name the sport.
 
@@ -94,16 +94,19 @@ npm run baseball:deploy
 
 ## Basketball (Bricks)
 
-Bricks is the NBA counterpart to Whiffs: Tango-style projection evaluation with minutes-weighted, league-adjusted rate errors. Season files use NBA calendar-overlap labels (`basketball/stats/2023-24.csv`). Baseline writes `basketball/projections/baseline_2009-10.csv` through `baseline_2026-27.csv`.
+Bricks is the NBA counterpart to Whiffs: Tango-style projection evaluation with minutes-weighted, league-adjusted rate errors. Season files use NBA calendar-overlap labels (`basketball/stats/2023-24.csv`). SPS writes `basketball/projections/sps_2009-10.csv` through `sps_2026-27.csv`.
 
-### Collect stats and build Baseline
+### Collect stats and build SPS
 
 ```bash
 # Regular-season player totals + bios into basketball/stats/
 npm run basketball:stats
 
-# Marcel-like Baseline projections into basketball/projections/
-npm run basketball:baseline
+# Basketball-Reference Simple Projection System into basketball/projections/
+npm run basketball:sps
+
+# ESPN fantasy season projections (2017-18 through 2026-27)
+npm run basketball:espn
 ```
 
 ### Build the site

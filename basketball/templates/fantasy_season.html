@@ -1,6 +1,18 @@
 {% extends "base.html" %}
-{% set title = (season or (year | season)) ~ " Projection Accuracy" %}
+{% set title = (season or (year | season)) ~ " Fantasy Projection Accuracy" %}
 {% set year_key = year|string %}
+{% set rateStats = [
+  { "name": 'MIN/G', "stat": 'fan_MIN/G' },
+  { "name": 'PTS/MIN', "stat": 'fan_PTS/MIN' },
+  { "name": 'REB/MIN', "stat": 'fan_REB/MIN' },
+  { "name": 'AST/MIN', "stat": 'fan_AST/MIN' },
+  { "name": 'STL/MIN', "stat": 'fan_STL/MIN' },
+  { "name": 'BLK/MIN', "stat": 'fan_BLK/MIN' },
+  { "name": 'TOV/MIN', "stat": 'fan_TOV/MIN' },
+  { "name": '3PM/MIN', "stat": 'fan_FG3M/MIN' },
+  { "name": 'FG%', "stat": 'fan_FGM/FGA' },
+  { "name": 'FT%', "stat": 'fan_FTM/FTA' }
+] %}
 
 {% block content %}
 {% macro renderEverybodyMissed(everybodyMissedData, statName, showVolume=false) %}
@@ -114,25 +126,6 @@
 </div>
 {% endmacro %}
 
-{% set rateStats = [
-  { "name": 'PTS/MIN', "stat": 'PTS/MIN' },
-  { "name": 'OREB/MIN', "stat": 'OREB/MIN' },
-  { "name": 'DREB/MIN', "stat": 'DREB/MIN' },
-  { "name": 'REB/MIN', "stat": 'REB/MIN' },
-  { "name": 'STL/MIN', "stat": 'STL/MIN' },
-  { "name": 'AST/MIN', "stat": 'AST/MIN' },
-  { "name": 'BLK/MIN', "stat": 'BLK/MIN' },
-  { "name": 'FTA/MIN', "stat": 'FTA/MIN' },
-  { "name": 'FGA/MIN', "stat": 'FGA/MIN' },
-  { "name": '3PA/MIN', "stat": 'FG3A/MIN' },
-  { "name": 'TOV/MIN', "stat": 'TOV/MIN' },
-  { "name": 'FT%', "stat": 'FTM/FTA' },
-  { "name": 'FG%', "stat": 'FGM/FGA' },
-  { "name": '3P%', "stat": 'FG3M/FG3A' },
-  { "name": '3PA/FGA', "stat": 'FG3A/FGA' },
-  { "name": 'MIN/G', "stat": 'MIN/G' }
-] %}
-
 {% set metrics = [
   { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
   { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
@@ -145,23 +138,24 @@
 ] %}
 
 {% set summaryColumns = [
-  { "label": "MIN", "title": "Minutes", "stat": "MIN", "isVolume": true, "anchor": "player-MIN" },
-  { "label": "G", "title": "Games", "stat": "G", "isVolume": true, "anchor": "player-G" }
+  { "label": "MIN", "title": "Minutes", "stat": "fan_MIN", "isVolume": true, "anchor": "player-MIN" },
+  { "label": "G", "title": "Games", "stat": "fan_G", "isVolume": true, "anchor": "player-G" }
 ] + rateStats %}
 
 {% set navStats = [
-  { "name": "Minutes", "stat": "MIN", "anchor": "player-MIN" },
-  { "name": "Games", "stat": "G", "anchor": "player-G" }
+  { "name": "Minutes", "stat": "fan_MIN", "anchor": "player-MIN" },
+  { "name": "Games", "stat": "fan_G", "anchor": "player-G" }
 ] + rateStats %}
 
 {% set yearMisses = misses.get(year_key, {}) %}
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ season or (year | season) }} Projection Accuracy</h1>
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ season or (year | season) }} Fantasy Projection Accuracy</h1>
+    <p class="max-w-3xl mx-auto text-lg text-slate-700 dark:text-slate-300">Fantasy-relevant accuracy for {{ season or (year | season) }}, excluding players with fewer than 1,500 minutes. Limited to minutes, games, minutes per game, and 9-cat rates.</p>
   </div>
 
-  <div id="season-summary" class="mb-12">
+  <div id="fantasy-summary" class="mb-12">
     <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
       <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Summary</h2>
       <div class="flex flex-wrap gap-4">
@@ -179,7 +173,7 @@
           <tr>
             <th scope="col" class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left">System</th>
             {% for col in summaryColumns %}
-            {% set anchor = col.anchor if col.anchor is defined else ('player-' ~ (col.stat | replace('/', '-'))) %}
+            {% set anchor = col.anchor if col.anchor is defined else ('player-' ~ (col.stat | replace('fan_', '') | replace('/', '-'))) %}
             <th scope="col" class="px-2 py-2 text-center font-medium whitespace-nowrap normal-case" title="{{ col.title if col.title is defined else col.name }}">
               <a href="#{{ anchor }}" class="hover:underline">{{ col.label if col.label is defined else col.name }}</a>
               {% if col.isVolume %}<span class="summary-raw-tag hidden font-normal normal-case text-slate-500 dark:text-slate-400"> raw</span>{% endif %}
@@ -215,13 +209,13 @@
         </div>
       </div>
       {% for metric in metrics %}
-      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="MIN" data-metric="{{ metric.value }}" data-adjustment="raw">
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="fan_MIN" data-metric="{{ metric.value }}" data-adjustment="raw">
         <div class="h-80"><canvas id="playerVolume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
       </div>
       {% endfor %}
       {% if yearMisses %}
-        {{ renderEverybodyMissed(yearMisses.everybody_missed_player['MIN'], 'Minutes', true) }}
-        {{ renderBiggestMisses('MIN', 'Minutes', true, yearMisses) }}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_player['fan_MIN'], 'Minutes', true) }}
+        {{ renderBiggestMisses('fan_MIN', 'Minutes', true, yearMisses) }}
       {% endif %}
     </div>
 
@@ -235,13 +229,13 @@
         </div>
       </div>
       {% for metric in metrics %}
-      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="G" data-metric="{{ metric.value }}" data-adjustment="raw">
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="fan_G" data-metric="{{ metric.value }}" data-adjustment="raw">
         <div class="h-80"><canvas id="playerG{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
       </div>
       {% endfor %}
       {% if yearMisses %}
-        {{ renderEverybodyMissed(yearMisses.everybody_missed_player['G'], 'Games', true) }}
-        {{ renderBiggestMisses('G', 'Games', true, yearMisses) }}
+        {{ renderEverybodyMissed(yearMisses.everybody_missed_player['fan_G'], 'Games', true) }}
+        {{ renderBiggestMisses('fan_G', 'Games', true, yearMisses) }}
       {% endif %}
     </div>
   </div>
@@ -250,8 +244,8 @@
     <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Rate Stats</h2>
 
     {% for statInfo in rateStats %}
-    {% set clean = statInfo.stat | replace('/', '') | replace('-', '') %}
-    <div class="chart-section mb-8 scroll-mt-4" id="player-{{ statInfo.stat | replace('/', '-') }}">
+    {% set clean = statInfo.stat | replace('fan_', '') | replace('/', '') | replace('-', '') %}
+    <div class="chart-section mb-8 scroll-mt-4" id="player-{{ statInfo.stat | replace('fan_', '') | replace('/', '-') }}">
       <div class="mb-4 py-4">
         <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
         <div class="flex flex-wrap gap-4">
@@ -288,9 +282,16 @@
     let projectionSystems = {{ site.meta.projection_systems | tojson }};
     let chartInstances = {};
 
+    const fantasyRateStats = {{ rateStats | tojson }};
+
     document.addEventListener('DOMContentLoaded', function() {
-        initializeSeasonCharts(yearData, projectionSystems);
-        initializeSummaryTable(yearData, "season-summary");
+        initializeSeasonCharts(yearData, projectionSystems, {
+            playerStats: fantasyRateStats,
+            volumeStat: "fan_MIN",
+            volumeLabel: "Minutes",
+            gamesStat: "fan_G",
+        });
+        initializeSummaryTable(yearData, "fantasy-summary");
         initializeChartFilters();
     });
 
@@ -306,7 +307,7 @@
                 const selectedMetric = metricSelect.value;
                 const selectedAdjustment = adjustmentSelect ? adjustmentSelect.value : 'raw';
                 section.querySelectorAll('.chart-container').forEach(container => {
-                    const isVolume = container.dataset.stat === 'MIN' || container.dataset.stat === 'G';
+                    const isVolume = container.dataset.stat === 'fan_MIN' || container.dataset.stat === 'fan_G';
                     const shouldShow = container.dataset.metric === selectedMetric &&
                         (isVolume || container.dataset.adjustment === selectedAdjustment);
                     container.style.display = shouldShow ? 'block' : 'none';

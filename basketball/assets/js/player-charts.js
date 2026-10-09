@@ -4,6 +4,7 @@ const PLAYER_STATS_CONFIG = [
   { name: "PTS/MIN", stat: "PTS/MIN", isVolume: false },
   { name: "OREB/MIN", stat: "OREB/MIN", isVolume: false },
   { name: "DREB/MIN", stat: "DREB/MIN", isVolume: false },
+  { name: "REB/MIN", stat: "REB/MIN", isVolume: false },
   { name: "STL/MIN", stat: "STL/MIN", isVolume: false },
   { name: "AST/MIN", stat: "AST/MIN", isVolume: false },
   { name: "BLK/MIN", stat: "BLK/MIN", isVolume: false },

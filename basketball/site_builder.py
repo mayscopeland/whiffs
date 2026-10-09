@@ -22,7 +22,8 @@ CACHE_DIR = REPORTS_DIR / "site_cache"
 CACHE_FILES = ("site.json", "years.json", "misses.json", "players.json")
 
 SYSTEM_COLORS = {
-    "Baseline": "text-amber-900 dark:text-amber-700",
+    "SPS": "text-amber-900 dark:text-amber-700",
+    "ESPN": "text-red-600 dark:text-red-400",
 }
 
 
@@ -222,6 +223,7 @@ def build_site(
     pages = [
         ("index.html", "index.html", "/", {"title": "NBA Projection Accuracy"}),
         ("stats.html", "stats/index.html", "/stats/", {"title": "All-Time Projection Accuracy"}),
+        ("fantasy.html", "fantasy/index.html", "/fantasy/", {"title": "Fantasy Leaderboards"}),
         ("methodology.html", "methodology/index.html", "/methodology/", {"title": "Methodology"}),
         ("404.html", "404.html", "/404.html", {"title": "Page Not Found"}),
     ]
@@ -249,6 +251,21 @@ def build_site(
         )
         _write(site_dir / "seasons" / year_key / "index.html", html)
     print(f"  Wrote {len(site.get('years', []))} season pages")
+
+    for year in site.get("years", []):
+        year_key = str(year)
+        season = end_year_to_season(year)
+        html = env.get_template("fantasy_season.html").render(
+            **base_ctx,
+            page_url=f"/fantasy/{year}/",
+            year=year,
+            year_key=year_key,
+            season=season,
+            yearData=years.get(year_key),
+            title=f"{season} Fantasy Projection Accuracy",
+        )
+        _write(site_dir / "fantasy" / year_key / "index.html", html)
+    print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(
