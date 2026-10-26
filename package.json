@@ -20,7 +20,8 @@
     "basketball:stats": "uv run python basketball/utils/fetch_nba_stats.py",
     "basketball:sps": "uv run python basketball/utils/sps.py",
     "basketball:darko": "uv run python basketball/utils/fetch_darko.py",
-    "basketball:espn": "uv run python basketball/utils/fetch_espn.py"
+    "basketball:espn": "uv run python basketball/utils/fetch_espn.py",
+    "basketball:preseason": "uv run python basketball/utils/fetch_preseason.py"
   },
   "author": "",
   "license": "AGPL-3.0",

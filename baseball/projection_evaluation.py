@@ -48,7 +48,8 @@ PITCHING_RATE_STATS: List[str] = [
     "WHIP",
 ]
 
-# Fantasy stats for players with significant playing time
+# Fantasy stats for the top ADP pool (overall draft capital, not PA/BF cutoffs)
+FAN_ADP_TOP_N = 250
 FAN_BATTING_VOLUME_STATS: List[str] = ["PA"]
 FAN_BATTING_RATE_STATS: List[str] = [
     "HR/BIP",
@@ -78,6 +79,7 @@ ROOT = Path(__file__).resolve().parent
 STATS_DIR = ROOT / "stats"
 PROJECTIONS_DIR = ROOT / "projections"
 REPORTS_DIR = ROOT / "reports"
+ADP_DIR = ROOT / "adp"
 
 # PA or BF assigned when a player is missing from a projection.
 MISSING_PLAYING_TIME = 100
@@ -319,6 +321,31 @@ def calculate_rate_stats(df: pd.DataFrame, player_type: str, year: Optional[int]
                         df[f"{stat}/G"] = df.apply(lambda row: 0 if row["G"] == 0 else row[stat] / row["G"], axis=1)
 
     return df
+
+def load_fantasy_adp_ids(year: int, top_n: int = FAN_ADP_TOP_N) -> List[str]:
+    """Return MLBAM IDs for the top-N FantasyPros overall ADP in a season."""
+    path = ADP_DIR / f"fantasypros_{year}.csv"
+    if not path.exists():
+        return []
+
+    adp = pd.read_csv(path)
+    if "rank" not in adp.columns or "mlbam_id" not in adp.columns:
+        print(f"Warning: {path} missing rank/mlbam_id columns")
+        return []
+
+    adp["rank"] = pd.to_numeric(adp["rank"], errors="coerce")
+    adp["mlbam_id"] = pd.to_numeric(adp["mlbam_id"], errors="coerce")
+    top = adp.dropna(subset=["rank", "mlbam_id"]).sort_values(["rank", "mlbam_id"])
+    # Overall ADP mixes hitters and pitchers; dedupe two-way/split ADP rows.
+    ids = (
+        top.drop_duplicates(subset=["mlbam_id"], keep="first")
+        .head(top_n)["mlbam_id"]
+        .astype(int)
+        .astype(str)
+        .tolist()
+    )
+    return ids
+
 
 def load_actual_stats(year: int, player_type: str) -> pd.DataFrame:
     """Load actual stats for a given year and player type"""
@@ -1442,6 +1469,11 @@ def process_fantasy_stats(
     # 1. Load data
     actual_df = load_actual_stats(year, player_type)
     proj_df = load_projections(year, system, player_type)
+    adp_ids = load_fantasy_adp_ids(year, FAN_ADP_TOP_N)
+
+    if not adp_ids:
+        print(f"  Skipping - no FantasyPros top-{FAN_ADP_TOP_N} ADP for {year}")
+        return []
 
     if actual_df.empty or proj_df.empty:
         return []
@@ -1450,19 +1482,15 @@ def process_fantasy_stats(
     actual_df["playerId"] = actual_df["playerId"].astype(str)
     proj_df["xMLBAMID"] = proj_df["xMLBAMID"].astype(str)
 
-    # 2. Filter for significant playing time
-    min_pa = 300
-    min_bf = 200
+    # 2. Restrict to the season's top overall ADP pool (hitters and pitchers mixed)
     playing_time_col = "PA" if player_type == "batting" else "BF"
-
-    if player_type == "batting":
-        actual_df = actual_df[actual_df[playing_time_col] >= min_pa]
-    else:  # pitching
-        actual_df = actual_df[actual_df[playing_time_col] >= min_bf]
+    actual_df = actual_df[actual_df["playerId"].isin(adp_ids)]
 
     if actual_df.empty:
-        print(f"  Skipping - no players met the playing time threshold")
+        print(f"  Skipping - no {player_type} players in top-{FAN_ADP_TOP_N} ADP")
         return []
+
+    print(f"  Using {len(actual_df)} {player_type} players from top-{FAN_ADP_TOP_N} ADP")
 
     # 3. Define fantasy stats and playing time columns
     if player_type == "batting":
