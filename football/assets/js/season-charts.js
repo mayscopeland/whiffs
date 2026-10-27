@@ -1,0 +1,255 @@
+function cleanStatName(stat) {
+  return String(stat).replace(/^fan_/, "").replace(/[\/\(\)\-]/g, "");
+}
+
+function initializeSeasonCharts(yearData, projectionSystems, pools, fantasy) {
+  registerProjectionSystems(projectionSystems);
+  if (!yearData) return;
+
+  function statName(stat) {
+    return fantasy ? `fan_${stat}` : stat;
+  }
+
+  (pools || []).forEach((pool) => {
+    const playerType = pool.key;
+    const rows = yearData[playerType] || [];
+    if (!rows.length) return;
+
+    const volumeStat = statName(pool.volume.stat);
+    const volumeLabel = pool.volumeLabel || pool.volume.name;
+    createChart(
+      `${playerType}VolumeMaeChart`,
+      "bar",
+      prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat),
+      `${volumeLabel} MAE`,
+      "MAE"
+    );
+    createChart(
+      `${playerType}VolumeRmseChart`,
+      "bar",
+      prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat),
+      `${volumeLabel} RMSE`,
+      "RMSE"
+    );
+
+    (pool.rates || []).forEach((statInfo) => {
+      const stat = statName(statInfo.stat);
+      const cleanName = cleanStatName(stat);
+      const prefix = `${playerType}${cleanName}`;
+      const mae = prepareStatSpecificData(yearData, playerType, stat, "MAE");
+      if (mae) createChart(`${prefix}MaeChart`, "bar", mae, `${statInfo.name} Raw MAE`, "MAE");
+      const rmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE");
+      if (rmse) createChart(`${prefix}RmseChart`, "bar", rmse, `${statInfo.name} Raw RMSE`, "RMSE");
+      const leagueMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "league-adj");
+      if (leagueMae) createChart(`${prefix}LeagueAdjMaeChart`, "bar", leagueMae, `${statInfo.name} League-Adjusted MAE`, "League-Adjusted MAE");
+      const leagueRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "league-adj");
+      if (leagueRmse) createChart(`${prefix}LeagueAdjRmseChart`, "bar", leagueRmse, `${statInfo.name} League-Adjusted RMSE`, "League-Adjusted RMSE");
+      const wlaMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "weighted-league-adj");
+      if (wlaMae) createChart(`${prefix}WLAMaeChart`, "bar", wlaMae, `${statInfo.name} Weighted LA MAE`, "Weighted LA MAE");
+      const wlaRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "weighted-league-adj");
+      if (wlaRmse) createChart(`${prefix}WLARmseChart`, "bar", wlaRmse, `${statInfo.name} Weighted LA RMSE`, "Weighted LA RMSE");
+    });
+  });
+}
+
+function prepareStatSpecificData(yearData, playerType, stat, dataType, adjustment = null) {
+  const results = yearData[playerType] || [];
+  const statData = results.filter((result) => result.stat === stat);
+  if (statData.length === 0) return null;
+
+  const datasets = projectionSystemsForPage()
+    .map((system) => {
+      const systemData = statData.find((result) => result.system === system);
+      let value = null;
+      if (systemData) {
+        if (adjustment === "league-adj") {
+          value = dataType === "MAE" ? systemData.la_mae : systemData.la_rmse;
+        } else if (adjustment === "weighted-league-adj") {
+          value = dataType === "MAE" ? systemData.wla_mae : systemData.wla_rmse;
+        } else {
+          value = dataType === "MAE" ? systemData.mae : systemData.rmse;
+        }
+      }
+      return {
+        label: system,
+        data: [value],
+        backgroundColor: projectionSystemColors[system] || defaultColor,
+        borderColor: projectionSystemBorderColors[system] || defaultColor,
+        borderWidth: 1,
+        hasData: value !== null && value !== undefined && !Number.isNaN(value),
+        errorValue: value,
+      };
+    })
+    .filter((dataset) => dataset.hasData)
+    .sort((a, b) => {
+      if (a.errorValue === null && b.errorValue === null) return 0;
+      if (a.errorValue === null) return 1;
+      if (b.errorValue === null) return -1;
+      return b.errorValue - a.errorValue;
+    });
+
+  datasets.forEach((dataset) => {
+    delete dataset.hasData;
+    delete dataset.errorValue;
+  });
+  if (!datasets.length) return null;
+  return { labels: [stat], datasets };
+}
+
+let seasonProjectionSystems = [];
+
+function projectionSystemsForPage() {
+  return seasonProjectionSystems;
+}
+
+const SUMMARY_METRIC_FIELDS = {
+  MAE: { raw: "mae", "league-adj": "la_mae", "weighted-league-adj": "wla_mae" },
+  RMSE: { raw: "rmse", "league-adj": "la_rmse", "weighted-league-adj": "wla_rmse" },
+};
+
+function summaryMetricValue(record, metric, adjustment, isVolume) {
+  if (!record) return null;
+  const field = SUMMARY_METRIC_FIELDS[metric][isVolume ? "raw" : adjustment];
+  const value = record[field];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function formatSummaryError(value, isVolume) {
+  if (value == null) return "-";
+  if (isVolume) return value.toFixed(1);
+  if (Math.abs(value) >= 1) return value.toFixed(3);
+  return value.toFixed(4);
+}
+
+function summaryHeatStyles(values) {
+  const finite = values.filter((value) => value != null);
+  const blank = "";
+  if (finite.length === 0) return values.map(() => blank);
+
+  const mean = finite.reduce((sum, value) => sum + value, 0) / finite.length;
+  const min = Math.min(...finite);
+  const max = Math.max(...finite);
+  const good = [22, 163, 74];
+  const bad = [220, 38, 38];
+
+  return values.map((value) => {
+    if (value == null) return blank;
+    let t = 0;
+    let target = good;
+    if (value < mean && mean > min) {
+      t = (mean - value) / (mean - min);
+    } else if (value > mean && max > mean) {
+      t = (value - mean) / (max - mean);
+      target = bad;
+    }
+    if (t < 0.02) return blank;
+    const alpha = Math.min(0.5, t * 0.5);
+    return `rgba(${target[0]}, ${target[1]}, ${target[2]}, ${alpha})`;
+  });
+}
+
+function summaryAverageRanks(valueRows) {
+  const sums = valueRows.map(() => 0);
+  const counts = valueRows.map(() => 0);
+  if (valueRows.length === 0) return sums;
+  const categoryCount = valueRows[0].length;
+
+  for (let category = 0; category < categoryCount; category++) {
+    const present = [];
+    valueRows.forEach((values, rowIndex) => {
+      const value = values[category];
+      if (value != null) present.push({ rowIndex, value });
+    });
+    present.sort((a, b) => a.value - b.value);
+    let start = 0;
+    while (start < present.length) {
+      let end = start + 1;
+      while (end < present.length && present[end].value === present[start].value) end++;
+      const rank = (start + 1 + end) / 2;
+      for (let i = start; i < end; i++) {
+        sums[present[i].rowIndex] += rank;
+        counts[present[i].rowIndex] += 1;
+      }
+      start = end;
+    }
+  }
+  return sums.map((sum, index) => (counts[index] ? sum / counts[index] : Number.POSITIVE_INFINITY));
+}
+
+function initializeSummaryTable(yearData, rootId, playerTypes) {
+  const root = document.getElementById(rootId);
+  if (!root || !yearData) return;
+  const metricSelect = root.querySelector(".summary-metric-select");
+  const adjustmentSelect = root.querySelector(".summary-adjustment-select");
+  if (!metricSelect || !adjustmentSelect) return;
+
+  const index = new Map();
+  for (const playerType of playerTypes) {
+    for (const record of yearData[playerType] || []) {
+      index.set(`${playerType}|${record.system}|${record.stat}`, record);
+    }
+  }
+
+  function render() {
+    const metric = metricSelect.value;
+    const adjustment = adjustmentSelect.value;
+    const showRawTag = adjustment !== "raw";
+    root.querySelectorAll(".summary-raw-tag").forEach((tag) => {
+      tag.classList.toggle("hidden", !showRawTag);
+    });
+
+    root.querySelectorAll("table").forEach((table) => {
+      const tbody = table.querySelector("tbody");
+      if (!tbody) return;
+      const rows = [...tbody.querySelectorAll("tr")];
+      if (!rows.length) return;
+      const entries = rows.map((row) => {
+        const cells = [...row.querySelectorAll(".summary-cell")];
+        const values = cells.map((cell) => {
+          const record = index.get(`${cell.dataset.playerType}|${row.dataset.system}|${cell.dataset.stat}`);
+          return summaryMetricValue(record, metric, adjustment, cell.dataset.volume === "true");
+        });
+        return { row, cells, values };
+      });
+
+      const categoryCount = entries[0]?.values.length ?? 0;
+      const bestRing = isDarkMode() ? "inset 0 0 0 2px #f8fafc" : "inset 0 0 0 2px #0f172a";
+      for (let category = 0; category < categoryCount; category++) {
+        const columnValues = entries.map((entry) => entry.values[category]);
+        const backgrounds = summaryHeatStyles(columnValues);
+        const finite = columnValues.filter((value) => value != null);
+        const best = finite.length ? Math.min(...finite) : null;
+        entries.forEach((entry, rowIndex) => {
+          const cell = entry.cells[category];
+          cell.textContent = formatSummaryError(entry.values[category], cell.dataset.volume === "true");
+          cell.style.backgroundColor = backgrounds[rowIndex];
+          cell.style.color = "";
+          cell.style.boxShadow = entry.values[category] != null && entry.values[category] === best ? bestRing : "";
+        });
+      }
+
+      const averageRanks = summaryAverageRanks(entries.map((entry) => entry.values));
+      entries
+        .map((entry, rowIndex) => ({ ...entry, averageRank: averageRanks[rowIndex] }))
+        .sort((a, b) => a.averageRank - b.averageRank || Number(a.row.dataset.order) - Number(b.row.dataset.order))
+        .forEach((entry) => {
+          entry.row.hidden = entry.values.every((value) => value == null);
+          tbody.appendChild(entry.row);
+        });
+    });
+  }
+
+  metricSelect.addEventListener("change", render);
+  adjustmentSelect.addEventListener("change", render);
+  new MutationObserver(render).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  render();
+}
+
+function bindSeasonCharts(yearData, projectionSystems, pools, fantasy) {
+  seasonProjectionSystems = projectionSystems || [];
+  initializeSeasonCharts(yearData, seasonProjectionSystems, pools, fantasy);
+  initializeSummaryTable(yearData, fantasy ? "fantasy-summary" : "season-summary", (pools || []).map((pool) => pool.key));
+}

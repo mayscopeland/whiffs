@@ -59,6 +59,7 @@ yarn-error.log*
 # Static site output
 baseball/_site/
 basketball/_site/
+football/_site/
 
 # Project data
 baseball/stats/
@@ -67,3 +68,6 @@ baseball/reports/
 basketball/stats/
 basketball/projections/
 basketball/reports/
+football/stats/
+football/projections/
+football/reports/

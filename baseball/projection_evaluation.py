@@ -964,6 +964,8 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
 
 def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Path) -> None:
     """Generate a spreadsheet summary of the evaluation results"""
+    if not results:
+        return
     print("\nGenerating summary spreadsheet...")
 
     data = []
@@ -1029,6 +1031,8 @@ def run_evaluation():
                 all_results.extend(fantasy_results)
 
     print(f"\nCompleted evaluation. Total results: {len(all_results)}")
+    if not all_results:
+        print("No projection files overlap baseball/stats. Writing an empty site cache.")
 
     # Identify players missed by everyone
     everybody_missed = {}  # (year, player_type, stat) -> list of misses

@@ -23,6 +23,7 @@ let lastStatsChartsOptions = {};
 
 function initializeStatsCharts(yearsData, projectionSystems, options = lastStatsChartsOptions) {
   lastStatsChartsOptions = options || {};
+  if (!yearsData || Object.keys(yearsData).length === 0) return;
   const playerStats = lastStatsChartsOptions.playerStats || DEFAULT_PLAYER_STATS;
 
   playerStats.forEach(({ stat, baseName, name, isVolume }) => {

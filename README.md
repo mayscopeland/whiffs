@@ -1,11 +1,12 @@
-# Whiffs and Bricks
+# Whiffs, Bricks, and Drops
 
-This repository holds two peer projection-evaluation pipelines:
+This repository holds three peer projection-evaluation pipelines:
 
 - **Whiffs** ([whiffs.org](https://whiffs.org)) — MLB projection accuracy (Marcel, Steamer, ZiPS, and others)
 - **Bricks** — NBA projection accuracy (SPS and ESPN so far)
+- **Drops** — NFL projection accuracy
 
-Baseball code and data live under [`baseball/`](baseball/). Basketball code and data live under [`basketball/`](basketball/). Root scripts always name the sport.
+Baseball code and data live under [`baseball/`](baseball/). Basketball code and data live under [`basketball/`](basketball/). Football code and data live under [`football/`](football/). Root scripts always name the sport.
 
 ## Prerequisites
 
@@ -133,6 +134,51 @@ npm run basketball:deploy
 ```
 
 Create the `bricks` Pages project once (`npx wrangler pages project create bricks`) before the first deploy.
+
+## Football (Drops)
+
+Drops is the NFL counterpart to Whiffs. Playing time stays separate from rate stats: pass attempts, carries, and targets are the weights, and accuracy, yards, touchdowns, interceptions, and catch rate are scored as rates. Actuals are scraped from the NFL.com passing, rushing, and receiving leaderboards and stored under each player's `nfl_slug`.
+
+Season files are named with the NFL season year (`football/stats/2024.csv`).
+
+### Collect stats
+
+```bash
+# Every season the current NFL.com leaderboards still serve
+npm run football:stats
+
+# One season
+npm run football:stats -- --season 2024
+```
+
+ESPN, Sleeper, FFToday, and FantasyPros season-long projections use `football/projections/{prefix}_{season}.csv` (for example `espn_2024.csv` for ESPN). Download them with `npm run football:espn`, `npm run football:sleeper`, `npm run football:fftoday`, and `npm run football:fantasypros`. ESPN 2023 is left out: that season's projection split is empty for most players. FantasyPros reads the session cookie from `FANTASYPROS_COOKIE` and does not store it in the script; without that cookie the live draft board is only a short public list. Seasons 2018–2022 are filled from Wayback Machine captures of the preseason draft board, because the live `year=` pages omit players who have since left the league. A position with no preseason capture keeps the players already in the saved file. Scored systems are listed in `PROJECTION_SYSTEMS` inside `football/projection_evaluation.py`; add a display name there and map it to the file prefix in `PROJECTION_SYSTEM_FILES` when they differ. Joins use `nfl_slug` from [`player_ids.csv`](https://github.com/mayscopeland/ffb_ids) in [mayscopeland/ffb_ids](https://github.com/mayscopeland/ffb_ids). The fetchers download that file. When an older id is missing and the player name matches one slug, that slug is used for the projection row. The crosswalk on GitHub is left unchanged. FantasyPros does not publish targets, so that file omits `TGT` the same way FFToday does.
+
+Fantasy pages use the top 150 offensive players by FantasyPros half-PPR preseason ADP. Download that board with `npm run football:adp`. It reads the same `FANTASYPROS_COOKIE` and writes `football/adp/fantasypros_{season}.csv` with kickers and defenses already removed.
+
+### Build the site
+
+```bash
+npm run football
+```
+
+Individual steps:
+
+```bash
+npm run football:evals   # evaluation + football/reports/site_cache/
+npm run football:site    # HTML into football/_site/
+npm run football:css     # Tailwind CSS
+npm run football:serve   # http://localhost:8082
+```
+
+### Deploy
+
+Build first (`npm run football`), then upload to the Drops Cloudflare Pages project:
+
+```bash
+npm run football:deploy
+```
+
+Create the `drops` Pages project once (`npx wrangler pages project create drops`) before the first deploy.
 
 ## License
 

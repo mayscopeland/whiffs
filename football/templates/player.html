@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+{% set adjustments = [
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LA' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+{% set playerTypes = player.types if player.types is defined else [] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ player.name }}</h1>
+  </div>
+
+  {% for pool in pools if pool.key in playerTypes %}
+  <section class="mb-16">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">{{ pool.label }}</h2>
+    {% for statInfo in [pool.volume] + pool.rates %}
+    {% set clean = statInfo.stat | replace('/', '') | replace('-', '') %}
+    <div class="mb-8">
+      <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        {% if not statInfo.isVolume %}
+        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+        {% endif %}
+      </div>
+      {% for metric in metrics %}
+        {% if statInfo.isVolume %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-volume="true" data-metric="{{ metric.value }}" data-adjustment="raw">
+          <div class="h-128"><canvas id="accuracy{{ pool.key }}{{ clean }}{{ metric.title }}Chart"></canvas></div>
+        </div>
+        {% else %}
+          {% for adj in adjustments %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-128"><canvas id="accuracy{{ adj.chartSuffix }}{{ pool.key }}{{ clean }}{{ metric.title }}Chart"></canvas></div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 overflow-x-auto">
+      <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+        <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+          <tr>
+            <th class="px-4 py-3">Season</th>
+            <th class="px-4 py-3">System</th>
+            {% for stat in pool.counting %}<th class="px-4 py-3 text-right">{{ stat }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for year, year_data in player.years.items() %}
+            {% set typed = year_data.get(pool.key, {}) %}
+            {% for system, stats in typed.items() %}
+            <tr class="border-t border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-3 whitespace-nowrap">{{ year }}</td>
+              <td class="px-4 py-3 {{ system_colors.get(system, '') if system != 'Actual' else '' }}">{{ system }}</td>
+              {% for stat in pool.counting %}
+              <td class="px-4 py-3 text-right font-mono">{{ stats.get(stat) | toFixed(0) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/player-charts.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const stats = [];
+    const playerTypes = {{ player.types | tojson }};
+    {% for pool in pools %}
+    if (playerTypes.includes({{ pool.key | tojson }})) {
+      {% for statInfo in [pool.volume] + pool.rates %}
+      stats.push({ name: {{ statInfo.name | tojson }}, stat: {{ statInfo.stat | tojson }}, isVolume: {{ statInfo.isVolume | tojson }}, playerType: {{ pool.key | tojson }} });
+      {% endfor %}
+    }
+    {% endfor %}
+    initializePlayerCharts({{ player.years | tojson }}, {{ site.meta.projection_systems | tojson }}, stats);
+    const metricSelects = document.querySelectorAll('.metric-select');
+    const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+    function updateChartVisibility() {
+      if (!metricSelects.length) return;
+      const selectedMetric = metricSelects[0].value;
+      const selectedAdjustment = adjustmentSelects.length ? adjustmentSelects[0].value : 'raw';
+      document.querySelectorAll('.chart-container').forEach(container => {
+        const isVolume = container.dataset.volume === 'true';
+        container.style.display = (container.dataset.metric === selectedMetric && (isVolume || container.dataset.adjustment === selectedAdjustment)) ? 'block' : 'none';
+      });
+    }
+    function sync(changed, kind) {
+      (kind === 'metric' ? metricSelects : adjustmentSelects).forEach(select => { if (select !== changed) select.value = changed.value; });
+      updateChartVisibility();
+    }
+    metricSelects.forEach(select => select.addEventListener('change', function() { sync(this, 'metric'); }));
+    adjustmentSelects.forEach(select => select.addEventListener('change', function() { sync(this, 'adjustment'); }));
+    updateChartVisibility();
+  });
+</script>
+{% endblock %}

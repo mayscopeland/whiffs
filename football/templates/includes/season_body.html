@@ -1,0 +1,206 @@
+{% macro renderEverybodyMissed(everybodyMissedData, statName, showVolume=false) %}
+  {% if everybodyMissedData %}
+    {% set ns = namespace(systemsWithData=[]) %}
+    {% for miss in everybodyMissedData %}
+      {% for system, projection in miss.projections.items() %}
+        {% if projection and system not in ns.systemsWithData %}
+          {% set _ = ns.systemsWithData.append(system) %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Everybody Missed for {{ statName }}</h3>
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4 overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="px-4 py-2">Player</th>
+              <th class="px-4 py-2 text-right">Actual</th>
+              {% for system in ns.systemsWithData %}<th class="px-4 py-2 text-right">{{ system }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for miss in everybodyMissedData %}
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-2"><a href="/players/{{ miss.player_id }}/" class="text-blue-600 dark:text-blue-400 hover:underline">{{ miss.player_name }}</a></td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
+              {% for system in ns.systemsWithData %}
+                {% set projection = miss.projections[system] %}
+                <td class="px-4 py-2 font-mono text-right">
+                  {% if projection %}
+                    <div>{{ projection.projected | toFixed(0 if showVolume else 4) }}</div>
+                    <div class="text-xs text-red-600 dark:text-red-400">({{ projection.error | toFixed(1) }})</div>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro renderBiggestMisses(stat, statName, showVolume, poolMisses) %}
+<div class="mb-8">
+  <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Individual Misses for {{ statName }}</h3>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for system in site.meta.projection_systems %}
+      {% set miss_ns = namespace(rows=none) %}
+      {% set statMisses = poolMisses.player_misses[stat] if poolMisses and poolMisses.player_misses else none %}
+      {% if statMisses %}
+        {% for missResult in statMisses %}
+          {% if missResult.system == system %}
+            {% set miss_ns.rows = missResult.biggest_misses %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      {% if miss_ns.rows %}
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+        <h4 class="text-lg font-medium {{ system_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="px-4 py-2">Rank</th>
+              <th class="px-4 py-2">Player</th>
+              <th class="px-4 py-2 text-right">Proj</th>
+              <th class="px-4 py-2 text-right">Actual</th>
+              <th class="px-4 py-2 text-right">Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for miss in miss_ns.rows[:10] %}
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-2 font-mono">{{ loop.index }}</td>
+              <td class="px-4 py-2"><a href="/players/{{ miss.player_id }}/" class="text-blue-600 dark:text-blue-400 hover:underline">{{ miss.player_name }}</a></td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0 if showVolume else 4) }}</td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
+              <td class="px-4 py-2 font-mono text-right text-red-600 dark:text-red-400">{{ miss.error | toFixed(1) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}
+
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WLA' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+{% set yearMisses = misses.get(year_key, {}) %}
+{% set summary_id = 'fantasy-summary' if fantasy else 'season-summary' %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ season }} {% if fantasy %}Fantasy {% endif %}Projection Accuracy</h1>
+    {% if fantasy %}
+    <p class="text-slate-600 dark:text-slate-300">Top 150 offensive players by FantasyPros half-PPR preseason ADP. Kickers and defenses are left out.</p>
+    {% endif %}
+  </div>
+
+  <div id="{{ summary_id }}" class="mb-12 space-y-8">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Summary</h2>
+      <div class="flex flex-wrap gap-4">
+        <select class="summary-metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Error metric">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        <select class="summary-adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Adjustment">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    {% for pool in pools %}
+    <div>
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">{{ pool.label }}</h3>
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
+        <table class="w-full text-sm text-slate-700 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left">System</th>
+              {% set columns = [pool.volume] + pool.rates %}
+              {% for col in columns %}
+              <th class="px-2 py-2 text-center font-medium whitespace-nowrap normal-case">
+                <a href="#{{ pool.key }}-{{ col.stat | replace('/', '-') }}" class="hover:underline">{{ col.name }}</a>
+                {% if col.isVolume %}<span class="summary-raw-tag hidden font-normal normal-case text-slate-500"> raw</span>{% endif %}
+              </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for system in site.meta.projection_systems %}
+            <tr class="border-t border-slate-200 dark:border-slate-700" data-system="{{ system }}" data-order="{{ loop.index0 }}">
+              <th class="sticky left-0 z-10 bg-white dark:bg-slate-900 px-3 py-1.5 text-left font-medium whitespace-nowrap">{{ system }}</th>
+              {% for col in columns %}
+              {% set stat_name = ('fan_' ~ col.stat) if fantasy else col.stat %}
+              <td class="summary-cell px-2 py-1.5 text-center font-mono tabular-nums" data-player-type="{{ pool.key }}" data-stat="{{ stat_name }}"{% if col.isVolume %} data-volume="true"{% endif %}></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% include "includes/stat-nav.html" %}
+
+  {% for pool in pools %}
+  {% set poolMisses = yearMisses.get(pool.key, {}) %}
+  <div class="mb-16">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ pool.label }}</h2>
+    {% set volume_stat = ('fan_' ~ pool.volume.stat) if fantasy else pool.volume.stat %}
+    <div id="{{ pool.key }}-{{ pool.volume.stat }}" class="chart-section mb-8 scroll-mt-4">
+      <h4 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ pool.volume.name }}</h4>
+      <div class="mb-4">
+        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+      </div>
+      {% for metric in metrics %}
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-volume="true" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="raw">
+        <div class="h-80"><canvas id="{{ pool.key }}Volume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+      </div>
+      {% endfor %}
+      {{ renderEverybodyMissed(poolMisses.everybody_missed[volume_stat] if poolMisses.everybody_missed is defined else none, pool.volume.name, true) }}
+      {{ renderBiggestMisses(volume_stat, pool.volume.name, true, poolMisses) }}
+    </div>
+
+    {% for statInfo in pool.rates %}
+    {% set stat_name = ('fan_' ~ statInfo.stat) if fantasy else statInfo.stat %}
+    {% set clean = statInfo.stat | replace('/', '') | replace('-', '') %}
+    <div id="{{ pool.key }}-{{ statInfo.stat | replace('/', '-') }}" class="chart-section mb-8 scroll-mt-4">
+      <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+      </div>
+      {% for metric in metrics %}
+        {% for adj in adjustments %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="{{ stat_name }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+          <div class="h-80"><canvas id="{{ pool.key }}{{ clean }}{{ adj.chartSuffix }}{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+      {{ renderEverybodyMissed(poolMisses.everybody_missed[stat_name] if poolMisses.everybody_missed is defined else none, statInfo.name, false) }}
+      {{ renderBiggestMisses(stat_name, statInfo.name, false, poolMisses) }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>

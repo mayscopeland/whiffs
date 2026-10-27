@@ -1,4 +1,5 @@
 function initializeIndexCharts(yearsData, projectionSystems) {
+  if (!yearsData || Object.keys(yearsData).length === 0) return;
   const battingStats = [
     { stat: "PA", baseName: "battingPA", name: "Plate Appearances", isVolume: true },
     { stat: "wOBA", baseName: "battingwOBA", name: "wOBA", isVolume: false },

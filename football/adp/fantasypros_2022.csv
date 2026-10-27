@@ -1,0 +1,247 @@
+year,rank,overall_rank,fantasypros_id,nfl_slug,player_name,slug,team,position,yahoo,sleeper,rtsports,avg
+2022,1,1,19217,jonathan-taylor,Jonathan Taylor,jonathan-taylor,IND,RB,1.0,1.0,,1.0
+2022,2,2,16393,christian-mccaffrey,Christian McCaffrey,christian-mccaffrey,SF,RB,2.0,2.0,,2.0
+2022,3,3,16483,austin-ekeler,Austin Ekeler,austin-ekeler,WAS,RB,3.0,4.0,,3.5
+2022,4,4,15514,derrick-henry,Derrick Henry,derrick-henry,BAL,RB,6.0,3.0,,4.5
+2022,5,5,16433,cooper-kupp,Cooper Kupp,cooper-kupp,SEA,WR,4.0,5.0,,4.5
+2022,6,6,19236,justin-jefferson,Justin Jefferson,justin-jefferson,MIN,WR,5.0,8.0,,6.5
+2022,7,7,16374,dalvin-cook,Dalvin Cook,dalvin-cook,,RB,7.0,6.0,,6.5
+2022,8,8,19302,najee-harris,Najee Harris,najee-harris-rb,,RB,9.0,7.0,,8.0
+2022,9,9,19788,ja-marr-chase,Ja'Marr Chase,jamarr-chase,CIN,WR,8.0,10.0,,9.0
+2022,10,10,16420,joe-mixon,Joe Mixon,joe-mixon,,RB,11.0,9.0,,10.0
+2022,11,11,12123,davante-adams,Davante Adams,davante-adams,LAR,WR,12.0,11.0,,11.5
+2022,12,12,13981,stefon-diggs,Stefon Diggs,stefon-diggs,WAS,WR,10.0,14.0,,12.0
+2022,13,13,19210,d-andre-swift,D'Andre Swift,dandre-swift,CHI,RB,17.0,12.0,,14.5
+2022,14,14,11594,travis-kelce,Travis Kelce,travis-kelce,KC,TE,15.0,15.0,,15.0
+2022,15,15,16421,alvin-kamara,Alvin Kamara,alvin-kamara,NO,RB,18.0,13.0,,15.5
+2022,16,16,19202,ceedee-lamb,CeeDee Lamb,ceedee-lamb,DAL,WR,13.0,19.0,,16.0
+2022,17,17,16673,aaron-jones,Aaron Jones Sr.,aaron-jones,MIN,RB,14.0,18.0,,16.0
+2022,18,18,17240,saquon-barkley,Saquon Barkley,saquon-barkley,PHI,RB,16.0,17.0,,16.5
+2022,19,19,17246,nick-chubb,Nick Chubb,nick-chubb,,RB,19.0,16.0,,17.5
+2022,20,20,15802,tyreek-hill,Tyreek Hill,tyreek-hill,,WR,24.0,20.0,,22.0
+2022,21,21,17298,josh-allen,Josh Allen,josh-allen-qb,BUF,QB,22.0,22.0,,22.0
+2022,22,22,16378,leonard-fournette,Leonard Fournette,leonard-fournette,,RB,20.0,25.0,,22.5
+2022,23,23,22739,javonte-williams,Javonte Williams,javonte-williams,DAL,RB,25.0,21.0,,23.0
+2022,24,24,12119,mike-evans,Mike Evans,mike-evans,SF,WR,21.0,26.0,,23.5
+2022,25,25,18244,deebo-samuel,Deebo Samuel Sr.,deebo-samuel,SF,WR,23.0,24.0,,23.5
+2022,26,26,17269,mark-andrews,Mark Andrews,mark-andrews,BAL,TE,26.0,23.0,,24.5
+2022,27,27,15498,ezekiel-elliott,Ezekiel Elliott,ezekiel-elliott,,RB,28.0,27.0,,27.5
+2022,28,28,16447,james-conner,James Conner,james-conner,ARI,RB,29.0,29.0,,29.0
+2022,29,29,19278,michael-pittman-2,Michael Pittman Jr.,michael-pittman,PIT,WR,27.0,33.0,,30.0
+2022,30,30,18218,a-j-brown,A.J. Brown,aj-brown,NE,WR,32.0,28.0,,30.0
+2022,31,31,11616,keenan-allen,Keenan Allen,keenan-allen,IND,WR,31.0,30.0,,30.5
+2022,32,32,19211,tee-higgins,Tee Higgins,tee-higgins,CIN,WR,30.0,34.0,,32.0
+2022,33,33,20164,kyle-pitts,Kyle Pitts Sr.,kyle-pitts,ATL,TE,33.0,31.0,,32.0
+2022,34,34,16413,patrick-mahomes,Patrick Mahomes II,patrick-mahomes,KC,QB,34.0,32.0,,33.0
+2022,35,35,18635,justin-herbert,Justin Herbert,justin-herbert,LAC,QB,36.0,36.0,,36.0
+2022,36,36,17265,d-j-moore,DJ Moore,dj-moore-wr,BUF,WR,35.0,41.0,,38.0
+2022,37,37,16499,george-kittle,George Kittle,george-kittle,SF,TE,42.0,35.0,,38.5
+2022,38,38,19231,travis-etienne,Travis Etienne Jr.,travis-etienne,NO,RB,43.0,37.0,,40.0
+2022,39,39,16377,mike-williams-6,Mike Williams,mike-williams-wr,,WR,38.0,43.0,,40.5
+2022,40,40,22982,breece-hall,Breece Hall,breece-hall,NYJ,RB,41.0,40.0,,40.5
+2022,41,41,18466,terry-mclaurin,Terry McLaurin,terry-mclaurin,WAS,WR,40.0,42.0,,41.0
+2022,42,42,18239,david-montgomery,David Montgomery,david-montgomery,HOU,RB,46.0,38.0,,42.0
+2022,43,43,19268,cam-akers,Cam Akers,cam-akers,,RB,45.0,39.0,,42.0
+2022,44,44,17233,lamar-jackson,Lamar Jackson,lamar-jackson,BAL,QB,39.0,46.0,,42.5
+2022,45,45,17253,courtland-sutton,Courtland Sutton,courtland-sutton,DEN,WR,44.0,44.0,,44.0
+2022,46,46,22813,elijah-mitchell-2,Elijah Mitchell,elijah-mitchell-rb,PHI,RB,37.0,54.0,,45.5
+2022,47,47,14104,darren-waller,Darren Waller,darren-waller,CAR,TE,47.0,48.0,,47.5
+2022,48,48,18615,diontae-johnson,Diontae Johnson,diontae-johnson,,WR,50.0,47.0,,48.5
+2022,49,49,19790,jaylen-waddle,Jaylen Waddle,jaylen-waddle,DEN,WR,49.0,49.0,,49.0
+2022,50,50,18269,josh-jacobs-x3315,Josh Jacobs,josh-jacobs,GB,RB,54.0,45.0,,49.5
+2022,51,51,12126,allen-robinson,Allen Robinson II,allen-robinson,,WR,48.0,53.0,,50.5
+2022,52,52,18219,d-k-metcalf,DK Metcalf,dk-metcalf,PIT,WR,55.0,50.0,,52.5
+2022,53,53,19358,a-j-dillon,AJ Dillon,aj-dillon,CAR,RB,52.0,56.0,,54.0
+2022,54,54,19245,j-k-dobbins,J.K. Dobbins,jk-dobbins,DEN,RB,58.0,52.0,,55.0
+2022,55,55,18600,kyler-murray,Kyler Murray,kyler-murray,MIN,QB,56.0,55.0,,55.5
+2022,56,56,19196,joe-burrow,Joe Burrow,joe-burrow,CIN,QB,51.0,62.0,,56.5
+2022,57,57,19201,jerry-jeudy,Jerry Jeudy,jerry-jeudy,CLE,WR,62.0,51.0,,56.5
+2022,58,58,17349,dalton-schultz,Dalton Schultz,dalton-schultz,HOU,TE,53.0,60.0,,56.5
+2022,59,59,19275,jalen-hurts,Jalen Hurts,jalen-hurts,PHI,QB,57.0,63.0,,60.0
+2022,60,60,19624,antonio-gibson-2,Antonio Gibson,antonio-gibson,,RB,69.0,57.0,,63.0
+2022,61,61,12122,brandin-cooks,Brandin Cooks,brandin-cooks,SF,WR,68.0,59.0,,63.5
+2022,62,62,16427,juju-smith-schuster,JuJu Smith-Schuster,juju-smith-schuster,,WR,59.0,68.0,,63.5
+2022,63,63,19799,amon-ra-st-brown,Amon-Ra St. Brown,amonra-stbrown,DET,WR,64.0,66.0,,65.0
+2022,64,64,19325,clyde-edwards-helaire,Clyde Edwards-Helaire,clyde-edwards-helaire,,RB,72.0,61.0,,66.5
+2022,65,65,19398,gabe-davis,Gabe Davis,gabriel-davis,,WR,63.0,70.0,,66.5
+2022,66,66,18226,marquise-brown,Hollywood Brown,marquise-brown,PHI,WR,78.0,58.0,,68.0
+2022,67,67,18290,t-j-hockenson,T.J. Hockenson,tj-hockenson,MIN,TE,65.0,71.0,,68.0
+2022,68,68,17270,dallas-goedert,Dallas Goedert,dallas-goedert,PHI,TE,61.0,79.0,,70.0
+2022,69,69,9603,tom-brady,Tom Brady,tom-brady,,QB,60.0,81.0,,70.5
+2022,70,70,15528,michael-thomas,Michael Thomas,michael-thomas-wr,,WR,74.0,67.0,,70.5
+2022,71,71,11180,russell-wilson,Russell Wilson,russell-wilson,,QB,70.0,73.0,,71.5
+2022,72,72,17496,chase-edmonds,Chase Edmonds,chase-edmonds,WAS,RB,67.0,78.0,,72.5
+2022,73,73,18230,damien-harris,Damien Harris,damien-harris-rb,,RB,71.0,74.0,,72.5
+2022,74,74,13429,adam-thielen,Adam Thielen,adam-thielen,,WR,77.0,69.0,,73.0
+2022,75,75,13894,amari-cooper,Amari Cooper,amari-cooper,,WR,86.0,65.0,,75.5
+2022,76,76,19794,rashod-bateman,Rashod Bateman,rashod-bateman,BAL,WR,79.0,76.0,,77.5
+2022,77,77,16406,chris-godwin,Chris Godwin Jr.,chris-godwin,TB,WR,94.0,64.0,,79.0
+2022,78,78,22947,dameon-pierce,Dameon Pierce,dameon-pierce,PHI,RB,75.0,83.0,,79.0
+2022,79,79,18631,dawson-knox,Dawson Knox,dawson-knox,BUF,TE,73.0,89.0,,81.0
+2022,80,80,19810,darnell-mooney,Darnell Mooney,darnell-mooney,NYG,WR,91.0,72.0,,81.5
+2022,81,81,18283,miles-sanders,Miles Sanders,miles-sanders,,RB,88.0,77.0,,82.5
+2022,82,83,18280,devin-singletary,Devin Singletary,devin-singletary,NYG,RB,83.0,85.0,,84.0
+2022,83,84,17308,rashaad-penny,Rashaad Penny,rashaad-penny,,RB,82.0,88.0,,85.0
+2022,84,85,16425,kareem-hunt,Kareem Hunt,kareem-hunt,,RB,99.0,75.0,,87.0
+2022,85,86,18705,tony-pollard,Tony Pollard,tony-pollard,TEN,RB,90.0,84.0,,87.0
+2022,86,87,15600,dak-prescott,Dak Prescott,dak-prescott,DAL,QB,85.0,94.0,,89.5
+2022,87,88,18345,hunter-renfrow,Hunter Renfrow,hunter-renfrow,,WR,93.0,86.0,,89.5
+2022,88,89,11613,cordarrelle-patterson,Cordarrelle Patterson,cordarrelle-patterson,,RB,101.0,80.0,,90.5
+2022,89,90,22726,rhamondre-stevenson,Rhamondre Stevenson,rhamondre-stevenson,NE,RB,87.0,96.0,,91.5
+2022,90,91,20114,elijah-moore,Elijah Moore,elijah-moore,PHI,WR,95.0,90.0,,92.5
+2022,91,92,9001,aaron-rodgers,Aaron Rodgers,aaron-rodgers,PIT,QB,89.0,97.0,,93.0
+2022,92,93,11606,deandre-hopkins,DeAndre Hopkins,deandre-hopkins,BAL,WR,105.0,82.0,,93.5
+2022,93,94,19252,brandon-aiyuk,Brandon Aiyuk,brandon-aiyuk,SF,WR,97.0,95.0,,96.0
+2022,94,95,11689,zach-ertz,Zach Ertz,zach-ertz,PHI,TE,96.0,98.0,,97.0
+2022,95,96,19222,devonta-smith,DeVonta Smith,devonta-smith,PHI,WR,108.0,87.0,,97.5
+2022,96,97,20082,trey-lance,Trey Lance,trey-lance,LAC,QB,92.0,104.0,,98.0
+2022,97,98,17301,allen-lazard,Allen Lazard,allen-lazard,,WR,106.0,91.0,,98.5
+2022,98,100,13903,melvin-gordon,Melvin Gordon III,melvin-gordon,,RB,103.0,100.0,,101.5
+2022,99,102,9451,matthew-stafford,Matthew Stafford,matthew-stafford,LAR,QB,98.0,108.0,,103.0
+2022,100,103,23021,kenneth-walker-iii,Kenneth Walker III,kenneth-walker-rb,KC,RB,114.0,93.0,,103.5
+2022,101,104,17268,christian-kirk,Christian Kirk,christian-kirk,SF,WR,107.0,101.0,,104.0
+2022,102,106,23163,drake-london,Drake London,drake-london,ATL,WR,122.0,92.0,,107.0
+2022,103,109,22958,james-cook,James Cook III,james-cook,BUF,RB,118.0,103.0,,110.5
+2022,104,110,13971,tyler-lockett,Tyler Lockett,tyler-lockett,LV,WR,116.0,105.0,,110.5
+2022,105,111,11610,robert-woods,Robert Woods,robert-woods,,WR,121.0,106.0,,113.5
+2022,106,112,20163,pat-freiermuth,Pat Freiermuth,pat-freiermuth,PIT,TE,119.0,109.0,,114.0
+2022,107,113,20111,chris-olave,Chris Olave,chris-olave,NO,WR,135.0,99.0,,117.0
+2022,108,114,19229,cole-kmet,Cole Kmet,cole-kmet,CHI,TE,117.0,120.0,,118.5
+2022,109,115,12092,derek-carr,Derek Carr,derek-carr,,QB,112.0,126.0,,119.0
+2022,110,116,18588,darrell-henderson,Darrell Henderson Jr.,darrell-henderson,,RB,125.0,113.0,,119.0
+2022,111,117,22728,michael-carter-3,Michael Carter,michael-carter-rb,TEN,RB,126.0,116.0,,121.0
+2022,112,119,22963,george-pickens,George Pickens,george-pickens,DAL,WR,130.0,114.0,,122.0
+2022,113,120,20119,kadarius-toney,Kadarius Toney,kadarius-toney,,WR,134.0,111.0,,122.5
+2022,114,122,19631,james-robinson-3,James Robinson,james-robinson,,RB,136.0,112.0,,124.0
+2022,115,123,11177,kirk-cousins,Kirk Cousins,kirk-cousins,LV,QB,120.0,132.0,,126.0
+2022,116,126,18627,chase-claypool,Chase Claypool,chase-claypool,,WR,150.0,110.0,,130.0
+2022,117,127,17272,mike-gesicki,Mike Gesicki,mike-gesicki,CIN,TE,132.0,128.0,,130.0
+2022,118,128,18621,alexander-mattison,Alexander Mattison,alexander-mattison,,RB,144.0,117.0,,130.5
+2022,119,130,17297,nyheim-hines,Nyheim Miller-Hines,nyheim-hines,,RB,143.0,121.0,,132.0
+2022,120,131,9867,julio-jones,Julio Jones,julio-jones,,WR,142.0,124.0,,133.0
+2022,121,133,20094,brian-robinson,Brian Robinson Jr.,brian-robinson-jr,ATL,RB,133.0,141.0,,137.0
+2022,122,137,23072,garrett-wilson,Garrett Wilson,garrett-wilson,NYJ,WR,166.0,122.0,,144.0
+2022,123,138,18246,albert-okwuegbunam,Albert Okwuegbunam Jr.,albert-okwuegbunam,,TE,131.0,157.0,,144.0
+2022,124,139,22905,treylon-burks,Treylon Burks,treylon-burks,WAS,WR,194.0,107.0,,150.5
+2022,125,140,15561,hunter-henry,Hunter Henry,hunter-henry,NE,TE,159.0,143.0,,151.0
+2022,126,141,17528,marquez-valdes-scantling,Marquez Valdes-Scantling,marquez-valdesscantling,PIT,WR,182.0,123.0,,152.5
+2022,127,142,24333,isiah-pacheco,Isiah Pacheco,isiah-pacheco,DET,RB,165.0,140.0,,152.5
+2022,128,143,12128,jarvis-landry,Jarvis Landry,jarvis-landry,,WR,160.0,145.0,,152.5
+2022,129,144,23905,skyy-moore,Skyy Moore,skyy-moore,GB,WR,192.0,115.0,,153.5
+2022,130,145,14338,raheem-mostert,Raheem Mostert,raheem-mostert,LV,RB,155.0,154.0,,154.5
+2022,131,146,16399,david-njoku,David Njoku,david-njoku,LAC,TE,163.0,147.0,,155.0
+2022,132,147,15547,tyler-boyd,Tyler Boyd,tyler-boyd,,WR,185.0,127.0,,156.0
+2022,133,148,13897,devante-parker,DeVante Parker,devante-parker,,WR,175.0,142.0,,158.5
+2022,134,149,17606,russell-gage,Russell Gage Jr.,russell-gage,,WR,146.0,176.0,,161.0
+2022,135,150,23143,isaiah-spiller,Isaiah Spiller,isaiah-spiller,,RB,190.0,134.0,,162.0
+2022,136,151,19198,tua-tagovailoa,Tua Tagovailoa,tua-tagovailoa,ATL,QB,169.0,155.0,,162.0
+2022,137,152,18587,mecole-hardman,Mecole Hardman Jr.,mecole-hardman,IND,WR,156.0,168.0,,162.0
+2022,138,153,23794,romeo-doubs,Romeo Doubs,romeo-doubs,NE,WR,187.0,138.0,,162.5
+2022,139,154,17243,ronald-jones,Ronald Jones II,ronald-jones-ii,,RB,124.0,204.0,,164.0
+2022,140,155,23310,kenneth-gainwell,Kenny Gainwell,kenneth-gainwell,TB,RB,200.0,129.0,,164.5
+2022,141,156,9872,mark-ingram,Mark Ingram II,mark-ingram,,RB,162.0,167.0,,164.5
+2022,142,157,24172,tyler-allgeier,Tyler Allgeier,tyler-allgeier,ARI,RB,184.0,148.0,,166.0
+2022,143,158,16444,marlon-mack,Marlon Mack,marlon-mack,,RB,129.0,205.0,,167.0
+2022,144,159,19781,justin-fields,Justin Fields,justin-fields,KC,QB,170.0,164.0,,167.0
+2022,145,161,23891,rachaad-white,Rachaad White,rachaad-white,WAS,RB,181.0,156.0,,168.5
+2022,146,162,23101,jahan-dotson,Jahan Dotson,jahan-dotson,ATL,WR,189.0,150.0,,169.5
+2022,147,163,22763,khalil-herbert,Khalil Herbert,khalil-herbert,ATL,RB,196.0,146.0,,171.0
+2022,148,165,17259,michael-gallup,Michael Gallup,michael-gallup,,WR,215.0,130.0,,172.5
+2022,149,166,17237,baker-mayfield,Baker Mayfield,baker-mayfield,TB,QB,137.0,209.0,,173.0
+2022,150,167,20095,zamir-white,Zamir White,zamir-white,NO,RB,183.0,163.0,,173.0
+2022,151,168,19780,trevor-lawrence,Trevor Lawrence,trevor-lawrence,JAC,QB,174.0,172.0,,173.0
+2022,152,169,15623,tyler-higbee,Tyler Higbee,tyler-higbee,LAR,TE,180.0,171.0,,175.5
+2022,153,171,16424,jamaal-williams,Jamaal Williams,jamaal-williams,,RB,209.0,149.0,,179.0
+2022,154,173,16488,kenny-golladay,Kenny Golladay,kenny-golladay,,WR,178.0,181.0,,179.5
+2022,155,174,22722,kenny-pickett,Kenny Pickett,kenny-pickett,CAR,QB,128.0,232.0,,180.0
+2022,156,175,16604,isaiah-mckenzie,Isaiah McKenzie,isaiah-mckenzie,,WR,198.0,162.0,,180.0
+2022,157,176,12127,odell-beckham,Odell Beckham Jr.,odell-beckham,MIN,WR,158.0,203.0,,180.5
+2022,158,177,22845,josh-palmer,Joshua Palmer,josh-palmer,BUF,WR,179.0,184.0,,181.5
+2022,159,178,20156,mac-jones,Mac Jones,mac-jones,SF,QB,151.0,215.0,,183.0
+2022,160,179,12118,sammy-watkins,Sammy Watkins,sammy-watkins,,WR,173.0,193.0,,183.0
+2022,161,180,23886,christian-watson,Christian Watson,christian-watson,GB,WR,191.0,178.0,,184.5
+2022,162,181,17283,hayden-hurst,Hayden Hurst,hayden-hurst,,TE,153.0,219.0,,186.0
+2022,163,182,17292,d-j-chark,DJ Chark Jr.,dj-chark,,WR,206.0,166.0,,186.0
+2022,164,183,23770,jalen-tolbert,Jalen Tolbert,jalen-tolbert,MIA,WR,172.0,200.0,,186.0
+2022,165,184,17115,taysom-hill,Taysom Hill,taysom-hill,,TE,138.0,235.0,,186.5
+2022,166,185,16398,deshaun-watson,Deshaun Watson,deshaun-watson,CLE,QB,171.0,202.0,,186.5
+2022,167,188,13891,jameis-winston,Jameis Winston,jameis-winston,NYG,QB,188.0,186.0,,187.0
+2022,168,189,16230,j-d-mckissic,J.D. McKissic,jd-mckissic,,RB,207.0,170.0,,188.5
+2022,169,190,15520,carson-wentz,Carson Wentz,carson-wentz,MIN,QB,139.0,,,139.0
+2022,170,191,13470,cameron-brate,Cameron Brate,cameron-brate,,TE,140.0,,,140.0
+2022,171,192,13943,mike-davis,Mike Davis,mike-davis-rb,,RB,197.0,182.0,,189.5
+2022,172,195,16407,d-onta-foreman,D'Onta Foreman,donta-foreman,,RB,193.0,191.0,,192.0
+2022,173,196,23781,isaiah-likely,Isaiah Likely,isaiah-likely,NYG,TE,164.0,222.0,,193.0
+2022,174,198,18598,jakobi-meyers,Jakobi Meyers,jakobi-meyers,JAC,WR,210.0,177.0,,193.5
+2022,175,199,16579,mo-alie-cox,Mo Alie-Cox,mo-alie-cox,IND,TE,149.0,,,149.0
+2022,176,200,11174,ryan-tannehill,Ryan Tannehill,ryan-tannehill,,QB,152.0,237.0,,194.5
+2022,177,201,18610,irv-smith,Irv Smith Jr.,irv-smith-jr,,TE,217.0,173.0,,195.0
+2022,178,202,17309,sony-michel,Sony Michel,sony-michel,,RB,157.0,234.0,,195.5
+2022,179,203,16502,robert-tonyan,Robert Tonyan,robert-tonyan,PIT,TE,201.0,192.0,,196.5
+2022,180,205,9444,matt-ryan,Matt Ryan,matt-ryan,,QB,203.0,195.0,,199.0
+2022,181,206,23677,jameson-williams,Jameson Williams,jameson-williams,DET,WR,225.0,174.0,,199.5
+2022,182,210,20130,nico-collins,Nico Collins,nico-collins,HOU,WR,212.0,188.0,,200.0
+2022,183,213,17514,darrel-williams,Darrel Williams,darrel-williams,,RB,186.0,221.0,,203.5
+2022,184,215,15501,jared-goff,Jared Goff,jared-goff,DET,QB,177.0,,,177.0
+2022,185,216,17527,noah-fant-x4946,Noah Fant,noah-fant,NO,TE,199.0,217.0,,208.0
+2022,186,219,16459,gerald-everett,Gerald Everett,gerald-everett,,TE,219.0,201.0,,210.0
+2022,187,221,22985,wan-dale-robinson,Wan'Dale Robinson,wandale-robinson,TEN,WR,,187.0,,187.0
+2022,188,222,19708,k-j-osborn,K.J. Osborn,kj-osborn,TEN,WR,,189.0,,189.0
+2022,189,223,19267,k-j-hamler,KJ Hamler,kj-hamler,,WR,,190.0,,190.0
+2022,190,224,15581,austin-hooper,Austin Hooper,austin-hooper,ATL,TE,218.0,213.0,,215.5
+2022,191,225,19792,chuba-hubbard,Chuba Hubbard,chuba-hubbard,CAR,RB,,196.0,,196.0
+2022,192,226,23791,alec-pierce,Alec Pierce,alec-pierce,IND,WR,,197.0,,197.0
+2022,193,227,22992,ty-davis-price,Tyrion Davis-Price,tyrion-davis-price,,RB,,199.0,,199.0
+2022,194,228,16411,evan-engram,Evan Engram,evan-engram,DEN,TE,222.0,218.0,,220.0
+2022,195,229,19270,devin-duvernay,Devin Duvernay,devin-duvernay,ARI,WR,204.0,,,204.0
+2022,196,230,17687,gus-edwards,Gus Edwards,gus-edwards,,RB,227.0,216.0,,221.5
+2022,197,233,18026,jeff-wilson,Jeff Wilson Jr.,jeffery-wilson,,RB,,206.0,,206.0
+2022,198,234,19361,eno-benjamin,Eno Benjamin,eno-benjamin,,RB,,208.0,,208.0
+2022,199,235,11215,marvin-jones,Marvin Jones Jr.,marvin-jones,,WR,,210.0,,210.0
+2022,200,238,15688,robbie-chosen,Robbie Chosen,robby-anderson,,WR,,214.0,,214.0
+2022,201,239,16431,zay-jones,Zay Jones,zay-jones,,WR,214.0,,,214.0
+2022,202,240,12095,logan-thomas,Logan Thomas,logan-thomas,,TE,216.0,,,216.0
+2022,203,242,19483,van-jefferson,Van Jefferson,van-jefferson,WAS,WR,,220.0,,220.0
+2022,204,245,18232,daniel-jones-x5302,Daniel Jones,daniel-jones,IND,QB,224.0,240.0,,232.0
+2022,205,246,18037,dontrell-hilliard,Dontrell Hilliard,dontrell-hilliard,,RB,,225.0,,225.0
+2022,206,247,12209,jerick-mckinnon,Jerick McKinnon,jerick-mckinnon,,RB,,226.0,,226.0
+2022,207,248,9902,randall-cobb,Randall Cobb,randall-cobb,,WR,,228.0,,228.0
+2022,208,250,15637,kenyan-drake,Kenyan Drake,kenyan-drake,,RB,,229.0,,229.0
+2022,209,251,18463,parris-campbell,Parris Campbell,parris-campbell,,WR,,230.0,,230.0
+2022,210,252,16423,samaje-perine,Samaje Perine,samaje-perine,CIN,RB,,231.0,,231.0
+2022,211,253,9857,a-j-green,A.J. Green,aj-green,,WR,,233.0,,233.0
+2022,212,256,23108,david-bell,David Bell,david-bell,,WR,,236.0,,236.0
+2022,213,258,19298,donovan-peoples-jones,Donovan Peoples-Jones,donovan-peoples-jones,,WR,,238.0,,238.0
+2022,214,259,16434,curtis-samuel,Curtis Samuel,curtis-samuel,,WR,,239.0,,239.0
+2022,215,260,23798,hassan-haskins,Hassan Haskins,hassan-haskins,,RB,,241.0,,241.0
+2022,216,261,20050,andre-baccellia,Andre Baccellia,andre-baccellia,,WR,,242.0,,242.0
+2022,217,262,19975,,Parker Houston,parker-houston,,TE,,243.0,,243.0
+2022,218,263,23390,carl-tucker,Carl Tucker,carl-tucker,,TE,,244.0,,244.0
+2022,219,264,24673,,Tyshaun James,tyshaun-james,,WR,,245.0,,245.0
+2022,220,265,19432,,Javon Leake,javon-leake,,RB,,246.0,,246.0
+2022,221,266,19559,,Charles Williams,charles-williams,,RB,,247.0,,247.0
+2022,222,267,20029,j-j-koski,J.J. Koski,jj-koski,,WR,,249.0,,249.0
+2022,223,268,23402,connor-wedington,Connor Wedington,connor-wedington,,WR,,250.0,,250.0
+2022,224,269,23461,shane-zylstra,Shane Zylstra,shane-zylstra,,TE,,251.0,,251.0
+2022,225,270,12138,,Shaquelle Evans,shaquelle-evans,,WR,,252.0,,252.0
+2022,226,271,12591,,Terrell Sinkfield,terrell-sinkfield,,WR,,254.0,,254.0
+2022,227,272,13753,diontae-spencer,Diontae Spencer,diontae-spencer,,WR,,255.0,,255.0
+2022,228,273,13081,bennie-fowler,Bennie Fowler III,bennie-fowler,,WR,,256.0,,256.0
+2022,229,274,24761,,Cade Brewer,cade-brewer,,TE,,257.0,,257.0
+2022,230,275,20076,,Levi Lewis,levi-lewis,,QB,,258.0,,258.0
+2022,231,276,16321,,Kendal Thompson,kendal-thompson,,WR,,259.0,,259.0
+2022,232,277,17708,,Terry Swanson,terry-swanson,,RB,,260.0,,260.0
+2022,233,278,16320,,David Watford,david-watford,,WR,,261.0,,261.0
+2022,234,279,17777,ryan-nall,Ryan Nall,ryan-nall,,RB,,262.0,,262.0
+2022,235,280,19562,juwan-johnson,Juwan Johnson,juwan-johnson,NO,TE,,263.0,,263.0
+2022,236,281,23873,,Emeka Emezie,emeka-emezie,,WR,,264.0,,264.0
+2022,237,283,22762,javian-hawkins,Javian Hawkins,javian-hawkins,TEN,RB,,268.0,,268.0
+2022,238,284,15577,,Kenneth Dixon,kenneth-dixon,,RB,,269.0,,269.0
+2022,239,285,16921,,Alonzo Moore,alonzo-moore,,WR,,271.0,,271.0
+2022,240,286,11898,,Jaron Brown,jaron-brown,,WR,,272.0,,272.0
+2022,241,288,17023,,Tyler Renew,tyler-renew,,RB,,274.0,,274.0
+2022,242,289,18820,john-lovett,John Lovett,john-lovett,,QB,,275.0,,275.0
+2022,243,291,13931,,Blake Sims,blake-sims,,QB,,277.0,,277.0
+2022,244,292,23193,jack-stoll,Jack Stoll,jack-stoll,SF,TE,,278.0,,278.0
+2022,245,293,14460,,Jake Heaps,jake-heap,,QB,,279.0,,279.0
+2022,246,294,11921,eric-rogers-2,Eric Rogers,eric-rogers,,WR,,280.0,,280.0

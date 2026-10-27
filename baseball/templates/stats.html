@@ -59,10 +59,14 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center mb-12">
     <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">All-Time Projection Accuracy</h1>
-
+    {% if site.years %}
     {% include "includes/2020-toggle.html" %}
+    {% endif %}
   </div>
 
+  {% if not site.years %}
+  <p class="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto">No projection files are loaded yet.</p>
+  {% else %}
   {% include "includes/stat-nav.html" %}
 
     <!-- Batting Statistics Section -->
@@ -150,10 +154,12 @@
             {% endfor %}
         </div>
     </div>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
+{% if site.years %}
 <script src="/assets/js/chart-utils.js"></script>
 <script src="/assets/js/stats-charts.js"></script>
 <script>
@@ -232,4 +238,5 @@
         updateChartVisibility();
     }
 </script>
+{% endif %}
 {% endblock %}

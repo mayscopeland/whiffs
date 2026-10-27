@@ -60,6 +60,7 @@ let lastStatsChartsOptions = {};
 
 function initializeStatsCharts(yearsData, projectionSystems, options = lastStatsChartsOptions) {
   lastStatsChartsOptions = options || {};
+  if (!yearsData || Object.keys(yearsData).length === 0) return;
   const battingStats = lastStatsChartsOptions.battingStats || DEFAULT_STATS_BATTING;
   const pitchingStats = lastStatsChartsOptions.pitchingStats || DEFAULT_STATS_PITCHING;
 

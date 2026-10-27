@@ -667,6 +667,8 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
 
 
 def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Path) -> None:
+    if not results:
+        return
     rows = []
     for r in results:
         rows.append(
@@ -719,10 +721,7 @@ def result_to_dict(result: ProjectionResult) -> Dict[str, Any]:
 def run_evaluation() -> None:
     print("Starting basketball projection evaluation...")
     if not YEARS:
-        raise SystemExit(
-            "No overlapping seasons found under basketball/stats and "
-            "basketball/projections. Run basketball:stats and basketball:sps first."
-        )
+        print("No projection files overlap basketball/stats. Writing an empty site cache.")
 
     print(f"Seasons: {', '.join(end_year_to_season(y) for y in YEARS)}")
 

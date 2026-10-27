@@ -72,6 +72,7 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
       delete dataset.hasData;
       delete dataset.errorValue;
     });
+    if (!datasets.length) return null;
 
     return { labels: [stat], datasets };
   }
@@ -186,6 +187,7 @@ function initializeSummaryTable(yearData, rootId = "season-summary", playerTypes
 
   const metricSelect = root.querySelector(".summary-metric-select");
   const adjustmentSelect = root.querySelector(".summary-adjustment-select");
+  if (!metricSelect || !adjustmentSelect) return;
   const index = new Map();
 
   for (const playerType of playerTypes) {
@@ -204,7 +206,9 @@ function initializeSummaryTable(yearData, rootId = "season-summary", playerTypes
 
     root.querySelectorAll("table").forEach((table) => {
       const tbody = table.querySelector("tbody");
+      if (!tbody) return;
       const rows = [...tbody.querySelectorAll("tr")];
+      if (!rows.length) return;
       const entries = rows.map((row) => {
         const cells = [...row.querySelectorAll(".summary-cell")];
         const values = cells.map((cell) => {

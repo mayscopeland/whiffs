@@ -30,6 +30,11 @@
       </p>
     </div>
 
+    {% if not site.years %}
+    <div class="max-w-3xl mx-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 text-slate-700 dark:text-slate-300">
+      <p class="text-lg">No projection files are loaded yet. Add <span class="font-mono text-sm">basketball/projections/{system}_{season}.csv</span> and rebuild the evaluation to fill these charts.</p>
+    </div>
+    {% else %}
     {% include "includes/2020-toggle.html" %}
 
     <div class="mb-12">
@@ -79,10 +84,12 @@
             View all-time stats for all metrics →
         </a>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
+{% if site.years %}
 <script src="/assets/js/chart-utils.js"></script>
 <script src="/assets/js/index-charts.js"></script>
 <script>
@@ -128,4 +135,5 @@
         updateChartVisibility();
     }
 </script>
+{% endif %}
 {% endblock %}

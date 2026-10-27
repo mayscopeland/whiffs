@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set title = "All-Time Projection Accuracy" %}
+
+{% block content %}
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted', "chartSuffix": 'WeightedLeagueAdj' },
+  { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
+  { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
+] %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">All-Time Projection Accuracy</h1>
+  </div>
+
+  {% if not site.years %}
+  <p class="text-lg text-slate-700 dark:text-slate-300 max-w-3xl mx-auto">No projection files are loaded yet.</p>
+  {% else %}
+  {% include "includes/stat-nav.html" %}
+  <div class="space-y-6">
+    {% for pool in pools %}
+      {% for statInfo in [pool.volume] + pool.rates %}
+      <div id="{{ pool.key }}-{{ statInfo.stat | replace('/', '-') }}" class="mb-4 py-4 scroll-mt-4">
+        <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ pool.label }} {{ statInfo.name }}</h4>
+        <div class="flex flex-wrap gap-4 mb-4">
+          <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+          </select>
+          {% if not statInfo.isVolume %}
+          <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+          </select>
+          {% endif %}
+        </div>
+        {% for metric in metrics %}
+          {% if statInfo.isVolume %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-volume="true" data-metric="{{ metric.value }}" data-adjustment="raw">
+            <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+          </div>
+          {% else %}
+            {% for adj in adjustments %}
+            <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+              <div class="h-128"><canvas id="{{ statInfo.baseName }}{{ adj.chartSuffix }}{{ 'MAE' if metric.value == 'MAE' else '' }}Chart"></canvas></div>
+            </div>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if site.years %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/stats-charts.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeStatsCharts({{ years | tojson }}, {{ site.meta.projection_systems | tojson }}, { pools: {{ pools | tojson }}, fantasy: false });
+    const metricSelects = document.querySelectorAll('.metric-select');
+    const adjustmentSelects = document.querySelectorAll('.adjustment-select');
+    function updateChartVisibility() {
+      if (!metricSelects.length) return;
+      const selectedMetric = metricSelects[0].value;
+      const selectedAdjustment = adjustmentSelects.length ? adjustmentSelects[0].value : 'raw';
+      document.querySelectorAll('.chart-container').forEach(container => {
+        const isVolume = container.dataset.volume === 'true';
+        container.style.display = (container.dataset.metric === selectedMetric && (isVolume || container.dataset.adjustment === selectedAdjustment)) ? 'block' : 'none';
+      });
+    }
+    function sync(changed, kind) {
+      (kind === 'metric' ? metricSelects : adjustmentSelects).forEach(select => { if (select !== changed) select.value = changed.value; });
+      updateChartVisibility();
+    }
+    metricSelects.forEach(select => select.addEventListener('change', function() { sync(this, 'metric'); }));
+    adjustmentSelects.forEach(select => select.addEventListener('change', function() { sync(this, 'adjustment'); }));
+    updateChartVisibility();
+  });
+</script>
+{% endif %}
+{% endblock %}

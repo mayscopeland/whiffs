@@ -1,0 +1,418 @@
+year,rank,overall_rank,fantasypros_id,nfl_slug,player_name,slug,team,position,yahoo,sleeper,rtsports,avg
+2021,1,1,16393,christian-mccaffrey,Christian McCaffrey,christian-mccaffrey,SF,RB,1.0,1.0,,1.0
+2021,2,2,16374,dalvin-cook,Dalvin Cook,dalvin-cook,,RB,2.0,2.0,,2.0
+2021,3,3,15514,derrick-henry,Derrick Henry,derrick-henry,BAL,RB,3.0,3.0,,3.3
+2021,4,4,16421,alvin-kamara,Alvin Kamara,alvin-kamara,NO,RB,4.0,4.0,,3.8
+2021,5,5,15498,ezekiel-elliott,Ezekiel Elliott,ezekiel-elliott,,RB,5.0,5.0,,5.0
+2021,6,6,17246,nick-chubb,Nick Chubb,nick-chubb,,RB,6.0,6.0,,6.5
+2021,7,7,16673,aaron-jones,Aaron Jones Sr.,aaron-jones,MIN,RB,7.0,8.0,,7.8
+2021,8,8,12123,davante-adams,Davante Adams,davante-adams,LAR,WR,9.0,11.0,,8.3
+2021,9,9,19217,jonathan-taylor,Jonathan Taylor,jonathan-taylor,IND,RB,10.0,9.0,,10.0
+2021,10,10,17240,saquon-barkley,Saquon Barkley,saquon-barkley,PHI,RB,11.0,7.0,,10.3
+2021,11,11,15802,tyreek-hill,Tyreek Hill,tyreek-hill,,WR,8.0,10.0,,10.3
+2021,12,12,11594,travis-kelce,Travis Kelce,travis-kelce,KC,TE,12.0,12.0,,10.8
+2021,13,13,16483,austin-ekeler,Austin Ekeler,austin-ekeler,WAS,RB,14.0,13.0,,12.5
+2021,14,14,13981,stefon-diggs,Stefon Diggs,stefon-diggs,WAS,WR,13.0,15.0,,14.3
+2021,15,15,19302,najee-harris,Najee Harris,najee-harris-rb,,RB,16.0,14.0,,14.8
+2021,16,16,19624,antonio-gibson-2,Antonio Gibson,antonio-gibson,,RB,17.0,21.0,,17.5
+2021,17,17,16413,patrick-mahomes,Patrick Mahomes II,patrick-mahomes,KC,QB,15.0,19.0,,18.3
+2021,18,18,11606,deandre-hopkins,DeAndre Hopkins,deandre-hopkins,BAL,WR,19.0,16.0,,18.3
+2021,19,19,16420,joe-mixon,Joe Mixon,joe-mixon,,RB,21.0,17.0,,19.0
+2021,20,20,17258,calvin-ridley,Calvin Ridley,calvin-ridley,TEN,WR,18.0,20.0,,19.0
+2021,21,21,18219,d-k-metcalf,DK Metcalf,dk-metcalf,PIT,WR,20.0,18.0,,19.5
+2021,22,22,19325,clyde-edwards-helaire,Clyde Edwards-Helaire,clyde-edwards-helaire,,RB,23.0,22.0,,21.5
+2021,23,23,14104,darren-waller,Darren Waller,darren-waller,CAR,TE,25.0,25.0,,24.0
+2021,24,24,19236,justin-jefferson,Justin Jefferson,justin-jefferson,MIN,WR,22.0,28.0,,24.5
+2021,25,25,18218,a-j-brown,A.J. Brown,aj-brown,NE,WR,24.0,24.0,,24.8
+2021,26,26,16499,george-kittle,George Kittle,george-kittle,SF,TE,32.0,23.0,,27.8
+2021,27,27,11616,keenan-allen,Keenan Allen,keenan-allen,IND,WR,31.0,26.0,,28.5
+2021,28,28,18239,david-montgomery,David Montgomery,david-montgomery,HOU,RB,34.0,27.0,,28.8
+2021,29,29,16754,chris-carson,Chris Carson,chris-carson,,RB,33.0,29.0,,29.3
+2021,30,30,18466,terry-mclaurin,Terry McLaurin,terry-mclaurin,WAS,WR,29.0,30.0,,30.3
+2021,31,31,17298,josh-allen,Josh Allen,josh-allen-qb,BUF,QB,26.0,36.0,,31.3
+2021,32,32,12126,allen-robinson,Allen Robinson II,allen-robinson,,WR,30.0,32.0,,32.8
+2021,33,33,18269,josh-jacobs-x3315,Josh Jacobs,josh-jacobs,GB,RB,38.0,31.0,,33.5
+2021,34,34,19202,ceedee-lamb,CeeDee Lamb,ceedee-lamb,DAL,WR,35.0,37.0,,34.3
+2021,35,35,19631,james-robinson-3,James Robinson,james-robinson,,RB,51.0,33.0,,36.8
+2021,36,36,12119,mike-evans,Mike Evans,mike-evans,SF,WR,36.0,34.0,,36.8
+2021,37,37,19210,d-andre-swift,D'Andre Swift,dandre-swift,CHI,RB,44.0,35.0,,38.0
+2021,38,38,18283,miles-sanders,Miles Sanders,miles-sanders,,RB,42.0,38.0,,38.8
+2021,39,39,18600,kyler-murray,Kyler Murray,kyler-murray,MIN,QB,43.0,39.0,,40.3
+2021,40,40,16406,chris-godwin,Chris Godwin Jr.,chris-godwin,TB,WR,37.0,40.0,,41.0
+2021,41,41,11610,robert-woods,Robert Woods,robert-woods,,WR,45.0,45.0,,41.8
+2021,42,42,13894,amari-cooper,Amari Cooper,amari-cooper,,WR,41.0,41.0,,41.8
+2021,43,43,17233,lamar-jackson,Lamar Jackson,lamar-jackson,BAL,QB,39.0,46.0,,44.5
+2021,44,44,16433,cooper-kupp,Cooper Kupp,cooper-kupp,SEA,WR,40.0,47.0,,44.5
+2021,45,45,9867,julio-jones,Julio Jones,julio-jones,,WR,49.0,43.0,,46.0
+2021,46,46,20164,kyle-pitts,Kyle Pitts Sr.,kyle-pitts,ATL,TE,46.0,44.0,,47.8
+2021,47,47,13971,tyler-lockett,Tyler Lockett,tyler-lockett,LV,WR,47.0,51.0,,50.5
+2021,48,48,18588,darrell-henderson,Darrell Henderson Jr.,darrell-henderson,,RB,50.0,42.0,,50.8
+2021,49,49,17251,myles-gaskin,Myles Gaskin,myles-gaskin,,RB,63.0,53.0,,51.0
+2021,50,50,17269,mark-andrews,Mark Andrews,mark-andrews,BAL,TE,48.0,50.0,,51.5
+2021,51,51,17265,d-j-moore,DJ Moore,dj-moore-wr,BUF,WR,52.0,48.0,,52.8
+2021,52,52,13429,adam-thielen,Adam Thielen,adam-thielen,,WR,56.0,52.0,,53.3
+2021,53,53,16425,kareem-hunt,Kareem Hunt,kareem-hunt,,RB,61.0,49.0,,53.8
+2021,54,54,18615,diontae-johnson,Diontae Johnson,diontae-johnson,,WR,60.0,54.0,,54.0
+2021,55,55,15600,dak-prescott,Dak Prescott,dak-prescott,DAL,QB,55.0,58.0,,57.3
+2021,56,56,18290,t-j-hockenson,T.J. Hockenson,tj-hockenson,MIN,TE,54.0,57.0,,58.3
+2021,57,57,11180,russell-wilson,Russell Wilson,russell-wilson,,QB,53.0,55.0,,58.8
+2021,58,58,9001,aaron-rodgers,Aaron Rodgers,aaron-rodgers,PIT,QB,57.0,63.0,,59.3
+2021,59,59,19252,brandon-aiyuk,Brandon Aiyuk,brandon-aiyuk,SF,WR,62.0,59.0,,59.5
+2021,60,60,18635,justin-herbert,Justin Herbert,justin-herbert,LAC,QB,59.0,61.0,,62.5
+2021,61,61,14338,raheem-mostert,Raheem Mostert,raheem-mostert,LV,RB,74.0,66.0,,63.3
+2021,62,62,18230,damien-harris,Damien Harris,damien-harris-rb,,RB,66.0,72.0,,64.8
+2021,63,63,19211,tee-higgins,Tee Higgins,tee-higgins,CIN,WR,67.0,65.0,,65.3
+2021,64,64,17496,chase-edmonds,Chase Edmonds,chase-edmonds,WAS,RB,73.0,60.0,,65.5
+2021,65,65,22739,javonte-williams,Javonte Williams,javonte-williams,DAL,RB,83.0,64.0,,66.3
+2021,66,66,18627,chase-claypool,Chase Claypool,chase-claypool,,WR,70.0,68.0,,67.3
+2021,67,67,12127,odell-beckham,Odell Beckham Jr.,odell-beckham,MIN,WR,71.0,69.0,,70.3
+2021,68,68,19201,jerry-jeudy,Jerry Jeudy,jerry-jeudy,CLE,WR,82.0,71.0,,73.3
+2021,69,69,9603,tom-brady,Tom Brady,tom-brady,,QB,65.0,79.0,,73.8
+2021,70,70,19788,ja-marr-chase,Ja'Marr Chase,jamarr-chase,CIN,WR,88.0,67.0,,74.0
+2021,71,71,19425,trey-sermon,Trey Sermon,trey-sermon,ATL,RB,76.0,76.0,,76.5
+2021,72,72,17243,ronald-jones,Ronald Jones II,ronald-jones-ii,,RB,79.0,74.0,,77.0
+2021,73,73,16488,kenny-golladay,Kenny Golladay,kenny-golladay,,WR,91.0,70.0,,77.5
+2021,74,74,15528,michael-thomas,Michael Thomas,michael-thomas-wr,,WR,104.0,62.0,,78.3
+2021,75,75,13903,melvin-gordon,Melvin Gordon III,melvin-gordon,,RB,92.0,75.0,,79.3
+2021,76,76,12095,logan-thomas,Logan Thomas,logan-thomas,,TE,72.0,92.0,,79.5
+2021,77,77,15688,robbie-chosen,Robbie Chosen,robby-anderson,,WR,84.0,80.0,,81.5
+2021,78,78,16427,juju-smith-schuster,JuJu Smith-Schuster,juju-smith-schuster,,WR,90.0,77.0,,83.3
+2021,79,79,17527,noah-fant-x4946,Noah Fant,noah-fant,NO,TE,89.0,82.0,,85.0
+2021,80,80,17253,courtland-sutton,Courtland Sutton,courtland-sutton,DEN,WR,101.0,78.0,,85.5
+2021,81,81,18244,deebo-samuel,Deebo Samuel Sr.,deebo-samuel,SF,WR,93.0,81.0,,86.5
+2021,82,82,19222,devonta-smith,DeVonta Smith,devonta-smith,PHI,WR,115.0,83.0,,87.8
+2021,83,83,9808,antonio-brown,Antonio Brown,antonio-brown,,WR,103.0,93.0,,88.8
+2021,84,84,16502,robert-tonyan,Robert Tonyan,robert-tonyan,PIT,TE,81.0,87.0,,88.8
+2021,85,85,16378,leonard-fournette,Leonard Fournette,leonard-fournette,,RB,102.0,85.0,,91.0
+2021,86,86,9451,matthew-stafford,Matthew Stafford,matthew-stafford,LAR,QB,99.0,88.0,,91.3
+2021,87,87,15547,tyler-boyd,Tyler Boyd,tyler-boyd,,WR,100.0,89.0,,92.5
+2021,88,88,22728,michael-carter-3,Michael Carter,michael-carter-rb,TEN,RB,116.0,90.0,,94.0
+2021,89,89,19275,jalen-hurts,Jalen Hurts,jalen-hurts,PHI,QB,77.0,104.0,,94.5
+2021,90,90,19358,a-j-dillon,AJ Dillon,aj-dillon,CAR,RB,105.0,99.0,,94.8
+2021,91,91,11174,ryan-tannehill,Ryan Tannehill,ryan-tannehill,,QB,96.0,102.0,,96.5
+2021,92,92,19263,zack-moss,Zack Moss,zack-moss,,RB,108.0,94.0,,96.8
+2021,93,93,15623,tyler-higbee,Tyler Higbee,tyler-higbee,LAR,TE,69.0,105.0,,97.0
+2021,94,94,17270,dallas-goedert,Dallas Goedert,dallas-goedert,PHI,TE,95.0,86.0,,97.3
+2021,95,95,16447,james-conner,James Conner,james-conner,ARI,RB,106.0,98.0,,98.0
+2021,96,96,17292,d-j-chark,DJ Chark Jr.,dj-chark,,WR,118.0,84.0,,99.5
+2021,97,98,12122,brandin-cooks,Brandin Cooks,brandin-cooks,SF,WR,109.0,91.0,,100.8
+2021,98,99,19221,laviska-shenault-jr,Laviska Shenault Jr.,laviska-shenault,,WR,123.0,97.0,,101.5
+2021,99,100,16385,corey-davis,Corey Davis,corey-davis,,WR,113.0,100.0,,102.3
+2021,100,103,15637,kenyan-drake,Kenyan Drake,kenyan-drake,,RB,122.0,106.0,,108.5
+2021,101,104,18280,devin-singletary,Devin Singletary,devin-singletary,NYG,RB,125.0,113.0,,109.0
+2021,102,105,13943,mike-davis,Mike Davis,mike-davis-rb,,RB,64.0,56.0,,135.8
+2021,103,106,12128,jarvis-landry,Jarvis Landry,jarvis-landry,,WR,129.0,95.0,,110.5
+2021,104,107,16424,jamaal-williams,Jamaal Williams,jamaal-williams,,RB,120.0,118.0,,110.5
+2021,105,109,13948,david-johnson,David Johnson,david-johnson-rb,,RB,112.0,116.0,,113.3
+2021,106,110,19196,joe-burrow,Joe Burrow,joe-burrow,CIN,QB,117.0,125.0,,114.5
+2021,107,111,9721,rob-gronkowski,Rob Gronkowski,rob-gronkowski,,TE,114.0,103.0,,114.5
+2021,108,112,15629,will-fuller,William Fuller V,will-fuller,,WR,130.0,107.0,,115.3
+2021,109,113,19790,jaylen-waddle,Jaylen Waddle,jaylen-waddle,DEN,WR,152.0,96.0,,115.5
+2021,110,114,17309,sony-michel,Sony Michel,sony-michel,,RB,111.0,108.0,,115.5
+2021,111,115,17272,mike-gesicki,Mike Gesicki,mike-gesicki,CIN,TE,119.0,112.0,,117.5
+2021,112,116,19278,michael-pittman-2,Michael Pittman Jr.,michael-pittman,PIT,WR,156.0,110.0,,118.0
+2021,113,117,19505,marquez-callaway,Marquez Callaway,marquez-callaway,,WR,124.0,114.0,,118.0
+2021,114,118,16377,mike-williams-6,Mike Williams,mike-williams-wr,,WR,137.0,109.0,,120.5
+2021,115,122,17259,michael-gallup,Michael Gallup,michael-gallup,,WR,127.0,122.0,,127.8
+2021,116,124,18705,tony-pollard,Tony Pollard,tony-pollard,TEN,RB,170.0,126.0,,130.5
+2021,117,125,16434,curtis-samuel,Curtis Samuel,curtis-samuel,,WR,155.0,115.0,,131.0
+2021,118,126,19780,trevor-lawrence,Trevor Lawrence,trevor-lawrence,JAC,QB,136.0,120.0,,132.5
+2021,119,127,18587,mecole-hardman,Mecole Hardman Jr.,mecole-hardman,IND,WR,165.0,128.0,,133.0
+2021,120,128,17297,nyheim-hines,Nyheim Miller-Hines,nyheim-hines,,RB,160.0,130.0,,133.0
+2021,121,130,19810,darnell-mooney,Darnell Mooney,darnell-mooney,NYG,WR,180.0,119.0,,135.3
+2021,122,131,19207,henry-ruggs-iii,Henry Ruggs III,henry-ruggs,,WR,163.0,127.0,,138.0
+2021,123,132,17237,baker-mayfield,Baker Mayfield,baker-mayfield,TB,QB,134.0,147.0,,140.5
+2021,124,134,11215,marvin-jones,Marvin Jones Jr.,marvin-jones,,WR,176.0,134.0,,142.0
+2021,125,135,18226,marquise-brown,Hollywood Brown,marquise-brown,PHI,WR,181.0,124.0,,143.0
+2021,126,136,9444,matt-ryan,Matt Ryan,matt-ryan,,QB,145.0,168.0,,145.3
+2021,127,137,19781,justin-fields,Justin Fields,justin-fields,KC,QB,172.0,136.0,,147.3
+2021,128,138,18598,jakobi-meyers,Jakobi Meyers,jakobi-meyers,JAC,WR,171.0,140.0,,147.8
+2021,129,139,16460,jonnu-smith,Jonnu Smith,jonnu-smith,GB,TE,188.0,142.0,,149.5
+2021,130,140,20082,trey-lance,Trey Lance,trey-lance,LAC,QB,209.0,131.0,,151.5
+2021,131,141,18621,alexander-mattison,Alexander Mattison,alexander-mattison,,RB,200.0,153.0,,152.5
+2021,132,142,11459,cole-beasley,Cole Beasley,cole-beasley,,WR,147.0,150.0,,153.0
+2021,133,143,20114,elijah-moore,Elijah Moore,elijah-moore,PHI,WR,199.0,133.0,,154.0
+2021,134,144,22726,rhamondre-stevenson,Rhamondre Stevenson,rhamondre-stevenson,NE,RB,179.0,141.0,,156.0
+2021,135,147,13926,tevin-coleman,Tevin Coleman,tevin-coleman,,RB,195.0,148.0,,158.0
+2021,136,148,12195,james-white,James White,james-white,,RB,175.0,157.0,,158.5
+2021,137,149,17606,russell-gage,Russell Gage Jr.,russell-gage,,WR,202.0,144.0,,158.8
+2021,138,150,16230,j-d-mckissic,J.D. McKissic,jd-mckissic,,RB,206.0,165.0,,159.8
+2021,139,152,17498,phillip-lindsay,Phillip Lindsay,phillip-lindsay,,RB,187.0,129.0,,161.3
+2021,140,153,13897,devante-parker,DeVante Parker,devante-parker,,WR,198.0,152.0,,161.5
+2021,141,154,15561,hunter-henry,Hunter Henry,hunter-henry,NE,TE,173.0,151.0,,163.8
+2021,142,155,20156,mac-jones,Mac Jones,mac-jones,SF,QB,140.0,176.0,,164.5
+2021,143,157,19792,chuba-hubbard,Chuba Hubbard,chuba-hubbard,CAR,RB,214.0,145.0,,165.5
+2021,144,158,11821,latavius-murray,Latavius Murray,latavius-murray,,RB,190.0,156.0,,167.0
+2021,145,159,11689,zach-ertz,Zach Ertz,zach-ertz,PHI,TE,150.0,183.0,,167.0
+2021,146,160,11177,kirk-cousins,Kirk Cousins,kirk-cousins,LV,QB,158.0,171.0,,167.3
+2021,147,161,19198,tua-tagovailoa,Tua Tagovailoa,tua-tagovailoa,ATL,QB,161.0,197.0,,169.8
+2021,148,163,23242,terrace-marshall-jr,Terrace Marshall Jr.,terrace-marshall,,WR,197.0,158.0,,170.3
+2021,149,165,11644,giovani-bernard,Giovani Bernard,giovani-bernard,,RB,201.0,187.0,,172.5
+2021,150,166,9039,ben-roethlisberger,Ben Roethlisberger,ben-roethlisberger,,QB,144.0,213.0,,173.0
+2021,151,167,13891,jameis-winston,Jameis Winston,jameis-winston,NYG,QB,177.0,181.0,,173.0
+2021,152,170,16459,gerald-everett,Gerald Everett,gerald-everett,,TE,183.0,180.0,,174.3
+2021,153,172,17308,rashaad-penny,Rashaad Penny,rashaad-penny,,RB,203.0,193.0,,175.5
+2021,154,173,9265,jared-cook,Jared Cook,jared-cook,,TE,191.0,160.0,,177.8
+2021,155,174,16411,evan-engram,Evan Engram,evan-engram,DEN,TE,222.0,196.0,,178.3
+2021,156,175,13969,nelson-agholor,Nelson Agholor,nelson-agholor,,WR,196.0,155.0,,178.3
+2021,157,176,9857,a-j-green,A.J. Green,aj-green,,WR,139.0,191.0,,179.8
+2021,158,178,14324,tyrell-williams,Tyrell Williams,tyrell-williams,,WR,142.0,179.0,,182.8
+2021,159,179,16444,marlon-mack,Marlon Mack,marlon-mack,,RB,166.0,218.0,,187.8
+2021,160,180,9545,ryan-fitzpatrick,Ryan Fitzpatrick,ryan-fitzpatrick,,QB,216.0,199.0,,189.8
+2021,161,181,22679,zach-wilson,Zach Wilson,zach-wilson,NO,QB,182.0,190.0,,189.8
+2021,162,182,9872,mark-ingram,Mark Ingram II,mark-ingram,,RB,164.0,209.0,,193.3
+2021,163,183,18634,bryan-edwards,Bryan Edwards,bryan-edwards,,WR,,161.0,,165.3
+2021,164,185,19219,jalen-reagor,Jalen Reagor,jalen-reagor,MIA,WR,174.0,172.0,,172.0
+2021,165,187,17514,darrel-williams,Darrel Williams,darrel-williams,,RB,193.0,212.0,,200.5
+2021,166,188,15569,sterling-shepard,Sterling Shepard,sterling-shepard,NYJ,WR,194.0,178.0,,175.7
+2021,167,189,9902,randall-cobb,Randall Cobb,randall-cobb,,WR,143.0,182.0,,177.7
+2021,168,190,17528,marquez-valdes-scantling,Marquez Valdes-Scantling,marquez-valdesscantling,PIT,WR,146.0,207.0,,203.8
+2021,169,191,23310,kenneth-gainwell,Kenny Gainwell,kenneth-gainwell,TB,RB,,173.0,,178.7
+2021,170,194,19398,gabe-davis,Gabe Davis,gabriel-davis,,WR,,185.0,,181.0
+2021,171,195,20163,pat-freiermuth,Pat Freiermuth,pat-freiermuth,PIT,TE,141.0,210.0,,181.7
+2021,172,196,9707,emmanuel-sanders,Emmanuel Sanders,emmanuel-sanders,,WR,148.0,211.0,,181.7
+2021,173,197,19636,,Ty'Son Williams,tyson-williams,,RB,208.0,175.0,,183.3
+2021,174,198,16398,deshaun-watson,Deshaun Watson,deshaun-watson,CLE,QB,162.0,202.0,,208.3
+2021,175,199,19799,amon-ra-st-brown,Amon-Ra St. Brown,amonra-stbrown,DET,WR,,170.0,,185.7
+2021,176,200,12092,derek-carr,Derek Carr,derek-carr,,QB,149.0,234.0,,187.7
+2021,177,202,15555,devontae-booker,Devontae Booker,devontae-booker,,RB,,184.0,,192.0
+2021,178,203,19482,,Tony Jones Jr.,tony-jones-rb,,RB,,204.0,,192.3
+2021,179,205,19794,rashod-bateman,Rashod Bateman,rashod-bateman,BAL,WR,212.0,198.0,,193.0
+2021,180,206,11206,t-y-hilton,T.Y. Hilton,ty-hilton,,WR,178.0,201.0,,193.3
+2021,181,207,18406,ty-johnson-x3152,Ty Johnson,ty-johnson,BUF,RB,,205.0,,193.7
+2021,182,210,19268,cam-akers,Cam Akers,cam-akers,,RB,27.0,,,246.5
+2021,183,211,13976,jamison-crowder,Jamison Crowder,jamison-crowder,,WR,192.0,239.0,,197.3
+2021,184,212,12334,damien-williams,Damien Williams,damien-williams,,RB,,219.0,,197.3
+2021,185,213,15581,austin-hooper,Austin Hooper,austin-hooper,ATL,TE,217.0,194.0,,203.3
+2021,186,214,16638,blake-jarwin,Blake Jarwin,blake-jarwin,,TE,159.0,220.0,,204.7
+2021,187,215,19229,cole-kmet,Cole Kmet,cole-kmet,CHI,TE,226.0,189.0,,208.7
+2021,188,216,19423,adam-trautman,Adam Trautman,adam-trautman,DEN,TE,221.0,221.0,,210.0
+2021,189,219,17236,sam-darnold,Sam Darnold,sam-darnold,SEA,QB,189.0,232.0,,215.0
+2021,190,220,13953,malcolm-brown,Malcolm Brown,malcolm-brown,,RB,,217.0,,215.3
+2021,191,222,16787,anthony-firkser,Anthony Firkser,anthony-firkser,,TE,229.0,238.0,,220.0
+2021,192,223,12143,eric-ebron,Eric Ebron,eric-ebron,,TE,138.0,241.0,,221.3
+2021,193,224,18232,daniel-jones-x5302,Daniel Jones,daniel-jones,IND,QB,219.0,240.0,,220.7
+2021,194,225,17261,,Tre'Quan Smith,trequan-smith,,WR,,203.0,,192.5
+2021,195,228,9869,cam-newton,Cam Newton,cam-newton,,QB,131.0,,,201.5
+2021,196,229,19418,darrynton-evans,Darrynton Evans,darrynton-evans,,RB,,245.0,,228.3
+2021,197,230,17268,christian-kirk,Christian Kirk,christian-kirk,SF,WR,,223.0,,203.0
+2021,198,233,12088,teddy-bridgewater,Teddy Bridgewater,teddy-bridgewater,,QB,135.0,,,212.0
+2021,199,235,18631,dawson-knox,Dawson Knox,dawson-knox,BUF,TE,153.0,,,220.5
+2021,200,236,16450,tarik-cohen,Tarik Cohen,tarik-cohen,,RB,,246.0,,217.5
+2021,201,237,18463,parris-campbell,Parris Campbell,parris-campbell,,WR,,214.0,,217.5
+2021,202,242,17301,allen-lazard,Allen Lazard,allen-lazard,,WR,,237.0,,225.5
+2021,203,243,19449,salvon-ahmed,Salvon Ahmed,salvon-ahmed,CHI,RB,,235.0,,226.0
+2021,204,244,15520,carson-wentz,Carson Wentz,carson-wentz,MIN,QB,213.0,242.0,,253.7
+2021,205,245,17300,justin-jackson,Justin Jackson,justin-jackson-rb,,RB,,,,229.0
+2021,206,246,17612,boston-scott,Boston Scott,boston-scott,,RB,,215.0,,230.0
+2021,207,247,20119,kadarius-toney,Kadarius Toney,kadarius-toney,,WR,,236.0,,231.0
+2021,208,248,17415,jordan-akins,Jordan Akins,jordan-akins,,TE,,,,185.0
+2021,209,250,19298,donovan-peoples-jones,Donovan Peoples-Jones,donovan-peoples-jones,,WR,,230.0,,235.5
+2021,210,251,11613,cordarrelle-patterson,Cordarrelle Patterson,cordarrelle-patterson,,RB,,227.0,,238.0
+2021,211,253,22845,josh-palmer,Joshua Palmer,josh-palmer,BUF,WR,,225.0,,241.0
+2021,212,254,12105,carlos-hyde,Carlos Hyde,carlos-hyde,,RB,,229.0,,242.5
+2021,213,256,17115,taysom-hill,Taysom Hill,taysom-hill,,TE,,,,205.0
+2021,214,258,19366,anthony-mcfarland-2,Anthony McFarland Jr.,anthony-mcfarland,,RB,,,,206.0
+2021,215,260,20130,nico-collins,Nico Collins,nico-collins,HOU,WR,,,,209.0
+2021,216,261,22813,elijah-mitchell-2,Elijah Mitchell,elijah-mitchell-rb,PHI,RB,,,,212.0
+2021,217,262,18609,benny-snell,Benny Snell Jr.,benjamin-snell-jr,,RB,,,,218.0
+2021,218,263,12118,sammy-watkins,Sammy Watkins,sammy-watkins,,WR,,222.0,,249.5
+2021,219,264,17283,hayden-hurst,Hayden Hurst,hayden-hurst,,TE,,,,223.0
+2021,220,265,11645,le-veon-bell,Le'Veon Bell,leveon-bell,,RB,,224.0,,224.0
+2021,221,266,13912,todd-gurley,Todd Gurley II,todd-gurley,,RB,,,,225.0
+2021,222,268,19438,j-j-taylor,J.J. Taylor,jj-taylor,,RB,,,,227.0
+2021,223,269,16380,o-j-howard,O.J. Howard,oj-howard,,TE,,,,229.0
+2021,224,270,22762,javian-hawkins,Javian Hawkins,javian-hawkins,TEN,RB,,,,232.0
+2021,225,272,12209,jerick-mckinnon,Jerick McKinnon,jerick-mckinnon,,RB,,233.0,,263.5
+2021,226,274,16448,brian-hill,Brian Hill,brian-hill,,RB,,,,239.0
+2021,227,276,20155,jaret-patterson,Jaret Patterson,jaret-patterson,CLE,RB,,,,240.0
+2021,228,277,19562,juwan-johnson,Juwan Johnson,juwan-johnson,NO,TE,,,,242.0
+2021,229,278,19493,xavier-jones,Xavier Jones,xavier-jones,,RB,,243.0,,356.0
+2021,230,279,20132,amari-rodgers,Amari Rodgers,amari-rodgers,,WR,,244.0,,290.5
+2021,231,280,17737,,Detrez Newsome,detrez-newsome,,RB,,248.0,,248.0
+2021,232,281,18706,darius-slayton,Darius Slayton,darius-slayton,,WR,,,,248.0
+2021,233,282,15905,,Paul McRoberts,paul-mcroberts,,WR,,249.0,,249.0
+2021,234,283,9690,,Tim Tebow,tim-tebow,,TE,,,,250.0
+2021,235,285,18026,jeff-wilson,Jeff Wilson Jr.,jeffery-wilson,,RB,,,,251.0
+2021,236,286,20014,,Nick Tiano,nick-tiano,,QB,,251.0,,251.0
+2021,237,287,9907,andy-dalton,Andy Dalton,andy-dalton,ATL,QB,,,,252.0
+2021,238,288,17228,,Kent Taylor,kent-taylor,,TE,,252.0,,252.0
+2021,239,289,9928,,Stevan Ridley,stevan-ridley,,RB,,253.0,,253.0
+2021,240,290,23190,jake-funk,Jake Funk,jake-funk,,RB,,,,253.0
+2021,241,291,19948,juwan-green,Juwan Green,juwan-green,,WR,,254.0,,254.0
+2021,242,292,16426,taywan-taylor,Taywan Taylor,taywan-taylor,,WR,,255.0,,255.0
+2021,243,293,14622,tyler-davis-3,Tyler Davis,tyler-davis,,WR,,256.0,,256.0
+2021,244,294,18167,,Khalid Hill,khalid-hill,,RB,,257.0,,257.0
+2021,245,295,9712,jimmy-graham,Jimmy Graham,jimmy-graham,,TE,,,,258.0
+2021,246,296,16129,,Austin Traylor,austin-traylor,,TE,,258.0,,258.0
+2021,247,297,13960,tyler-kroft,Tyler Kroft,tyler-kroft,,TE,,,,259.0
+2021,248,298,17518,,Jarvion Franklin,jarvion-franklin,,RB,,259.0,,259.0
+2021,249,299,15501,jared-goff,Jared Goff,jared-goff,DET,QB,,,,260.0
+2021,250,300,18900,,Drew Anderson,drew-anderson,,QB,,260.0,,260.0
+2021,251,301,18628,,Darrin Hall,darrin-hall,,RB,,261.0,,261.0
+2021,252,302,13975,breshad-perriman,Breshad Perriman,breshad-perriman,,WR,,,,262.0
+2021,253,304,9986,jeremy-kerley,Jeremy Kerley,jeremy-kerley,,WR,,263.0,,263.0
+2021,254,305,19333,,La'Mical Perine,lamical-perine,,RB,,,,263.0
+2021,255,306,19967,,Broc Rutter,broc-rutter,,QB,,264.0,,264.0
+2021,256,307,17245,royce-freeman,Royce Freeman,royce-freeman,,RB,,,,265.0
+2021,257,308,17849,,Lamar Jordan,lamar-jordan,,QB,,265.0,,265.0
+2021,258,309,17143,dan-arnold,Dan Arnold,dan-arnold,,TE,,,,266.0
+2021,259,311,23549,,Daniel Crawford,daniel-crawford,,TE,,267.0,,267.0
+2021,260,312,17485,,Quinton Flowers,quinton-flowers,,QB,,268.0,,268.0
+2021,261,313,19445,joshua-kelley,Joshua Kelley,joshua-kelley,,RB,,,,268.0
+2021,262,314,16422,wayne-gallman,Wayne Gallman Jr.,wayne-gallman,,RB,,,,269.0
+2021,263,315,19065,,Isaac Zico,isaac-zico,,WR,,269.0,,269.0
+2021,264,316,17739,byron-pringle,Byron Pringle,byron-pringle,,WR,,,,270.0
+2021,265,317,18726,trenton-irwin,Trenton Irwin,trenton-irwin,,WR,,270.0,,270.0
+2021,266,319,18129,,Kayaune Ross,kayaune-ross,,WR,,272.0,,272.0
+2021,267,320,18480,qadree-ollison,Qadree Ollison,qadree-ollison,,RB,,,,273.0
+2021,268,323,19344,denzel-mims,Denzel Mims,denzel-mims,,WR,,,,274.0
+2021,269,325,20090,,Pooka Williams Jr.,pooka-williams,,RB,,,,275.0
+2021,270,326,23550,,Corey Taylor II,corey-taylor-ii,,RB,,276.0,,276.0
+2021,271,327,18821,,T.J. Linta,tj-linta,,QB,,277.0,,277.0
+2021,272,328,10007,tyrod-taylor,Tyrod Taylor,tyrod-taylor,GB,QB,,,,278.0
+2021,273,329,19937,travis-jonsen,Travis Jonsen,travis-jonsen,,WR,,278.0,,278.0
+2021,274,330,17538,trenton-cannon,Trenton Cannon,trenton-cannon,,RB,,279.0,,279.0
+2021,275,331,9186,desean-jackson,DeSean Jackson,desean-jackson,,WR,,,,280.0
+2021,276,332,18133,,Austin Roberts,austin-roberts,,TE,,280.0,,280.0
+2021,277,333,9972,anthony-sherman,Anthony Sherman,anthony-sherman,,RB,,281.0,,281.0
+2021,278,334,15665,demarcus-robinson,Demarcus Robinson,demarcus-robinson,SF,WR,,,,281.0
+2021,279,335,17490,keke-coutee,Keke Coutee,keke-coutee,,WR,,,,282.0
+2021,280,336,18225,drew-lock,Drew Lock,drew-lock,SEA,QB,,,,283.0
+2021,281,337,18714,scott-miller,Scotty Miller,scott-miller,CHI,WR,,,,286.0
+2021,282,338,19715,quez-watkins,Quez Watkins,quez-watkins,IND,WR,,,,287.0
+2021,283,339,17536,chris-herndon,Chris Herndon IV,chris-herndon-iv,,TE,,,,290.0
+2021,284,340,18345,hunter-renfrow,Hunter Renfrow,hunter-renfrow,,WR,,,,291.0
+2021,285,341,19361,eno-benjamin,Eno Benjamin,eno-benjamin,,RB,,,,293.0
+2021,286,342,16579,mo-alie-cox,Mo Alie-Cox,mo-alie-cox,IND,TE,,,,295.0
+2021,287,343,17349,dalton-schultz,Dalton Schultz,dalton-schultz,HOU,TE,,,,296.0
+2021,288,345,17813,mike-boone,Mike Boone,mike-boone,,RB,,,,298.0
+2021,289,346,22785,d-wayne-eskridge,Dee Eskridge,dwayne-eskridge,,WR,,,,300.0
+2021,290,347,12208,jimmy-garoppolo,Jimmy Garoppolo,jimmy-garoppolo,LAR,QB,,,,301.0
+2021,291,348,19537,larry-rountree-iii,Larry Rountree III,larry-rountree,,RB,,,,302.0
+2021,292,349,16120,jalen-richard,Jalen Richard,jalen-richard,,RB,,,,303.0
+2021,293,350,16423,samaje-perine,Samaje Perine,samaje-perine,CIN,RB,,,,304.0
+2021,294,351,18864,olamide-zaccheaus-x1231,Olamide Zaccheaus,olamide-zaccheaus,ATL,WR,,,,305.0
+2021,295,352,18470,travis-fulgham,Travis Fulgham,travis-fulgham,,WR,,,,307.0
+2021,296,353,14498,adam-humphries,Adam Humphries,adam-humphries,,WR,,,,311.0
+2021,297,354,19351,ke-shawn-vaughn,Ke'Shawn Vaughn,keshawn-vaughn,,RB,,,,312.0
+2021,298,355,19396,quintez-cephus,Quintez Cephus,quintez-cephus,,WR,,,,313.0
+2021,299,356,22797,chris-evans,Chris Evans,chris-evans,,RB,,,,314.0
+2021,300,357,17255,anthony-miller,Anthony Miller,anthony-miller,,WR,,,,315.0
+2021,301,358,16556,tim-patrick,Tim Patrick,tim-patrick,NYJ,WR,,,,317.0
+2021,302,359,17250,kalen-ballage,Kalen Ballage,kalen-ballage,,RB,,,,318.0
+2021,303,361,16757,david-moore,David Moore,david-moore,CAR,WR,,,,321.0
+2021,304,362,19267,k-j-hamler,KJ Hamler,kj-hamler,,WR,,,,322.0
+2021,305,363,16439,josh-reynolds,Josh Reynolds,josh-reynolds,,WR,,,,323.0
+2021,306,364,16607,,De'Angelo Henderson Sr.,deangelo-henderson,,RB,,,,324.0
+2021,307,365,12231,john-brown,John Brown,john-brown,,WR,,,,325.0
+2021,308,367,18876,deonte-harris,Deonte Harty,deonte-harty,,WR,,,,327.0
+2021,309,368,17247,kerryon-johnson,Kerryon Johnson,kerryon-johnson,,RB,,,,328.0
+2021,310,370,16407,d-onta-foreman,D'Onta Foreman,donta-foreman,,RB,,,,330.0
+2021,311,371,14084,c-j-uzomah,C.J. Uzomah,cj-uzomah,,TE,,,,331.0
+2021,312,372,15586,rashard-higgins,Rashard Higgins,rashard-higgins,,WR,,,,332.0
+2021,313,373,20113,dyami-brown,Dyami Brown,dyami-brown,WAS,WR,,,,334.0
+2021,314,377,13924,ameer-abdullah,Ameer Abdullah,ameer-abdullah,JAC,RB,,,,341.0
+2021,315,379,16972,zach-pascal,Zach Pascal,zach-pascal,,WR,,,,343.0
+2021,316,380,19483,van-jefferson,Van Jefferson,van-jefferson,WAS,WR,,,,344.0
+2021,317,381,17249,ito-smith,Ito Smith,ito-smith,,RB,,,,345.0
+2021,318,385,13915,,Devin Funchess,devin-funchess,,WR,,,,349.0
+2021,319,386,14151,chris-conley,Chris Conley,chris-conley,,WR,,,,350.0
+2021,320,387,11599,marquise-goodwin,Marquise Goodwin,marquise-goodwin,,WR,,,,351.0
+2021,321,388,15611,jonathan-williams,Jonathan Williams,jonathan-williams,,RB,,,,352.0
+2021,322,389,17058,matt-breida,Matt Breida,matt-breida,,RB,,,,353.0
+2021,323,390,17066,kendrick-bourne,Kendrick Bourne,kendrick-bourne,ARI,WR,,,,354.0
+2021,324,391,15760,stephen-anderson,Stephen Anderson,stephen-anderson,,TE,,,,355.0
+2021,325,392,16864,keelan-cole,Keelan Cole Sr.,keelan-cole,,WR,,,,356.0
+2021,326,393,18370,terry-godwin,Terry Godwin,terry-godwin,,WR,,,,357.0
+2021,327,394,19914,,Case Cookus,case-cookus,,QB,,,,358.0
+2021,328,395,13890,marcus-mariota,Marcus Mariota,marcus-mariota,WAS,QB,,,,359.0
+2021,329,397,18835,donald-parham,Donald Parham Jr.,donald-parham,,TE,,,,361.0
+2021,330,398,19801,tylan-wallace,Tylan Wallace,tylan-wallace,CLE,WR,,,,363.0
+2021,331,399,19338,antonio-gandy-golden,Antonio Gandy-Golden,antonio-gandy-golden,,WR,,,,364.0
+2021,332,401,17254,james-washington,James Washington,james-washington,,WR,,,,366.0
+2021,333,402,12338,albert-wilson,Albert Wilson,albert-wilson,,WR,,,,367.0
+2021,334,403,20126,tutu-atwell,Tutu Atwell,tutu-atwell,LAR,WR,,,,368.0
+2021,335,404,18222,n-keal-harry,N'Keal Harry,nkeal-harry,,WR,,,,369.0
+2021,336,407,16399,david-njoku,David Njoku,david-njoku,LAC,TE,,,,373.0
+2021,337,408,18612,preston-williams,Preston Williams,preston-williams,,WR,,,,374.0
+2021,338,409,18941,jalen-guyton,Jalen Guyton,jalen-guyton,,WR,,,,375.0
+2021,339,410,18016,cam-sims,Cam Sims,cam-sims,,WR,,,,376.0
+2021,340,411,11200,mohamed-sanu,Mohamed Sanu Sr.,mohamed-sanu,,WR,,,,377.0
+2021,341,412,20127,shi-smith,Shi Smith,shi-smith,,WR,,,,378.0
+2021,342,413,14222,damiere-byrd,Damiere Byrd,damiere-byrd,,WR,,,,379.0
+2021,343,414,16381,mitchell-trubisky,Mitchell Trubisky,mitch-trubisky,TEN,QB,,,,380.0
+2021,344,415,19803,sam-ehlinger,Sam Ehlinger,sam-ehlinger,DEN,QB,,,,381.0
+2021,345,416,20125,anthony-schwartz,Anthony Schwartz,anthony-schwartz,,WR,,,,382.0
+2021,346,417,19843,antonio-williams,Antonio Williams,antonio-williams,,RB,,,,384.0
+2021,347,418,18633,tyler-johnson,Tyler Johnson,tyler-johnson,,WR,,,,385.0
+2021,348,419,17286,antonio-callaway,Antonio Callaway,antonio-callaway,,WR,,,,386.0
+2021,349,420,20112,dez-fitzpatrick,Dez Fitzpatrick,dez-fitzpatrick,,WR,,,,387.0
+2021,350,421,18397,foster-moreau,Foster Moreau,foster-moreau,HOU,TE,,,,388.0
+2021,351,422,11987,jack-doyle,Jack Doyle,jack-doyle,,TE,,,,389.0
+2021,352,423,13947,,Matt Jones,matt-jones-rb,,RB,,,,390.0
+2021,353,424,13977,ty-montgomery,Ty Montgomery II,ty-montgomery,,RB,,,,391.0
+2021,354,425,14146,,James O'Shaughnessy,james-oshaughnessy,,TE,,,,392.0
+2021,355,426,18804,tyron-johnson,Tyron Billy-Johnson,tyron-johnson,,WR,,,,393.0
+2021,356,427,19220,jacob-eason,Jacob Eason,jacob-eason,,QB,,,,394.0
+2021,357,428,23395,mike-strachan,Michael Strachan,mike-strachan,,WR,,,,395.0
+2021,358,429,20088,jermar-jefferson,Jermar Jefferson,jermar-jefferson,,RB,,,,396.0
+2021,359,430,18318,jalen-hurd,Jalen Hurd,jalen-hurd,,WR,,,,397.0
+2021,360,431,17271,jaylen-samuels,Jaylen Samuels,jaylen-samuels,,RB,,,,398.0
+2021,361,432,17598,tyler-conklin,Tyler Conklin,tyler-conklin,DET,TE,,,,399.0
+2021,362,433,9891,,Colin Kaepernick,colin-kaepernick,,QB,,,,400.0
+2021,363,434,12089,,Johnny Manziel,johnny-manziel,,QB,,,,401.0
+2021,364,435,18246,albert-okwuegbunam,Albert Okwuegbunam Jr.,albert-okwuegbunam,,TE,,,,402.0
+2021,365,436,9523,,Ray Rice,ray-rice,,RB,,,,403.0
+2021,366,437,19323,kylin-hill,Kylin Hill,kylin-hill,,RB,,,,404.0
+2021,367,438,17130,greg-ward,Greg Ward,greg-ward,,WR,,,,405.0
+2021,368,439,19246,jordan-love,Jordan Love,jordan-love,GB,QB,,,,406.0
+2021,369,441,19486,easop-winston,Easop Winston Jr.,easop-winston,,WR,,,,408.0
+2021,370,443,13974,,Devin Smith,devin-smith-wr,,WR,,,,410.0
+2021,371,444,18264,riley-ridley,Riley Ridley,riley-ridley,,WR,,,,411.0
+2021,372,445,9006,adrian-peterson,Adrian Peterson,adrian-peterson-min,,RB,,,,412.0
+2021,373,447,20122,dazz-newsome,Dazz Newsome,dazz-newsome,,WR,,,,414.0
+2021,374,448,17888,trent-sherfield,Trent Sherfield Sr.,trent-sherfield,BUF,WR,,,,415.0
+2021,375,449,18831,,Jody Fortson Jr.,joe-fortson,,TE,,,,416.0
+2021,376,450,16436,dede-westbrook,Dede Westbrook,dede-westbrook,,WR,,,,417.0
+2021,377,451,9609,,Tony Romo,tony-romo,,QB,,,,418.0
+2021,378,452,18409,andy-isabella,Andy Isabella,andy-isabella,,WR,,,,419.0
+2021,379,454,16431,zay-jones,Zay Jones,zay-jones,,WR,,,,421.0
+2021,380,456,19521,deejay-dallas,DeeJay Dallas,deejay-dallas,MIN,RB,,,,423.0
+2021,381,457,16446,corey-clement,Corey Clement,corey-clement,,RB,,,,424.0
+2021,382,458,18049,will-dissly,Will Dissly,will-dissly,,TE,,,,425.0
+2021,383,459,19052,tom-kennedy,Tom Kennedy,tom-kennedy,DET,WR,,,,426.0
+2021,384,460,22841,kylen-granson,Kylen Granson,kylen-granson,TEN,TE,,,,427.0
+2021,385,461,19270,devin-duvernay,Devin Duvernay,devin-duvernay,ARI,WR,,,,428.0
+2021,386,462,19539,noah-gray,Noah Gray,noah-gray,KC,TE,,,,429.0
+2021,387,463,23286,gerrid-doaks,Gerrid Doaks,gerrid-doaks,,RB,,,,430.0
+2021,388,464,23196,simi-fehoko,Simi Fehoko,simi-fehoko,ARI,WR,,,,431.0
+2021,389,465,17848,,Damoun Patterson,damoun-patterson,,WR,,,,432.0
+2021,390,466,19665,charlie-woerner,Charlie Woerner,charlie-woerner,ATL,TE,,,,433.0
+2021,391,467,15557,pharoh-cooper,Pharoh Cooper,pharoh-cooper,,WR,,,,434.0
+2021,392,469,9906,kyle-rudolph,Kyle Rudolph,kyle-rudolph,,TE,,,,436.0
+2021,393,470,22763,khalil-herbert,Khalil Herbert,khalil-herbert,ATL,RB,,,,437.0
+2021,394,471,19736,dezmon-patmon,Dezmon Patmon,dezmon-patmon,,WR,,,,438.0
+2021,395,472,16445,jeremy-mcnichols,Jeremy McNichols,jeremy-mcnichols,WAS,RB,,,,439.0
+2021,396,473,18400,brandon-dillon,Brandon Dillon,brandon-dillon,,TE,,,,440.0
+2021,397,474,11798,kyle-juszczyk,Kyle Juszczyk,kyle-juszczyk,SF,RB,,,,441.0
+2021,398,475,18063,chad-beebe,Chad Beebe,chad-beebe,,WR,,,,442.0
+2021,399,476,13932,taylor-heinicke,Taylor Heinicke,taylor-heinicke,,QB,,,,443.0
+2021,400,477,20105,demetric-felton,Demetric Felton Jr.,demetric-felton,,RB,,,,444.0
+2021,401,479,16494,rodney-adams,Rodney Adams,rodney-adams,,WR,,,,446.0
+2021,402,480,22799,davis-mills,Davis Mills,davis-mills,HOU,QB,,,,447.0
+2021,403,483,18482,jesper-horsted,Jesper Horsted,jesper-horsted,,TE,,,,450.0
+2021,404,484,17508,durham-smythe,Durham Smythe,durham-smythe,BAL,TE,,,,451.0
+2021,405,485,15920,peyton-barber,Peyton Barber,peyton-barber,,RB,,,,452.0
+2021,406,486,9101,chad-henne,Chad Henne,chad-henne,,QB,,,,453.0
+2021,407,487,18185,john-wolford,John Wolford,john-wolford,,QB,,,,454.0
+2021,408,488,11685,mike-glennon,Mike Glennon,mike-glennon,,QB,,,,455.0
+2021,409,489,11655,rex-burkhead,Rex Burkhead,rex-burkhead,,RB,,,,456.0
+2021,410,490,12904,willie-snead,Willie Snead IV,willie-snead,,WR,,,,457.0
+2021,411,491,18561,drew-sample,Drew Sample,drew-sample,CIN,TE,,,,458.0
+2021,412,492,22811,cornell-powell,Cornell Powell,cornell-powell,,WR,,,,459.0
+2021,413,493,9300,joe-flacco,Joe Flacco,joe-flacco,CIN,QB,,,,460.0
+2021,414,494,15642,jacoby-brissett,Jacoby Brissett,jacoby-brissett,ARI,QB,,,,461.0
+2021,415,495,19389,harrison-bryant,Harrison Bryant,harrison-bryant,,TE,,,,462.0
+2021,416,496,18562,gardner-minshew,Gardner Minshew II,gardner-minshew,ARI,QB,,,,463.0
+2021,417,497,16527,jacob-hollister,Jacob Hollister,jacob-hollister,,TE,,,,464.0
