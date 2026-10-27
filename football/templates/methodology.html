@@ -8,29 +8,25 @@
   </div>
 
   <div class="text-slate-700 dark:text-slate-300">
-    <p class="my-6 text-lg leading-8">Drops is the NFL counterpart to <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a>, applying Tom Tango's projection-evaluation principles the same way Bricks does for basketball.</p>
+    <p class="my-6 text-lg leading-8">Drops is the NFL counterpart to <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a>, applying Tom Tango's approach to evaluating projection systems.</p>
+
+    <p class="my-6 text-lg leading-8">Drops follows four principles:</p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Separate playing time from rate stats</h2>
-    <p class="my-6 text-lg leading-8">Passing, rushing, and receiving are separate pools. A player can appear in more than one. Passing volume is attempts. Rushing volume is carries, including quarterback rushes. Receiving volume is targets.</p>
-    <p class="my-6 text-lg leading-8">Rates use the narrowest denominator on which the event can happen. Passers are scored on completion percentage, yards per completion, touchdowns per completion, and interceptions per attempt. Rushers are scored on yards per carry and touchdowns per carry. Receivers are scored on catch rate, yards per reception, and touchdowns per reception. Yards and touchdowns sit on completions and receptions, so those rates stay separate from completion percentage and catch rate. An interception does not require a completion, so interceptions stay per attempt. The NFL.com leaderboards do not publish games played, so games are not a volume stat.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops evaluates playing time and rate stats separately to avoid misleading conclusions.</strong></p>
+    <p class="my-6 text-lg leading-8">Playing time is measured by <strong class="font-semibold">attempts</strong> for passers, <strong class="font-semibold">carries</strong> for rushers, and <strong class="font-semibold">targets</strong> for receivers. A player can appear in more than one. Other stats are evaluated as rates using the most appropriate denominator.</p>
+    <p class="my-6 text-lg leading-8">For example, yards and touchdowns are per completion, carry, or reception; interceptions are per attempt, and completion percentage and catch rate stand on their own. This keeps each stat in its most meaningful context.</p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Adjust for league context</h2>
-    <p class="my-6 text-lg leading-8">Drops subtracts the opportunity-weighted league average from each projected and actual rate before measuring error, then reports raw, league-adjusted, and opportunity-weighted league-adjusted MAE and RMSE.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops subtracts the league average from each projected rate before computing error.</strong></p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Weight by opportunity</h2>
-    <p class="my-6 text-lg leading-8">An error for a 12-carry back matters less than the same error for a 300-carry back. Weighted league-adjusted metrics use actual attempts, carries, or targets as weights.</p>
+    <p class="my-6 text-lg leading-8">An error for a 12-carry back matters less than the same error for a 300-carry back. Systems shouldn't be penalized equally for misses on marginal and regular players.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops weights each error by the player's actual attempts, carries, or targets to reflect real-world impact.</strong></p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Include unprojected players at league average</h2>
-    <p class="my-6 text-lg leading-8">If a player appears in actuals but not in a projection system, Drops assigns <strong class="font-semibold">30 attempts</strong>, <strong class="font-semibold">10 carries</strong>, or <strong class="font-semibold">8 targets</strong>, and league-average rates. Each figure is about the average volume among players who recorded that stat and were absent from the projection.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Actuals</h2>
-    <p class="my-6 text-lg leading-8">Season totals come from the NFL.com passing, rushing, and receiving leaderboards. Those pages repeat after the second screen, so each sortable column is collected in both directions and each player is kept once. Each player is stored under the <span class="font-mono text-base">nfl_slug</span> from the player link.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Projections</h2>
-    <p class="my-6 text-lg leading-8">ESPN, Sleeper, FFToday, and FantasyPros season-long projections are scored when that season's actuals exist. ESPN 2023 is left out: the season projection split is empty for most players, so the counting stats would be zeros. Each file is <span class="font-mono text-base">football/projections/{prefix}_{season}.csv</span> (for example <span class="font-mono text-base">espn_2024.csv</span> for ESPN). Joins use <span class="font-mono text-base">nfl_slug</span> from <a href="https://github.com/mayscopeland/ffb_ids" class="text-blue-600 dark:text-blue-400 hover:underline">mayscopeland/ffb_ids</a>, translated from each site's player id. An older id that is missing from the crosswalk is matched by player name when that name has one slug. A stat the system does not publish is left out of that comparison. FFToday and FantasyPros do not publish targets, so they are not scored on targets or catch rate, but they are still scored on yards and touchdowns per reception.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Fantasy pages</h2>
-    <p class="my-6 text-lg leading-8">The <a href="/fantasy/" class="text-blue-600 dark:text-blue-400 hover:underline">fantasy</a> pages ask a narrower question: how accurate were projections for players a standard league would draft? The pool is the top 150 offensive players by FantasyPros half-PPR preseason ADP. Kickers and defenses are left out. Passing, rushing, and receiving still include only players from that list who recorded the stat. The stats are the same rates, not fantasy points.</p>
+    <p class="my-6 text-lg leading-8">Limiting evaluation to players projected by every system biases toward the easiest cases. We want to reward systems that attempt harder projections.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">If a player is missing from a projection system, Drops assigns them 30 attempts, 10 carries, or 8 targets for playing-time evaluation and league average for rate stats.</strong></p>
   </div>
 </div>
 {% endblock %}

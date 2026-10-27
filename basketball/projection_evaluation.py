@@ -28,10 +28,12 @@ from rates import (  # noqa: E402
 PROJECTION_SYSTEMS: List[str] = [
     "SPS",
     "ESPN",
+    "DARKO",
 ]
 PROJECTION_SYSTEM_FILES: Dict[str, str] = {
     "SPS": "sps",
     "ESPN": "espn",
+    "DARKO": "darko",
 }
 PLAYER_TYPE = "player"
 PLAYER_TYPES: List[str] = [PLAYER_TYPE]
@@ -291,6 +293,30 @@ def as_player_id(series: pd.Series) -> pd.Series:
     return numeric.astype("Int64").astype("string")
 
 
+def actual_minutes_column(df: pd.DataFrame) -> Optional[str]:
+    """Minutes from actuals after a projection merge.
+
+    A projection that also publishes MIN produces MIN_x. A projection with
+    rates only leaves the actual minutes column named MIN.
+    """
+    suffixed = f"{PLAYING_TIME_COL}_x"
+    if suffixed in df.columns:
+        return suffixed
+    if PLAYING_TIME_COL in df.columns:
+        return PLAYING_TIME_COL
+    return None
+
+
+def weighted_mean(values: pd.Series, weights: pd.Series) -> Optional[float]:
+    """Minutes-weighted mean, ignoring rows with a missing value or weight."""
+    vals = pd.to_numeric(values, errors="coerce")
+    wts = pd.to_numeric(weights, errors="coerce")
+    mask = vals.notna() & wts.notna() & (wts > 0)
+    if not bool(mask.any()):
+        return None
+    return float(np.average(vals[mask], weights=wts[mask]))
+
+
 def load_projections(end_year: int, system: str) -> pd.DataFrame:
     prefix = PROJECTION_SYSTEM_FILES.get(
         system, system.replace(" ", "").lower()
@@ -358,14 +384,14 @@ def process_year_system(
             fill = MISSING_PLAYING_TIME if stat == PLAYING_TIME_COL else 0
             merged_df[proj_col] = merged_df[proj_col].fillna(fill)
 
-    playing_time_col_x = f"{PLAYING_TIME_COL}_x"
+    playing_time_col_x = actual_minutes_column(merged_df)
     proj_league_avgs = {}
     for stat in RATE_STATS:
         proj_col = f"{stat}_y"
-        if proj_col in merged_df.columns and playing_time_col_x in merged_df.columns:
-            weights = merged_df[playing_time_col_x]
-            if weights.sum() > 0:
-                proj_league_avgs[stat] = float(np.average(merged_df[proj_col], weights=weights))
+        if proj_col in merged_df.columns and playing_time_col_x is not None:
+            league_avg = weighted_mean(merged_df[proj_col], merged_df[playing_time_col_x])
+            if league_avg is not None:
+                proj_league_avgs[stat] = league_avg
 
     for stat in RATE_STATS:
         actual_col = f"{stat}_x"
@@ -397,12 +423,14 @@ def process_year_system(
         if len(actual_clean) == 0:
             continue
 
-        if playing_time_col_x in merged_df.columns:
+        if playing_time_col_x is not None:
             weights = merged_df[playing_time_col_x][mask].values
         else:
             weights = np.ones(len(actual_clean))
 
         if stat in RATE_STATS:
+            if stat not in actual_league_avgs or stat not in proj_league_avgs:
+                continue
             actual_la = actual_clean - actual_league_avgs[stat]
             proj_la = proj_clean - proj_league_avgs[stat]
             raw_metrics = calculate_metrics(actual_clean, proj_clean)
@@ -516,16 +544,14 @@ def process_fantasy_stats(year: int, system: str) -> List[ProjectionResult]:
             fill = MISSING_PLAYING_TIME if stat == PLAYING_TIME_COL else 0
             merged_df[proj_col] = merged_df[proj_col].fillna(fill)
 
-    playing_time_col_x = f"{PLAYING_TIME_COL}_x"
+    playing_time_col_x = actual_minutes_column(merged_df)
     proj_league_avgs = {}
     for stat in rate_stats:
         proj_col = f"{stat}_y"
-        if proj_col in merged_df.columns and playing_time_col_x in merged_df.columns:
-            weights = merged_df[playing_time_col_x]
-            if weights.sum() > 0:
-                proj_league_avgs[stat] = float(
-                    np.average(merged_df[proj_col], weights=weights)
-                )
+        if proj_col in merged_df.columns and playing_time_col_x is not None:
+            league_avg = weighted_mean(merged_df[proj_col], merged_df[playing_time_col_x])
+            if league_avg is not None:
+                proj_league_avgs[stat] = league_avg
 
     results: List[ProjectionResult] = []
     for stat in all_fan_stats:
@@ -541,6 +567,8 @@ def process_fantasy_stats(year: int, system: str) -> List[ProjectionResult]:
 
         actual_vals = clean_df[actual_col].values
         proj_vals = clean_df[proj_col].values
+        if playing_time_col_x is None:
+            continue
         weights = clean_df[playing_time_col_x].values
 
         if stat in rate_stats:

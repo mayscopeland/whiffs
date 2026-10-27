@@ -3,7 +3,7 @@
 This repository holds three peer projection-evaluation pipelines:
 
 - **Whiffs** ([whiffs.org](https://whiffs.org)) — MLB projection accuracy (Marcel, Steamer, ZiPS, and others)
-- **Bricks** — NBA projection accuracy (SPS and ESPN so far)
+- **Bricks** — NBA projection accuracy (SPS, ESPN, and DARKO)
 - **Drops** — NFL projection accuracy
 
 Baseball code and data live under [`baseball/`](baseball/). Basketball code and data live under [`basketball/`](basketball/). Football code and data live under [`football/`](football/). Root scripts always name the sport.
@@ -108,6 +108,9 @@ npm run basketball:sps
 
 # ESPN fantasy season projections (2017-18 through 2026-27)
 npm run basketball:espn
+
+# Historical DARKO box-score projections (2006-07 through 2025-26)
+npm run basketball:darko
 ```
 
 ### Build the site

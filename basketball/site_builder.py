@@ -24,6 +24,7 @@ CACHE_FILES = ("site.json", "years.json", "misses.json", "players.json")
 SYSTEM_COLORS = {
     "SPS": "text-amber-900 dark:text-amber-700",
     "ESPN": "text-red-600 dark:text-red-400",
+    "DARKO": "text-blue-700 dark:text-blue-400",
 }
 
 
@@ -87,6 +88,20 @@ def create_env() -> Environment:
 def _write(path: Path, html: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")
+
+
+def _write_season_redirects(years: list[Any], site_dir: Path) -> None:
+    """Send old end-year paths to the NBA season label (2024 -> 2023-24)."""
+    lines: list[str] = []
+    for year in years:
+        season = end_year_to_season(year)
+        for prefix in ("seasons", "fantasy"):
+            lines.append(f"/{prefix}/{year} /{prefix}/{season}/ 301")
+            lines.append(f"/{prefix}/{year}/ /{prefix}/{season}/ 301")
+    if not lines:
+        return
+    (site_dir / "_redirects").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"  Wrote _redirects ({len(lines)} rules)")
 
 
 def _stat_num(value: Any) -> float:
@@ -242,14 +257,14 @@ def build_site(
         season = end_year_to_season(year)
         html = env.get_template("season.html").render(
             **base_ctx,
-            page_url=f"/seasons/{year}/",
+            page_url=f"/seasons/{season}/",
             year=year,
             year_key=year_key,
             season=season,
             yearData=years.get(year_key),
             title=f"{season} Projection Accuracy",
         )
-        _write(site_dir / "seasons" / year_key / "index.html", html)
+        _write(site_dir / "seasons" / season / "index.html", html)
     print(f"  Wrote {len(site.get('years', []))} season pages")
 
     for year in site.get("years", []):
@@ -257,15 +272,17 @@ def build_site(
         season = end_year_to_season(year)
         html = env.get_template("fantasy_season.html").render(
             **base_ctx,
-            page_url=f"/fantasy/{year}/",
+            page_url=f"/fantasy/{season}/",
             year=year,
             year_key=year_key,
             season=season,
             yearData=years.get(year_key),
             title=f"{season} Fantasy Projection Accuracy",
         )
-        _write(site_dir / "fantasy" / year_key / "index.html", html)
+        _write(site_dir / "fantasy" / season / "index.html", html)
     print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
+
+    _write_season_redirects(site.get("years", []), site_dir)
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(

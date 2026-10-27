@@ -8,29 +8,25 @@
   </div>
 
   <div class="text-slate-700 dark:text-slate-300">
-    <p class="my-6 text-lg leading-8">Bricks is the NBA counterpart to <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a>, applying Tom Tango's projection-evaluation principles to basketball.</p>
+    <p class="my-6 text-lg leading-8">Bricks is the NBA counterpart to <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a>, applying Tom Tango's approach to evaluating projection systems.</p>
+
+    <p class="my-6 text-lg leading-8">Bricks follows four principles:</p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Separate playing time from rate stats</h2>
-    <p class="my-6 text-lg leading-8">Playing time is measured in <strong class="font-semibold">minutes</strong> (and games). Scoring, rebounding, playmaking, and other outcomes are evaluated as rates—most often per minute, with shooting percentages and 3PA/FGA kept as their own rates.</p>
-    <p class="my-6 text-lg leading-8">Total rebounds are scored as <strong class="font-semibold">REB/MIN</strong> along with the offensive and defensive splits. A system that publishes REB is scored on that total. A system that publishes OREB and DREB is scored on their sum.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Bricks evaluates playing time and rate stats separately to avoid misleading conclusions.</strong></p>
+    <p class="my-6 text-lg leading-8">Playing time is measured in <strong class="font-semibold">minutes</strong> and <strong class="font-semibold">games</strong>. Other stats are evaluated as rates using the most appropriate denominator.</p>
+    <p class="my-6 text-lg leading-8">For example, points, rebounds, and assists are per minute; shooting percentages stand on their own. This keeps each stat in its most meaningful context.</p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Adjust for league context</h2>
-    <p class="my-6 text-lg leading-8">League scoring environments change. Bricks subtracts the minutes-weighted league average from each projected and actual rate before measuring error, then reports raw, league-adjusted, and minutes-weighted league-adjusted MAE/RMSE.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Bricks subtracts the league average from each projected rate before computing error.</strong></p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Weight by minutes</h2>
-    <p class="my-6 text-lg leading-8">An error for a 200-minute player matters less than the same error for a 2,500-minute player. Weighted league-adjusted metrics use actual minutes as weights.</p>
+    <p class="my-6 text-lg leading-8">An error for a 200-minute player matters less than the same error for a 2,500-minute player. Systems shouldn't be penalized equally for misses on marginal and regular players.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Bricks weights each error by the player's actual minutes to reflect real-world impact.</strong></p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Include unprojected players at league average</h2>
-    <p class="my-6 text-lg leading-8">If a player appears in actuals but not in a projection system, Bricks assigns <strong class="font-semibold">500 minutes</strong> for playing-time evaluation and league average for rate stats.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">SPS</h2>
-    <p class="my-6 text-lg leading-8">SPS is Basketball-Reference's <a href="https://www.basketball-reference.com/about/projections.html" class="text-blue-600 dark:text-blue-400 hover:underline">Simple Projection System</a>. The last three seasons are weighted 6/3/1. Each rate is regressed with 1,000 minutes of league-average production, then aged around 28. Missed shots and turnovers take the opposite age adjustment. Attempts are makes plus misses, and points are computed from the makes. The published figures are per 36 minutes. Bricks also projects minutes with a Marcel playing-time split — half of last year's minutes, a tenth of the minutes from two seasons ago, and 600 minutes of prior, aged around 27 — and sets games from minutes per game after the same 6/3/1 regression. A player is projected only if he played at least one game the previous season.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">ESPN</h2>
-    <p class="my-6 text-lg leading-8">ESPN is the full-season fantasy projection ESPN stores beside its actuals, from 2017-18 on. It includes games, minutes, shooting, total rebounds, assists, steals, blocks, and turnovers. The offensive and defensive rebound split is absent, so ESPN is scored on REB/MIN and left out of OREB/MIN and DREB/MIN. Players are joined on NBA id using the <a href="https://github.com/mayscopeland/fbkb_ids" class="text-blue-600 dark:text-blue-400 hover:underline">fbkb_ids</a> crosswalk.</p>
-
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Fantasy pages</h2>
-    <p class="my-6 text-lg leading-8">The <a href="/fantasy/" class="text-blue-600 dark:text-blue-400 hover:underline">fantasy</a> pages ask a narrower question: how accurate were projections for players who actually mattered in category leagues? Bricks keeps players with at least <strong class="font-semibold">1,500 minutes</strong>, then scores minutes, games, minutes per game, and the usual 9-cat rates (points, rebounds, assists, steals, blocks, turnovers, threes, FG%, and FT%). Playing time stays separate from rates, and the same league-average and minutes-weighting rules apply.</p>
+    <p class="my-6 text-lg leading-8">Limiting evaluation to players projected by every system biases toward the easiest cases. We want to reward systems that attempt harder projections.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">If a player is missing from a projection system, Bricks assigns them 500 minutes for playing-time evaluation and league average for rate stats.</strong></p>
   </div>
 </div>
 {% endblock %}

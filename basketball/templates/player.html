@@ -99,7 +99,7 @@
             {% set typed = year_data.get('player', {}) %}
             {% for system, stats in typed.items() %}
             <tr class="border-t border-slate-200 dark:border-slate-700">
-              <td class="px-4 py-3 whitespace-nowrap">{{ year | season }}</td>
+              <td class="px-4 py-3 whitespace-nowrap"><a href="/seasons/{{ year | season }}/" class="text-blue-600 dark:text-blue-400 hover:underline">{{ year | season }}</a></td>
               <td class="px-4 py-3 {{ system_colors.get(system, '') if system != 'Actual' else '' }}">{{ system }}</td>
               {% for stat in rawStats %}
               <td class="px-4 py-3 text-right">{% if stat == 'MIN' %}{{ stats.get(stat) | toFixed(1) }}{% else %}{{ stats.get(stat) | toFixed(0) }}{% endif %}</td>

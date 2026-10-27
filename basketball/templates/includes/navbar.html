@@ -102,8 +102,9 @@
                 <a href="/stats/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/stats/' %} text-blue-500{% endif %}">All-Time</a>
               </li>
               {% for year in site.years | reverse %}
+              {% set season_slug = year | season %}
               <li>
-                <a href="/seasons/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/seasons/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year | season }}</a>
+                <a href="/seasons/{{ season_slug }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/seasons/' ~ season_slug ~ '/' %} text-blue-500{% endif %}">{{ season_slug }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -123,8 +124,9 @@
                 <a href="/fantasy/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' %} text-blue-500{% endif %}">All-Time</a>
               </li>
               {% for year in site.years | reverse %}
+              {% set season_slug = year | season %}
               <li>
-                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year | season }}</a>
+                <a href="/fantasy/{{ season_slug }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' ~ season_slug ~ '/' %} text-blue-500{% endif %}">{{ season_slug }}</a>
               </li>
               {% endfor %}
             </ul>
