@@ -90,20 +90,6 @@ def _write(path: Path, html: str) -> None:
     path.write_text(html, encoding="utf-8")
 
 
-def _write_season_redirects(years: list[Any], site_dir: Path) -> None:
-    """Send old end-year paths to the NBA season label (2024 -> 2023-24)."""
-    lines: list[str] = []
-    for year in years:
-        season = end_year_to_season(year)
-        for prefix in ("seasons", "fantasy"):
-            lines.append(f"/{prefix}/{year} /{prefix}/{season}/ 301")
-            lines.append(f"/{prefix}/{year}/ /{prefix}/{season}/ 301")
-    if not lines:
-        return
-    (site_dir / "_redirects").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"  Wrote _redirects ({len(lines)} rules)")
-
-
 def _stat_num(value: Any) -> float:
     if value is None:
         return 0.0
@@ -281,8 +267,6 @@ def build_site(
         )
         _write(site_dir / "fantasy" / season / "index.html", html)
     print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
-
-    _write_season_redirects(site.get("years", []), site_dir)
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(

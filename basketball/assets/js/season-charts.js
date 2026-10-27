@@ -151,7 +151,7 @@ function summaryHeatStyles(values) {
 
 function summaryAverageRanks(valueRows) {
   const sums = valueRows.map(() => 0);
-
+  const counts = valueRows.map(() => 0);
   if (valueRows.length === 0) return sums;
   const categoryCount = valueRows[0].length;
 
@@ -168,17 +168,15 @@ function summaryAverageRanks(valueRows) {
       let end = start + 1;
       while (end < present.length && present[end].value === present[start].value) end++;
       const rank = (start + 1 + end) / 2;
-      for (let i = start; i < end; i++) sums[present[i].rowIndex] += rank;
+      for (let i = start; i < end; i++) {
+        sums[present[i].rowIndex] += rank;
+        counts[present[i].rowIndex] += 1;
+      }
       start = end;
     }
-
-    const missingRank = present.length + 1;
-    valueRows.forEach((values, rowIndex) => {
-      if (values[category] == null) sums[rowIndex] += missingRank;
-    });
   }
 
-  return sums.map((sum) => sum / categoryCount);
+  return sums.map((sum, index) => (counts[index] ? sum / counts[index] : Number.POSITIVE_INFINITY));
 }
 
 function initializeSummaryTable(yearData, rootId = "season-summary", playerTypes = ["player"]) {
