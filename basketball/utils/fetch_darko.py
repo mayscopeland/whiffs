@@ -4,9 +4,9 @@ The projections board (``/projections?asof=``) publishes minutes per game, pace,
 and per-100 possession box rates. Bricks scores the per-minute rates those
 fields imply. Games and season minutes are not on the board.
 
-An offseason ``asof`` still returns the previous season, and opening night
-lists only that night's games. For each season this script takes the first
-later date whose board is labeled with the new season and covers a full roster.
+An offseason ``asof`` still returns the previous season. For each season this
+script takes the first later date whose board is the new season and names
+every franchise.
 
 Writes basketball/projections/darko_YYYY-YY.csv for 2006-07 through 2025-26.
 The 2026-27 file is the separate preseason snapshot and is left alone.
@@ -44,9 +44,8 @@ HEADERS = {
 DEFAULT_START = 2007
 DEFAULT_END = 2026
 
-# Opening night is a single slate. A full roster is the whole league.
 FULL_ROSTER = 350
-# How far past the season flip to look for that roster.
+EXPECTED_TEAMS = 30
 SCAN_DAYS = 28
 
 MAX_RETRIES = 5
@@ -161,11 +160,25 @@ def _is_new_season(root: dict[str, Any] | None, end_year: int) -> bool:
     return history.get("season") == end_year and history.get("pastRegularSeason") is False
 
 
-def _player_count(root: dict[str, Any] | None) -> int:
+def _players(root: dict[str, Any] | None) -> list[Any]:
     if not root:
-        return 0
+        return []
     players = root.get("players")
-    return len(players) if isinstance(players, list) else 0
+    return players if isinstance(players, list) else []
+
+
+def _player_count(root: dict[str, Any] | None) -> int:
+    return len(_players(root))
+
+
+def _team_count(root: dict[str, Any] | None) -> int:
+    return len(
+        {
+            player.get("team_name")
+            for player in _players(root)
+            if isinstance(player, dict) and player.get("team_name")
+        }
+    )
 
 
 def _first_true(cache: BoardCache, end_year: int, lo: date, hi: date) -> date | None:
@@ -186,7 +199,7 @@ def _first_true(cache: BoardCache, end_year: int, lo: date, hi: date) -> date | 
 def find_full_board(
     cache: BoardCache, end_year: int
 ) -> tuple[date, dict[str, Any]] | None:
-    """First full-roster board after the season label flips."""
+    """Earliest board after the season flip that names every franchise."""
     start_year = end_year - 1
     opened = _first_true(
         cache, end_year, date(start_year, 10, 1), date(end_year, 1, 31)
@@ -195,21 +208,37 @@ def find_full_board(
         print(f"    No {end_year_to_season(end_year)} board between Oct 1 and Jan 31.")
         return None
 
+    best: tuple[date, dict[str, Any], int] | None = None
     for offset in range(SCAN_DAYS + 1):
         day = opened + timedelta(days=offset)
         root = cache.get(day)
-        if not _is_new_season(root, end_year):
+        if not _is_new_season(root, end_year) or root is None:
             continue
-        if root is not None and _player_count(root) >= FULL_ROSTER:
+        if _player_count(root) < FULL_ROSTER:
+            continue
+        n_teams = _team_count(root)
+        if best is None or n_teams > best[2]:
+            best = (day, root, n_teams)
+        if n_teams >= EXPECTED_TEAMS:
             if offset:
-                print(f"    Full roster is {offset} day(s) after the season flip ({opened}).")
+                print(
+                    f"    All {n_teams} teams are {offset} day(s) after the season flip ({opened})."
+                )
             return day, root
 
+    if best is None:
+        print(
+            f"    No full roster within {SCAN_DAYS} days of {opened} "
+            f"for {end_year_to_season(end_year)}."
+        )
+        return None
+
+    day, root, n_teams = best
     print(
-        f"    No full roster within {SCAN_DAYS} days of {opened} "
-        f"for {end_year_to_season(end_year)}."
+        f"    Only {n_teams} teams within {SCAN_DAYS} days of {opened} "
+        f"for {end_year_to_season(end_year)}; using {day.isoformat()}."
     )
-    return None
+    return day, root
 
 
 def _per_minute(per_100: pd.Series, pace: pd.Series) -> pd.Series:
@@ -325,8 +354,8 @@ def main() -> None:
         saved += 1
         minutes = frame["MIN/G"]
         print(
-            f"    Saved {len(frame)} players to {out_path.name} "
-            f"(asof {day.isoformat()}, "
+            f"    Saved {len(frame)} players, {frame['team_name'].nunique()} teams "
+            f"to {out_path.name} (asof {day.isoformat()}, "
             f"mpg median {minutes.median():.1f}, max {minutes.max():.1f})"
         )
 
