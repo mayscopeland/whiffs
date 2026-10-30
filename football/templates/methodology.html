@@ -12,21 +12,21 @@
 
     <p class="my-6 text-lg leading-8">Drops follows four principles:</p>
 
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Separate playing time from rate stats</h2>
-    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops evaluates playing time and rate stats separately to avoid misleading conclusions.</strong></p>
-    <p class="my-6 text-lg leading-8">Playing time is measured by <strong class="font-semibold">attempts</strong> for passers, <strong class="font-semibold">carries</strong> for rushers, and <strong class="font-semibold">targets</strong> for receivers. A player can appear in more than one. Other stats are evaluated as rates using the most appropriate denominator.</p>
-    <p class="my-6 text-lg leading-8">For example, yards and touchdowns are per completion, carry, or reception; interceptions are per attempt, and completion percentage and catch rate stand on their own. This keeps each stat in its most meaningful context.</p>
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Score counting stats per game</h2>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops evaluates attempts, completions, yards, touchdowns, interceptions, carries, targets, and receptions on a per-game basis.</strong></p>
+    <p class="my-6 text-lg leading-8">Players still belong to passing, rushing, and receiving pools by season opportunity (attempts, carries, or targets). Within each pool, the scored metrics are the counting stats divided by games played, so efficiency that buys more snaps shows up in the same numbers as role and durability.</p>
+    <p class="my-6 text-lg leading-8">Actuals, including games played, come from nflverse regular-season player stats joined on GSIS id. When a projection file omits games, Drops treats the line as a full season (16 games through 2020, 17 from 2021 on) before dividing.</p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Adjust for league context</h2>
-    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops subtracts the league average from each projected rate before computing error.</strong></p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops subtracts the league average from each projected per-game rate before computing error.</strong></p>
 
-    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Weight by opportunity</h2>
-    <p class="my-6 text-lg leading-8">An error for a 12-carry back matters less than the same error for a 300-carry back. Systems shouldn't be penalized equally for misses on marginal and regular players.</p>
-    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops weights each error by the player's actual attempts, carries, or targets to reflect real-world impact.</strong></p>
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Weight by games played</h2>
+    <p class="my-6 text-lg leading-8">An error for a one-game cup of coffee matters less than the same error for a 17-game starter. Systems shouldn't be penalized equally for misses on marginal and regular players.</p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">Drops weights each error by the player's actual games played to reflect real-world impact.</strong></p>
 
     <h2 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-12 mb-8 leading-10">Include unprojected players at league average</h2>
     <p class="my-6 text-lg leading-8">Limiting evaluation to players projected by every system biases toward the easiest cases. We want to reward systems that attempt harder projections.</p>
-    <p class="my-6 text-lg leading-8"><strong class="font-semibold">If a player is missing from a projection system, Drops assigns them 30 attempts, 10 carries, or 8 targets for playing-time evaluation and league average for rate stats.</strong></p>
+    <p class="my-6 text-lg leading-8"><strong class="font-semibold">If a player is missing from a projection system, Drops assigns league average for each per-game rate.</strong></p>
   </div>
 </div>
 {% endblock %}

@@ -21,7 +21,7 @@ REPORTS_DIR = ROOT / "reports"
 CACHE_DIR = REPORTS_DIR / "site_cache"
 
 sys.path.insert(0, str(ROOT / "utils"))
-from rates import OVERVIEW_STATS, POOLS, stat_base_name  # noqa: E402
+from rates import OVERVIEW_STATS, POOLS, stat_base_name, stat_display_name  # noqa: E402
 
 SYSTEM_COLORS = {
     "ESPN": "text-red-600 dark:text-red-400",
@@ -82,9 +82,10 @@ def template_pools() -> list[dict[str, Any]]:
     for key, pool in POOLS.items():
         overview = set(OVERVIEW_STATS[key])
         volume_stat = pool["volume"]
+        volume_as_rate = bool(pool.get("volume_as_rate"))
         rates = [
             {
-                "name": stat,
+                "name": stat_display_name(stat),
                 "stat": stat,
                 "baseName": stat_base_name(key, stat),
                 "isVolume": False,
@@ -103,7 +104,7 @@ def template_pools() -> list[dict[str, Any]]:
                     "name": pool["volume_label"],
                     "stat": volume_stat,
                     "baseName": stat_base_name(key, volume_stat),
-                    "isVolume": True,
+                    "isVolume": not volume_as_rate,
                     "overview": volume_stat in overview,
                 },
                 "rates": rates,
@@ -141,11 +142,13 @@ def _stat_num(value: Any) -> float:
 def player_rank_score(player: dict[str, Any]) -> float:
     """Career attempts, carries, and targets, for search ranking."""
     total = 0.0
-    volume_stats = {key: pool["volume"] for key, pool in POOLS.items()}
+    membership_stats = {
+        key: pool.get("membership", pool["volume"]) for key, pool in POOLS.items()
+    }
     for year_data in (player.get("years") or {}).values():
-        for player_type, volume_stat in volume_stats.items():
+        for player_type, membership_stat in membership_stats.items():
             actual = ((year_data.get(player_type) or {}).get("Actual")) or {}
-            total += _stat_num(actual.get(volume_stat))
+            total += _stat_num(actual.get(membership_stat))
     return total
 
 

@@ -161,20 +161,34 @@
   <div class="mb-16">
     <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ pool.label }}</h2>
     {% set volume_stat = ('fan_' ~ pool.volume.stat) if fantasy else pool.volume.stat %}
+    {% set volume_clean = pool.volume.stat | replace('/', '') | replace('-', '') %}
     <div id="{{ pool.key }}-{{ pool.volume.stat }}" class="chart-section mb-8 scroll-mt-4">
       <h4 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ pool.volume.name }}</h4>
-      <div class="mb-4">
+      <div class="flex flex-wrap gap-4 mb-4">
         <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
           {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
         </select>
+        {% if not pool.volume.isVolume %}
+        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+        {% endif %}
       </div>
       {% for metric in metrics %}
-      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-volume="true" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="raw">
-        <div class="h-80"><canvas id="{{ pool.key }}Volume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
-      </div>
+        {% if pool.volume.isVolume %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-volume="true" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="raw">
+          <div class="h-80"><canvas id="{{ pool.key }}Volume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+        </div>
+        {% else %}
+          {% for adj in adjustments %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-80"><canvas id="{{ pool.key }}{{ volume_clean }}{{ adj.chartSuffix }}{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+          </div>
+          {% endfor %}
+        {% endif %}
       {% endfor %}
-      {{ renderEverybodyMissed(poolMisses.everybody_missed[volume_stat] if poolMisses.everybody_missed is defined else none, pool.volume.name, true) }}
-      {{ renderBiggestMisses(volume_stat, pool.volume.name, true, poolMisses) }}
+      {{ renderEverybodyMissed(poolMisses.everybody_missed[volume_stat] if poolMisses.everybody_missed is defined else none, pool.volume.name, pool.volume.isVolume) }}
+      {{ renderBiggestMisses(volume_stat, pool.volume.name, pool.volume.isVolume, poolMisses) }}
     </div>
 
     {% for statInfo in pool.rates %}

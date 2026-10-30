@@ -2,7 +2,7 @@
 
 Sleeper's season projection (no week) is a full-season line attributed to
 RotoWire, for 2018 through the current season. 2017 and earlier come back
-empty. Counting stats match the NFL.com actuals. Targets are published only
+empty. Counting stats match the nflverse actuals. Targets are published only
 in 2019 and 2020; other seasons omit ``TGT`` rather than storing a zero.
 ``nfl_slug`` comes from the mayscopeland/ffb_ids crosswalk, joined on
 ``sleeper_id``. A missing Sleeper id is matched by name when that name has

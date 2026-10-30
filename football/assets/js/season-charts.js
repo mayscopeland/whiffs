@@ -17,39 +17,54 @@ function initializeSeasonCharts(yearData, projectionSystems, pools, fantasy) {
 
     const volumeStat = statName(pool.volume.stat);
     const volumeLabel = pool.volumeLabel || pool.volume.name;
-    createChart(
-      `${playerType}VolumeMaeChart`,
-      "bar",
-      prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat),
-      `${volumeLabel} MAE`,
-      "MAE"
-    );
-    createChart(
-      `${playerType}VolumeRmseChart`,
-      "bar",
-      prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat),
-      `${volumeLabel} RMSE`,
-      "RMSE"
-    );
+    if (pool.volume && pool.volume.isVolume) {
+      createChart(
+        `${playerType}VolumeMaeChart`,
+        "bar",
+        prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat),
+        `${volumeLabel} MAE`,
+        "MAE"
+      );
+      createChart(
+        `${playerType}VolumeRmseChart`,
+        "bar",
+        prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat),
+        `${volumeLabel} RMSE`,
+        "RMSE"
+      );
+    } else if (pool.volume) {
+      drawRateStatCharts(yearData, playerType, projectionSystems, {
+        stat: volumeStat,
+        name: volumeLabel,
+        cleanName: cleanStatName(pool.volume.stat),
+      });
+    }
 
     (pool.rates || []).forEach((statInfo) => {
-      const stat = statName(statInfo.stat);
-      const cleanName = cleanStatName(stat);
-      const prefix = `${playerType}${cleanName}`;
-      const mae = prepareStatSpecificData(yearData, playerType, stat, "MAE");
-      if (mae) createChart(`${prefix}MaeChart`, "bar", mae, `${statInfo.name} Raw MAE`, "MAE");
-      const rmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE");
-      if (rmse) createChart(`${prefix}RmseChart`, "bar", rmse, `${statInfo.name} Raw RMSE`, "RMSE");
-      const leagueMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "league-adj");
-      if (leagueMae) createChart(`${prefix}LeagueAdjMaeChart`, "bar", leagueMae, `${statInfo.name} League-Adjusted MAE`, "League-Adjusted MAE");
-      const leagueRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "league-adj");
-      if (leagueRmse) createChart(`${prefix}LeagueAdjRmseChart`, "bar", leagueRmse, `${statInfo.name} League-Adjusted RMSE`, "League-Adjusted RMSE");
-      const wlaMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "weighted-league-adj");
-      if (wlaMae) createChart(`${prefix}WLAMaeChart`, "bar", wlaMae, `${statInfo.name} Weighted LA MAE`, "Weighted LA MAE");
-      const wlaRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "weighted-league-adj");
-      if (wlaRmse) createChart(`${prefix}WLARmseChart`, "bar", wlaRmse, `${statInfo.name} Weighted LA RMSE`, "Weighted LA RMSE");
+      drawRateStatCharts(yearData, playerType, projectionSystems, {
+        stat: statName(statInfo.stat),
+        name: statInfo.name,
+        cleanName: cleanStatName(statInfo.stat),
+      });
     });
   });
+}
+
+function drawRateStatCharts(yearData, playerType, projectionSystems, statInfo) {
+  const { stat, name, cleanName } = statInfo;
+  const prefix = `${playerType}${cleanName}`;
+  const mae = prepareStatSpecificData(yearData, playerType, stat, "MAE");
+  if (mae) createChart(`${prefix}MaeChart`, "bar", mae, `${name} Raw MAE`, "MAE");
+  const rmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE");
+  if (rmse) createChart(`${prefix}RmseChart`, "bar", rmse, `${name} Raw RMSE`, "RMSE");
+  const leagueMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "league-adj");
+  if (leagueMae) createChart(`${prefix}LeagueAdjMaeChart`, "bar", leagueMae, `${name} League-Adjusted MAE`, "League-Adjusted MAE");
+  const leagueRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "league-adj");
+  if (leagueRmse) createChart(`${prefix}LeagueAdjRmseChart`, "bar", leagueRmse, `${name} League-Adjusted RMSE`, "League-Adjusted RMSE");
+  const wlaMae = prepareStatSpecificData(yearData, playerType, stat, "MAE", "weighted-league-adj");
+  if (wlaMae) createChart(`${prefix}WLAMaeChart`, "bar", wlaMae, `${name} Weighted LA MAE`, "Weighted LA MAE");
+  const wlaRmse = prepareStatSpecificData(yearData, playerType, stat, "RMSE", "weighted-league-adj");
+  if (wlaRmse) createChart(`${prefix}WLARmseChart`, "bar", wlaRmse, `${name} Weighted LA RMSE`, "Weighted LA RMSE");
 }
 
 function prepareStatSpecificData(yearData, playerType, stat, dataType, adjustment = null) {

@@ -1,69 +1,48 @@
-"""Scrape NFL.com regular-season player leaderboards into football/stats.
+"""Download regular-season player stats from nflverse into football/stats.
 
-Passing, rushing, and receiving pages are fetched with requests and
-BeautifulSoup. Each player is stored under the slug from /players/{slug}/.
+Season totals (including games played) come from nflverse
+``stats_player_reg_{season}.csv``. Each row is joined to ``nfl_slug`` through
+``gsis_id`` on the mayscopeland/ffb_ids crosswalk.
 """
 
 from __future__ import annotations
 
 import argparse
-import time
+import io
+import urllib.error
+import urllib.request
 from datetime import date
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
 
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parent.parent
 STATS_DIR = ROOT / "stats"
-BASE = "https://www.nfl.com"
-PAGE = (
-    BASE + "/stats/player-stats/category/{category}/{season}/reg/all/{sort}/desc"
+NFLVERSE_REG = (
+    "https://github.com/nflverse/nflverse-data/releases/download/"
+    "stats_player/stats_player_reg_{season}.csv"
 )
+FFB_IDS_URL = "https://raw.githubusercontent.com/mayscopeland/ffb_ids/main/player_ids.csv"
 
-HEADERS = {
-    "Accept": "text/html",
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/154.0.0.0 Safari/537.36"
-    ),
-}
-
-# Leaderboard header -> counting column. Headers are lowercased.
-CATEGORIES = {
-    "passing": {
-        "sort": "passingyards",
-        "columns": {
-            "pass yds": "PASS_YDS",
-            "att": "ATT",
-            "cmp": "CMP",
-            "td": "PASS_TD",
-            "int": "INT",
-        },
-    },
-    "rushing": {
-        "sort": "rushingyards",
-        "columns": {
-            "rush yds": "RUSH_YDS",
-            "att": "CAR",
-            "td": "RUSH_TD",
-        },
-    },
-    "receiving": {
-        "sort": "receivingreceptions",
-        "columns": {
-            "rec": "REC",
-            "yds": "REC_YDS",
-            "td": "REC_TD",
-            "tgts": "TGT",
-        },
-    },
+# nflverse column -> Drops counting column.
+NFLVERSE_COLS = {
+    "games": "G",
+    "attempts": "ATT",
+    "completions": "CMP",
+    "passing_yards": "PASS_YDS",
+    "passing_tds": "PASS_TD",
+    "passing_interceptions": "INT",
+    "carries": "CAR",
+    "rushing_yards": "RUSH_YDS",
+    "rushing_tds": "RUSH_TD",
+    "targets": "TGT",
+    "receptions": "REC",
+    "receiving_yards": "REC_YDS",
+    "receiving_tds": "REC_TD",
 }
 
 COUNTING_COLS = [
+    "G",
     "ATT",
     "CMP",
     "PASS_YDS",
@@ -78,242 +57,164 @@ COUNTING_COLS = [
     "REC_TD",
 ]
 
-REQUEST_PAUSE = 0.25
+# Align with projection coverage; earlier nflverse seasons exist but are unused.
+FIRST_SEASON = 2018
 
 
-def header_key(text: str) -> str:
-    return " ".join(text.split()).lower()
+def _read_csv_url(url: str) -> pd.DataFrame:
+    request = urllib.request.Request(url, headers={"User-Agent": "whiffs"})
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return pd.read_csv(io.StringIO(response.read().decode("utf-8")))
 
 
-def parse_number(text: str) -> float:
-    cleaned = text.replace(",", "").strip()
-    if cleaned in {"", "-", "—"}:
-        return 0.0
-    return float(cleaned)
+def _url_exists(url: str) -> bool:
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "whiffs"})
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return 200 <= getattr(response, "status", 200) < 300
+    except urllib.error.HTTPError as exc:
+        if exc.code in {404, 403}:
+            return False
+        # Some hosts reject HEAD; fall through to a tiny GET.
+    except urllib.error.URLError:
+        pass
+    try:
+        frame = _read_csv_url(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, pd.errors.EmptyDataError):
+        return False
+    return not frame.empty
 
 
-def player_slug(href: str) -> str:
-    parts = [part for part in href.split("/") if part]
-    if "players" not in parts:
-        return ""
-    index = parts.index("players")
-    if index + 1 >= len(parts):
-        return ""
-    return parts[index + 1]
+def load_ffb_gsis_slugs() -> pd.DataFrame:
+    ids = _read_csv_url(FFB_IDS_URL)
+    if "gsis_id" not in ids.columns or "nfl_slug" not in ids.columns:
+        raise SystemExit("ffb_ids is missing gsis_id or nfl_slug")
+    keep = ["gsis_id", "nfl_slug"]
+    if "gsis_name" in ids.columns:
+        keep.append("gsis_name")
+    frame = ids[keep].copy()
+    frame["gsis_id"] = frame["gsis_id"].astype(str).str.strip()
+    frame["nfl_slug"] = frame["nfl_slug"].astype(str).str.strip()
+    frame = frame.loc[
+        frame["gsis_id"].ne("")
+        & frame["gsis_id"].str.lower().ne("nan")
+        & frame["nfl_slug"].ne("")
+        & frame["nfl_slug"].str.lower().ne("nan")
+    ]
+    return frame.drop_duplicates(subset=["gsis_id"], keep="first")
 
 
-class Leaderboard:
-    def __init__(self, session: requests.Session) -> None:
-        self.session = session
-
-    def get(self, url: str) -> BeautifulSoup:
-        response = self.session.get(url, timeout=60)
-        response.raise_for_status()
-        time.sleep(REQUEST_PAUSE)
-        return BeautifulSoup(response.text, "lxml")
-
-    def parse_page(self, soup: BeautifulSoup, columns: dict[str, str]) -> list[dict]:
-        table = soup.find("table")
-        if table is None:
-            return []
-        header_cells = table.find("thead")
-        if header_cells is None:
-            return []
-        headers = [header_key(cell.get_text(" ", strip=True)) for cell in header_cells.find_all("th")]
-        indexes = {}
-        for key, column in columns.items():
-            if key not in headers:
-                found = ", ".join(headers)
-                raise SystemExit(f"NFL.com table is missing {key!r}. Headers: {found}")
-            indexes[column] = headers.index(key)
-
-        rows = []
-        body = table.find("tbody") or table
-        for tr in body.find_all("tr"):
-            link = tr.find("a", href=True)
-            if link is None:
-                continue
-            slug = player_slug(link["href"])
-            if not slug:
-                continue
-            cells = tr.find_all("td")
-            record = {
-                "slug": slug,
-                "table_name": link.get_text(" ", strip=True),
-            }
-            for column, index in indexes.items():
-                if index >= len(cells):
-                    record[column] = 0.0
-                    continue
-                record[column] = parse_number(cells[index].get_text(" ", strip=True))
-            rows.append(record)
-        return rows
-
-    def next_url(self, soup: BeautifulSoup, current: str) -> str | None:
-        for link in soup.find_all("a", href=True):
-            if "aftercursor" not in link["href"]:
-                continue
-            if "next" not in link.get_text(" ", strip=True).lower():
-                continue
-            nxt = urljoin(current, link["href"])
-            if nxt != current:
-                return nxt
-        return None
-
-    def canonical(self, url: str) -> str:
-        parts = [part for part in urlsplit(url).path.split("/") if part]
-        if parts and parts[-1].lower() in {"asc", "desc"}:
-            parts[-1] = parts[-1].upper()
-        return BASE + "/" + "/".join(parts)
-
-    def sort_roots(self, season: int, category: str) -> list[str]:
-        """Every column sort, both directions.
-
-        The Next Page link on these leaderboards repeats the second page, so
-        a single sort stops at 50 players. Walking each column both ways
-        collects the top and bottom of every stat the table can rank.
-        """
-        spec = CATEGORIES[category]
-        first = PAGE.format(category=category, season=season, sort=spec["sort"])
-        soup = self.get(first)
-        roots = {self.canonical(first)}
-        for link in soup.select("thead a[href]"):
-            href = urljoin(first, link["href"])
-            if f"/category/{category}/" not in urlsplit(href).path.lower():
-                continue
-            roots.add(self.canonical(href))
-        flipped = set()
-        for root in roots:
-            if root.endswith("/DESC"):
-                flipped.add(root[:-4] + "ASC")
-            elif root.endswith("/ASC"):
-                flipped.add(root[:-3] + "DESC")
-        return sorted(roots | flipped)
-
-    def walk(self, start: str, columns: dict[str, str]) -> list[dict]:
-        url = start
-        seen_urls: set[str] = set()
-        seen_first: set[str] = set()
-        rows: list[dict] = []
-        while url and url not in seen_urls:
-            seen_urls.add(url)
-            soup = self.get(url)
-            page_rows = self.parse_page(soup, columns)
-            if not page_rows:
-                break
-            first = page_rows[0]["slug"]
-            if first in seen_first:
-                break
-            seen_first.add(first)
-            rows.extend(page_rows)
-            url = self.next_url(soup, url)
-        return rows
-
-    def has_players(self, season: int, category: str) -> bool:
-        spec = CATEGORIES[category]
-        url = PAGE.format(category=category, season=season, sort=spec["sort"])
-        soup = self.get(url)
-        return bool(self.parse_page(soup, spec["columns"]))
-
-    def scrape_category(self, season: int, category: str) -> list[dict]:
-        spec = CATEGORIES[category]
-        by_slug: dict[str, dict] = {}
-        for root in self.sort_roots(season, category):
-            for row in self.walk(root, spec["columns"]):
-                by_slug.setdefault(row["slug"], row)
-        return list(by_slug.values())
-
-
-def category_frame(rows: list[dict]) -> pd.DataFrame:
-    records = []
-    for row in rows:
-        records.append(
-            {
-                "nfl_slug": row["slug"],
-                "player_name": row["table_name"],
-                **{key: row[key] for key in row if key not in {"slug", "table_name"}},
-            }
-        )
-    if not records:
-        return pd.DataFrame(columns=["nfl_slug", "player_name"])
-    return pd.DataFrame(records)
-
-
-def scrape_season(board: Leaderboard, season: int) -> pd.DataFrame:
-    frames = []
-    for category in CATEGORIES:
-        rows = board.scrape_category(season, category)
-        print(f"  {season} {category}: {len(rows)} players")
-        frame = category_frame(rows)
-        if not frame.empty:
-            frames.append(frame)
-    if not frames:
+def load_nflverse_season(season: int) -> pd.DataFrame:
+    url = NFLVERSE_REG.format(season=season)
+    try:
+        reg = _read_csv_url(url)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return pd.DataFrame()
+        raise
+    if "season_type" in reg.columns:
+        reg = reg.loc[reg["season_type"].astype(str).str.upper().eq("REG")].copy()
+    if reg.empty:
         return pd.DataFrame()
-    merged = frames[0]
-    for frame in frames[1:]:
-        merged = merged.merge(frame, on="nfl_slug", how="outer", suffixes=("", "_dup"))
-        if "player_name_dup" in merged.columns:
-            merged["player_name"] = merged["player_name"].fillna(merged["player_name_dup"])
-            merged = merged.drop(columns=["player_name_dup"])
+
+    out = pd.DataFrame(
+        {
+            "gsis_id": reg["player_id"].astype(str).str.strip(),
+            "player_name": reg.get(
+                "player_display_name",
+                reg.get("player_name", pd.Series(index=reg.index, dtype=str)),
+            ),
+        }
+    )
+    for source, dest in NFLVERSE_COLS.items():
+        if source in reg.columns:
+            out[dest] = pd.to_numeric(reg[source], errors="coerce").fillna(0)
+        else:
+            out[dest] = 0.0
+
+    volume = out[["ATT", "CAR", "TGT"]].sum(axis=1)
+    out = out.loc[volume > 0].copy()
+    return out
+
+
+def scrape_season(season: int, ids: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Build one season file: nflverse totals joined to nfl_slug on gsis_id."""
+    if ids is None:
+        ids = load_ffb_gsis_slugs()
+    frame = load_nflverse_season(season)
+    if frame.empty:
+        return pd.DataFrame()
+
+    before = len(frame)
+    merged = frame.merge(ids[["gsis_id", "nfl_slug"]], on="gsis_id", how="left")
+    matched = merged["nfl_slug"].notna().sum()
+    dropped = before - int(matched)
+    print(f"  {season}: {matched} players ({dropped} without an nfl_slug)")
+    merged = merged.loc[merged["nfl_slug"].notna()].copy()
+    if merged.empty:
+        return pd.DataFrame()
+
+    if "gsis_name" in ids.columns:
+        names = ids.drop_duplicates("gsis_id").set_index("gsis_id")["gsis_name"]
+        named = merged["gsis_id"].map(names)
+        use_name = named.notna() & named.astype(str).str.strip().ne("")
+        merged.loc[use_name, "player_name"] = named.loc[use_name].astype(str).str.strip()
+
     for column in COUNTING_COLS:
         if column not in merged.columns:
-            merged[column] = 0
+            merged[column] = 0.0
         merged[column] = pd.to_numeric(merged[column], errors="coerce").fillna(0)
+
     merged.insert(0, "season", season)
     return merged[["season", "nfl_slug", "player_name", *COUNTING_COLS]].sort_values(
         ["player_name", "nfl_slug"]
     )
 
 
-def latest_season(board: Leaderboard) -> int:
+def latest_season() -> int:
     year = date.today().year + 1
-    while year >= 1920:
-        if board.has_players(year, "passing"):
+    while year >= FIRST_SEASON:
+        if _url_exists(NFLVERSE_REG.format(season=year)):
             return year
         year -= 1
-    raise SystemExit("NFL.com returned no passing leaderboard.")
+    raise SystemExit("nflverse returned no regular-season player stats.")
 
 
-def seasons_to_fetch(board: Leaderboard, args: argparse.Namespace) -> list[int]:
+def seasons_to_fetch(args: argparse.Namespace) -> list[int]:
     if args.season:
         return sorted(set(args.season))
-    start = args.last if args.last is not None else latest_season(board)
-    stop = args.first if args.first is not None else 1920
+    start = args.last if args.last is not None else latest_season()
+    stop = args.first if args.first is not None else FIRST_SEASON
     seasons = []
     year = start
     while year >= stop:
-        if not board.has_players(year, "passing"):
-            if args.first is None:
-                break
-            year -= 1
-            continue
-        seasons.append(year)
+        if _url_exists(NFLVERSE_REG.format(season=year)):
+            seasons.append(year)
+        elif args.first is None:
+            break
         year -= 1
     return seasons
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Scrape NFL.com player leaderboards")
-    parser.add_argument("--season", type=int, action="append", help="Scrape this season only. Repeatable.")
+    parser = argparse.ArgumentParser(description="Download nflverse player season stats")
+    parser.add_argument("--season", type=int, action="append", help="Fetch this season only. Repeatable.")
     parser.add_argument("--first", type=int, help="Oldest season to include when walking backward.")
     parser.add_argument("--last", type=int, help="Newest season to include when walking backward.")
     parser.add_argument("--refresh", action="store_true", help="Rewrite seasons that already have a CSV.")
     args = parser.parse_args()
 
-    session = requests.Session()
-    session.headers.update(HEADERS)
-    board = Leaderboard(session)
     STATS_DIR.mkdir(parents=True, exist_ok=True)
+    ids = load_ffb_gsis_slugs()
+    print(f"Loaded {len(ids)} gsis_id -> nfl_slug rows from ffb_ids")
 
-    for season in seasons_to_fetch(board, args):
+    for season in seasons_to_fetch(args):
         path = STATS_DIR / f"{season}.csv"
         if path.exists() and not args.refresh and not args.season:
             print(f"Skipping {season}; {path.name} exists")
             continue
-        print(f"Scraping {season}...")
-        # Walking the default range probes passing once to find the edge, then
-        # scrapes it again here. --season scrapes each category once.
-        frame = scrape_season(board, season)
+        print(f"Fetching {season}...")
+        frame = scrape_season(season, ids=ids)
         if frame.empty:
             print(f"  No players for {season}")
             continue

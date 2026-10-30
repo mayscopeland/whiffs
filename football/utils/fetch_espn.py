@@ -5,7 +5,7 @@ ESPN keeps a full-season projection (stat source 1, split 0, period 0) for
 that season split only carries stat 210 for most players, so the counting
 columns would be zeros. Weekly splits are later in-season updates, not the
 preseason season line, so 2023 is left out and a leftover file is removed.
-Counting stats are the same box-score columns as the NFL.com actuals.
+Counting stats are the same box-score columns as the nflverse actuals.
 ``nfl_slug`` comes from the mayscopeland/ffb_ids crosswalk, joined on
 ``espn_id``. A missing ESPN id is matched by name when that name has one slug.
 

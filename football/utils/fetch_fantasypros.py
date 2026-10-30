@@ -3,7 +3,7 @@
 The draft board is the season-long consensus at
 ``/nfl/projections/{position}.php?week=draft&year={season}`` for quarterbacks,
 running backs, wide receivers, and tight ends. Counting stats match the
-NFL.com actuals except targets, which FantasyPros does not publish, so ``TGT``
+nflverse actuals except targets, which FantasyPros does not publish, so ``TGT``
 is omitted. Receptions are the ``rec_att`` column. ``nfl_slug`` comes from the
 mayscopeland/ffb_ids crosswalk, joined on ``fantasypros_id``. A missing
 FantasyPros id is matched by name when that name has one slug.
@@ -44,7 +44,7 @@ from rates import COUNTING_COLS  # noqa: E402
 
 PROJECTIONS_DIR = ROOT / "projections"
 
-# 2018 is the first season with NFL.com actuals here. Earlier FantasyPros
+# 2018 is the first season with nflverse actuals here. Earlier FantasyPros
 # draft pages only list a handful of players.
 FIRST_SEASON = 2018
 

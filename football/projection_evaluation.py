@@ -1,7 +1,8 @@
 """Evaluate NFL projection accuracy (Drops) and write the site cache.
 
-Playing time is separate for passing, rushing, and receiving. A player can
-land in more than one pool. With no projection files, this still writes an
+Each pool scores counting stats per game (attempts, yards, touchdowns, and so
+on). A player can land in more than one pool. Projections without games played
+are treated as a full season. With no projection files, this still writes an
 empty cache so the site can render.
 """
 
@@ -27,7 +28,13 @@ ADP_DIR = ROOT / "adp"
 FAN_ADP_TOP_N = 150
 
 sys.path.insert(0, str(ROOT / "utils"))
-from rates import PLAYER_TYPES, POOLS, add_rate_stats  # noqa: E402
+from rates import (  # noqa: E402
+    PLAYER_TYPES,
+    POOLS,
+    add_rate_stats,
+    ensure_projection_games,
+    scored_rate_stats,
+)
 
 PROJECTION_SYSTEMS: List[str] = [
     "ESPN",
@@ -135,6 +142,10 @@ def load_actual_stats(year: int) -> pd.DataFrame:
     frame["player_id"] = as_player_id(frame["nfl_slug"])
     frame = frame.drop(columns=["nfl_slug"])
     frame = frame[frame["player_id"].notna()]
+    if "G" not in frame.columns:
+        print(f"Warning: {path.name} has no G column; re-run npm run football:stats")
+        return pd.DataFrame()
+    frame["G"] = pd.to_numeric(frame["G"], errors="coerce")
     return add_rate_stats(frame)
 
 
@@ -153,6 +164,7 @@ def load_projections(year: int, system: str) -> pd.DataFrame:
     frame = frame.rename(columns={id_column: "xPlayerId"})
     frame["xPlayerId"] = as_player_id(frame["xPlayerId"])
     frame = frame[frame["xPlayerId"].notna()]
+    frame = ensure_projection_games(frame, year)
     return add_rate_stats(frame)
 
 
@@ -264,33 +276,32 @@ def evaluate_pool(
         print("  Skipping - missing data")
         return [], None
 
-    volume = pool["volume"]
+    membership = pool.get("membership", pool["volume"])
+    weight_col = pool.get("weight", pool["volume"])
+    rate_stats = scored_rate_stats(pool)
     if fantasy:
         adp_ids = load_fantasy_adp_ids(year, FAN_ADP_TOP_N)
         if not adp_ids:
             print(f"  Skipping - no FantasyPros top-{FAN_ADP_TOP_N} ADP for {year}")
             return [], None
         actual_df = actual_df[actual_df["player_id"].isin(adp_ids)]
-    actual_df = restrict_pool(actual_df, volume, 0, at_least=False)
+    actual_df = restrict_pool(actual_df, membership, 0, at_least=False)
+    actual_df = restrict_pool(actual_df, weight_col, 0, at_least=False)
     if actual_df.empty:
         print("  Skipping - no players in this pool")
         return [], None
     if fantasy:
         print(f"  Using {len(actual_df)} {player_type} players from top-{FAN_ADP_TOP_N} ADP")
 
-    rate_stats = list(pool["rates"])
-    # Only score stats this projection file actually publishes (after rate
-    # columns are derived). Missing targets still allows YDS/REC and TD/REC.
-    stat_names: List[str] = []
-    if volume in proj_df.columns:
-        stat_names.append(volume)
-    stat_names.extend(stat for stat in rate_stats if stat in proj_df.columns)
+    # Only score per-game stats this projection can derive (counting numerators
+    # present after rates are added). Missing targets still skips TGT/G.
+    stat_names = [stat for stat in rate_stats if stat in proj_df.columns]
     if not stat_names:
         print("  Skipping - projection has no stats for this pool")
         return [], None
 
     actual_league_avgs = {
-        stat: weighted_mean(actual_df[stat], actual_df[volume])
+        stat: weighted_mean(actual_df[stat], actual_df[weight_col])
         for stat in rate_stats
         if stat in actual_df.columns
     }
@@ -316,16 +327,12 @@ def evaluate_pool(
         if proj_col is not None and stat in actual_league_avgs:
             merged[proj_col] = merged[proj_col].fillna(actual_league_avgs[stat])
 
-    proj_volume = merged_column(merged, volume, "_y")
-    if proj_volume is not None:
-        merged[proj_volume] = merged[proj_volume].fillna(pool["prior"])
-
-    actual_volume = merged_column(merged, volume, "_x")
+    actual_weight = merged_column(merged, weight_col, "_x")
     proj_league_avgs = {}
     for stat in rate_stats:
         proj_col = merged_column(merged, stat, "_y")
-        if proj_col is not None and actual_volume is not None:
-            avg = weighted_mean(merged[proj_col], merged[actual_volume])
+        if proj_col is not None and actual_weight is not None:
+            avg = weighted_mean(merged[proj_col], merged[actual_weight])
             if avg is not None:
                 proj_league_avgs[stat] = avg
 
@@ -346,31 +353,25 @@ def evaluate_pool(
     for stat in stat_names:
         actual_col = merged_column(merged, stat, "_x")
         proj_col = merged_column(merged, stat, "_y")
-        if actual_col is None or proj_col is None or actual_volume is None:
+        if actual_col is None or proj_col is None or actual_weight is None:
             continue
-        mask = merged[[actual_col, proj_col]].notna().all(axis=1)
+        mask = merged[[actual_col, proj_col, actual_weight]].notna().all(axis=1)
         clean = merged.loc[mask]
         if clean.empty:
             continue
 
         actual_vals = clean[actual_col].to_numpy(dtype=float)
         proj_vals = clean[proj_col].to_numpy(dtype=float)
-        weights = clean[actual_volume].to_numpy(dtype=float)
+        weights = clean[actual_weight].to_numpy(dtype=float)
 
-        if stat in rate_stats:
-            if stat not in actual_league_avgs or stat not in proj_league_avgs:
-                continue
-            actual_la = actual_vals - actual_league_avgs[stat]
-            proj_la = proj_vals - proj_league_avgs[stat]
-            raw_metrics = calculate_metrics(actual_vals, proj_vals)
-            la_metrics = calculate_metrics(actual_la, proj_la)
-            wla_metrics = calculate_metrics(actual_la, proj_la, weights=weights)
-            miss_errors = np.abs(actual_la - proj_la) * weights
-        else:
-            raw_metrics = calculate_metrics(actual_vals, proj_vals)
-            la_metrics = raw_metrics
-            wla_metrics = raw_metrics
-            miss_errors = np.abs(actual_vals - proj_vals)
+        if stat not in actual_league_avgs or stat not in proj_league_avgs:
+            continue
+        actual_la = actual_vals - actual_league_avgs[stat]
+        proj_la = proj_vals - proj_league_avgs[stat]
+        raw_metrics = calculate_metrics(actual_vals, proj_vals)
+        la_metrics = calculate_metrics(actual_la, proj_la)
+        wla_metrics = calculate_metrics(actual_la, proj_la, weights=weights)
+        miss_errors = np.abs(actual_la - proj_la) * weights
 
         temp = clean.copy()
         temp["miss_error"] = miss_errors
@@ -518,7 +519,8 @@ def generate_players_data(merged_dataframes: Dict) -> List[Dict[str, Any]]:
     players: Dict[str, Dict[str, Any]] = {}
     for (year, system, player_type), merged in merged_dataframes.items():
         pool = POOLS[player_type]
-        keep_stats = list(dict.fromkeys([*pool["counting"], pool["volume"], *pool["rates"]]))
+        rate_stats = scored_rate_stats(pool)
+        keep_stats = list(dict.fromkeys([*pool["counting"], *rate_stats]))
         for _, row in merged.iterrows():
             player_id = str(row["playerId"])
             info = players.setdefault(
@@ -534,7 +536,7 @@ def generate_players_data(merged_dataframes: Dict) -> List[Dict[str, Any]]:
                 actual_stats: Dict[str, Any] = {}
                 for stat in keep_stats:
                     actual_stats[stat] = _stat_value(row, stat)
-                for stat in pool["rates"]:
+                for stat in rate_stats:
                     la_col = f"{stat}_actual_la"
                     if la_col in row.index and not pd.isna(row[la_col]):
                         actual_stats[f"{stat}_la"] = row[la_col]
@@ -548,7 +550,7 @@ def generate_players_data(merged_dataframes: Dict) -> List[Dict[str, Any]]:
                     proj_stats[stat] = row[proj_col]
                 else:
                     proj_stats[stat] = None
-            for stat in pool["rates"]:
+            for stat in rate_stats:
                 la_col = f"{stat}_proj_la"
                 if la_col in row.index and not pd.isna(row[la_col]):
                     proj_stats[f"{stat}_la"] = row[la_col]
@@ -568,9 +570,9 @@ def generate_players_data(merged_dataframes: Dict) -> List[Dict[str, Any]]:
                 if player_type not in present:
                     present.append(player_type)
                 actual = typed.get("Actual") or {}
-                volume = actual.get(POOLS[player_type]["volume"])
-                if isinstance(volume, (int, float)) and not pd.isna(volume):
-                    totals[player_type] += float(volume)
+                membership = actual.get(POOLS[player_type].get("membership", POOLS[player_type]["volume"]))
+                if isinstance(membership, (int, float)) and not pd.isna(membership):
+                    totals[player_type] += float(membership)
         player["types"] = present
         ranked = [player_type for player_type in present if totals[player_type] > 0]
         if ranked:

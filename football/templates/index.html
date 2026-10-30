@@ -16,10 +16,10 @@
   <div class="text-lg text-slate-600 dark:text-slate-300 max-w-4xl mx-auto mb-16">
     <h1 class="text-center text-balance text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-slate-100 mb-8">An open-source framework for analyzing NFL player projection accuracy</h1>
     <p class="mb-6 text-lg sm:text-xl">
-      <strong>Drops</strong> applies the <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a> evaluation framework to football, the same approach Bricks uses for the NBA: separate playing time from rates, adjust for league average, and weight errors by opportunity. (See the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a>.)
+      <strong>Drops</strong> applies the <a href="https://whiffs.org" class="text-blue-600 dark:text-blue-400 hover:underline">Whiffs</a> evaluation framework to football: score counting stats per game, adjust for league average, and weight errors by games played. (See the <a href="/methodology/" class="text-blue-600 dark:text-blue-400 hover:underline">methodology</a>.)
     </p>
     <p class="mb-8 text-lg sm:text-xl">
-      Passing is weighted by attempts, rushing by carries, and receiving by targets. Projection systems in <span class="font-mono text-sm">football/projection_evaluation.py</span> are scored when their CSVs line up with a season of actuals.
+      Passing, rushing, and receiving are scored as per-game rates (attempts, yards, touchdowns, and the rest). Projection systems in <span class="font-mono text-sm">football/projection_evaluation.py</span> are scored when their CSVs line up with a season of actuals.
     </p>
   </div>
 
