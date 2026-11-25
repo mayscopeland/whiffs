@@ -109,7 +109,7 @@
               </li>
               {% for year in site.years | reverse %}
               <li>
-                <a href="/seasons/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/seasons/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year }}</a>
+                <a href="/seasons/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url.startswith('/seasons/' ~ year ~ '/') %} text-blue-500{% endif %}">{{ year }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -130,7 +130,28 @@
               </li>
               {% for year in site.years | reverse %}
               <li>
-                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year }}</a>
+                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url.startswith('/fantasy/' ~ year ~ '/') %} text-blue-500{% endif %}">{{ year }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </li>
+        <li>
+          {% set rookies_active = page_url.startswith('/rookies/') %}
+          <button id="dropdownRookiesLink" data-dropdown-toggle="dropdownRookies" class="{% if rookies_active %}flex items-center justify-between w-full py-2 px-3 text-white bg-blue-600 rounded md:bg-transparent md:text-blue-600 md:p-0 md:w-auto{% else %}flex items-center justify-between w-full py-2 px-3 text-slate-100 rounded hover:bg-slate-800 md:hover:bg-transparent md:border-0 md:hover:text-blue-600 md:p-0 md:w-auto{% endif %}">
+            Rookies
+            <svg class="w-2.5 h-2.5 ms-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div id="dropdownRookies" class="z-10 hidden font-normal bg-slate-900 divide-y divide-slate-700 rounded-lg shadow w-44">
+            <ul class="py-2 text-sm text-slate-400">
+              <li>
+                <a href="/rookies/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/rookies/' %} text-blue-500{% endif %}">All-Time</a>
+              </li>
+              {% for year in site.years | reverse %}
+              <li>
+                <a href="/rookies/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url.startswith('/rookies/' ~ year ~ '/') %} text-blue-500{% endif %}">{{ year }}</a>
               </li>
               {% endfor %}
             </ul>

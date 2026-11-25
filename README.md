@@ -56,6 +56,14 @@ Projections and stats are not included in the repository.
 
    [Historical Steamer and ZiPS projections](https://www.fangraphs.com/projections) are available on FanGraphs for members. Place them in `baseball/projections/` in a format like `steamer_2012_bat.csv`.
 
+4. **Build rookie-eligibility cohorts** (optional; needed for Rookies pages)
+
+   ```bash
+   npm run baseball:rookies
+   ```
+
+   Writes `baseball/rookies/{year}.csv` for players who entered each season under MLB's official rookie thresholds (130 AB / 50 IP / 45 active-roster days). Roster-day ledgers cache under `baseball/stats/roster_days/`.
+
 ### Build the site
 
 ```bash

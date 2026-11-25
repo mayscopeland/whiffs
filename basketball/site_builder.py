@@ -27,6 +27,146 @@ SYSTEM_COLORS = {
     "DARKO": "text-blue-700 dark:text-blue-400",
 }
 
+RATE_STATS = [
+    {"name": "PTS/MIN", "stat": "PTS/MIN"},
+    {"name": "OREB/MIN", "stat": "OREB/MIN"},
+    {"name": "DREB/MIN", "stat": "DREB/MIN"},
+    {"name": "REB/MIN", "stat": "REB/MIN"},
+    {"name": "STL/MIN", "stat": "STL/MIN"},
+    {"name": "AST/MIN", "stat": "AST/MIN"},
+    {"name": "BLK/MIN", "stat": "BLK/MIN"},
+    {"name": "FTA/MIN", "stat": "FTA/MIN"},
+    {"name": "FGA/MIN", "stat": "FGA/MIN"},
+    {"name": "3PA/MIN", "stat": "FG3A/MIN"},
+    {"name": "TOV/MIN", "stat": "TOV/MIN"},
+    {"name": "FT%", "stat": "FTM/FTA"},
+    {"name": "FG%", "stat": "FGM/FGA"},
+    {"name": "3P%", "stat": "FG3M/FG3A"},
+    {"name": "3PA/FGA", "stat": "FG3A/FGA"},
+    {"name": "MIN/G", "stat": "MIN/G"},
+]
+
+FANTASY_RATE_STATS = [
+    {"name": "MIN/G", "stat": "MIN/G"},
+    {"name": "PTS/MIN", "stat": "PTS/MIN"},
+    {"name": "REB/MIN", "stat": "REB/MIN"},
+    {"name": "AST/MIN", "stat": "AST/MIN"},
+    {"name": "STL/MIN", "stat": "STL/MIN"},
+    {"name": "BLK/MIN", "stat": "BLK/MIN"},
+    {"name": "TOV/MIN", "stat": "TOV/MIN"},
+    {"name": "3PM/MIN", "stat": "FG3M/MIN"},
+    {"name": "FG%", "stat": "FGM/FGA"},
+    {"name": "FT%", "stat": "FTM/FTA"},
+]
+
+
+def stat_slug(stat: str) -> str:
+    display = stat
+    if display.startswith("fan_"):
+        display = display[4:]
+    return display.replace("/", "-").replace("(", "").replace(")", "").lower()
+
+
+def page_slug(stat: str) -> str:
+    return f"player-{stat_slug(stat)}"
+
+
+def chart_clean(stat: str) -> str:
+    display = stat[4:] if stat.startswith("fan_") else stat
+    return display.replace("/", "").replace("(", "").replace(")", "").replace("-", "")
+
+
+def season_stat_defs(variant: str = "season") -> list[dict[str, Any]]:
+    fantasy = variant == "fantasy"
+    prefix = "fan_" if fantasy else ""
+    rates = FANTASY_RATE_STATS if fantasy else RATE_STATS
+    pages = [
+        {
+            "pool": "player",
+            "pool_label": "Player",
+            "name": "Minutes",
+            "stat": f"{prefix}MIN",
+            "slug": page_slug("MIN"),
+            "is_volume": True,
+            "volume_kind": "minutes",
+            "chart_id": "playerVolume",
+        },
+        {
+            "pool": "player",
+            "pool_label": "Player",
+            "name": "Games",
+            "stat": f"{prefix}G",
+            "slug": page_slug("G"),
+            "is_volume": True,
+            "volume_kind": "games",
+            "chart_id": "playerG",
+        },
+    ]
+    for rate in rates:
+        data_stat = f"{prefix}{rate['stat']}"
+        pages.append(
+            {
+                "pool": "player",
+                "pool_label": "Player",
+                "name": rate["name"],
+                "stat": data_stat,
+                "slug": page_slug(rate["stat"]),
+                "is_volume": False,
+                "volume_kind": None,
+                "chart_id": f"player{chart_clean(data_stat)}",
+            }
+        )
+    return pages
+
+
+def summary_columns(variant: str = "season") -> list[dict[str, Any]]:
+    fantasy = variant == "fantasy"
+    prefix = "fan_" if fantasy else ""
+    rates = FANTASY_RATE_STATS if fantasy else RATE_STATS
+    cols = [
+        {"label": "MIN", "title": "Minutes", "stat": f"{prefix}MIN", "isVolume": True, "slug": page_slug("MIN")},
+        {"label": "G", "title": "Games", "stat": f"{prefix}G", "isVolume": True, "slug": page_slug("G")},
+    ]
+    for rate in rates:
+        cols.append(
+            {
+                "label": rate["name"],
+                "title": rate["name"],
+                "name": rate["name"],
+                "stat": f"{prefix}{rate['stat']}",
+                "slug": page_slug(rate["stat"]),
+                "isVolume": False,
+            }
+        )
+    return cols
+
+
+def filter_year_data(year_data: dict[str, Any] | None, stat: str) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    rows = year_data.get("player") or []
+    return {"player": [row for row in rows if row.get("stat") == stat]}
+
+
+def filter_year_data_summary(year_data: dict[str, Any] | None, columns: list[dict[str, Any]]) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    wanted = {c["stat"] for c in columns}
+    return {"player": [row for row in (year_data.get("player") or []) if row.get("stat") in wanted]}
+
+
+def nav_stats_for_pages(pages: list[dict[str, Any]], summary_url: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "stat": page["stat"],
+            "name": page["name"],
+            "label": page["name"],
+            "href": f"{summary_url}{page['slug']}/",
+            "slug": page["slug"],
+        }
+        for page in pages
+    ]
+
 
 def end_year_to_season(end_year: int | str) -> str:
     end = int(end_year)
@@ -238,35 +378,87 @@ def build_site(
         _write(site_dir / out_rel, html)
         print(f"  Wrote {out_rel}")
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        season = end_year_to_season(year)
-        html = env.get_template("season.html").render(
-            **base_ctx,
-            page_url=f"/seasons/{season}/",
-            year=year,
-            year_key=year_key,
-            season=season,
-            yearData=years.get(year_key),
-            title=f"{season} Projection Accuracy",
-        )
-        _write(site_dir / "seasons" / season / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} season pages")
+    def write_season_variant(
+        *,
+        variant: str,
+        section: str,
+        summary_template: str,
+        title_suffix: str,
+        heading_suffix: str,
+        blurb: str | None = None,
+    ) -> None:
+        pages = season_stat_defs(variant)
+        columns = summary_columns(variant)
+        summary_count = 0
+        stat_count = 0
+        for year in site.get("years", []):
+            year_key = str(year)
+            season = end_year_to_season(year)
+            summary_url = f"/{section}/{season}/"
+            nav = nav_stats_for_pages(pages, summary_url)
+            year_full = years.get(year_key)
+            year_misses = misses.get(year_key) or {}
+            for col in columns:
+                col["href"] = f"{summary_url}{col['slug']}/"
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        season = end_year_to_season(year)
-        html = env.get_template("fantasy_season.html").render(
-            **base_ctx,
-            page_url=f"/fantasy/{season}/",
-            year=year,
-            year_key=year_key,
-            season=season,
-            yearData=years.get(year_key),
-            title=f"{season} Fantasy Projection Accuracy",
-        )
-        _write(site_dir / "fantasy" / season / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
+            html = env.get_template(summary_template).render(
+                **base_ctx,
+                page_url=summary_url,
+                summary_url=summary_url,
+                year=year,
+                year_key=year_key,
+                season=season,
+                yearData=filter_year_data_summary(year_full, columns),
+                title=f"{season} {title_suffix}",
+                heading=f"{season} {heading_suffix}",
+                blurb=blurb.format(season=season) if blurb else None,
+                summaryColumns=columns,
+                navStats=nav,
+                variant=variant,
+            )
+            _write(site_dir / section / season / "index.html", html)
+            summary_count += 1
+
+            for page in pages:
+                page_url = f"{summary_url}{page['slug']}/"
+                html = env.get_template("season_stat.html").render(
+                    **base_ctx,
+                    page_url=page_url,
+                    summary_url=summary_url,
+                    year=year,
+                    year_key=year_key,
+                    season=season,
+                    yearData=filter_year_data(year_full, page["stat"]),
+                    yearMisses=year_misses,
+                    title=f"{season} {page['name']}",
+                    heading=f"{season}: {page['name']}",
+                    navStats=nav,
+                    variant=variant,
+                    current_slug=page["slug"],
+                    stat_page=page,
+                )
+                _write(site_dir / section / season / page["slug"] / "index.html", html)
+                stat_count += 1
+        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+
+    write_season_variant(
+        variant="season",
+        section="seasons",
+        summary_template="season.html",
+        title_suffix="Projection Accuracy",
+        heading_suffix="Projection Accuracy",
+    )
+    write_season_variant(
+        variant="fantasy",
+        section="fantasy",
+        summary_template="fantasy_season.html",
+        title_suffix="Fantasy Projection Accuracy",
+        heading_suffix="Fantasy Projection Accuracy",
+        blurb=(
+            "Fantasy-relevant accuracy for {season}, excluding players with fewer than "
+            "1,500 minutes. Limited to minutes, games, minutes per game, and 9-cat rates."
+        ),
+    )
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(

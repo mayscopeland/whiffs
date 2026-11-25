@@ -2,9 +2,15 @@
   {% for pool in pools %}
   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
     <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">{{ pool.label }}:</span>
-    <a href="#{{ pool.key }}-{{ pool.volume.stat }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ pool.volume.name }}</a>
+    {% set vol_slug = pool.volume.slug if pool.volume.slug is defined else (pool.key ~ '-' ~ (pool.volume.stat | replace('/', '-') | lower)) %}
+    {% set vol_href = pool.volume.href if pool.volume.href is defined else ((summary_url ~ vol_slug ~ '/') if summary_url is defined and summary_url else ('#' ~ pool.key ~ '-' ~ pool.volume.stat)) %}
+    {% set vol_current = current_slug is defined and current_slug == vol_slug %}
+    <a href="{{ vol_href }}" class="{% if vol_current %}font-semibold text-slate-900 dark:text-slate-100{% else %}text-blue-600 dark:text-blue-400 hover:underline{% endif %}">{{ pool.volume.name }}</a>
     {% for rate in pool.rates %}
-      <a href="#{{ pool.key }}-{{ rate.stat | replace('/', '-') }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ rate.name }}</a>
+      {% set rate_slug = rate.slug if rate.slug is defined else (pool.key ~ '-' ~ (rate.stat | replace('/', '-') | lower)) %}
+      {% set rate_href = rate.href if rate.href is defined else ((summary_url ~ rate_slug ~ '/') if summary_url is defined and summary_url else ('#' ~ pool.key ~ '-' ~ (rate.stat | replace('/', '-')))) %}
+      {% set rate_current = current_slug is defined and current_slug == rate_slug %}
+      <a href="{{ rate_href }}" class="{% if rate_current %}font-semibold text-slate-900 dark:text-slate-100{% else %}text-blue-600 dark:text-blue-400 hover:underline{% endif %}">{{ rate.name }}</a>
     {% endfor %}
   </div>
   {% endfor %}

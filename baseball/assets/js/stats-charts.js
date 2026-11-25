@@ -149,3 +149,20 @@ function initializeFantasyStatsCharts(yearsData, projectionSystems) {
     pitchingStats: FANTASY_STATS_PITCHING,
   });
 }
+
+const ROOKIES_STATS_BATTING = DEFAULT_STATS_BATTING.map((s) => ({
+  ...s,
+  stat: `rok_${s.stat}`,
+}));
+
+const ROOKIES_STATS_PITCHING = DEFAULT_STATS_PITCHING.map((s) => ({
+  ...s,
+  stat: `rok_${s.stat}`,
+}));
+
+function initializeRookiesStatsCharts(yearsData, projectionSystems) {
+  initializeStatsCharts(yearsData, projectionSystems, {
+    battingStats: ROOKIES_STATS_BATTING,
+    pitchingStats: ROOKIES_STATS_PITCHING,
+  });
+}

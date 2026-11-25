@@ -15,29 +15,31 @@ function initializeSeasonCharts(yearData, projectionSystems, pools, fantasy) {
     const rows = yearData[playerType] || [];
     if (!rows.length) return;
 
-    const volumeStat = statName(pool.volume.stat);
-    const volumeLabel = pool.volumeLabel || pool.volume.name;
-    if (pool.volume && pool.volume.isVolume) {
-      createChart(
-        `${playerType}VolumeMaeChart`,
-        "bar",
-        prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat),
-        `${volumeLabel} MAE`,
-        "MAE"
-      );
-      createChart(
-        `${playerType}VolumeRmseChart`,
-        "bar",
-        prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat),
-        `${volumeLabel} RMSE`,
-        "RMSE"
-      );
-    } else if (pool.volume) {
-      drawRateStatCharts(yearData, playerType, projectionSystems, {
-        stat: volumeStat,
-        name: volumeLabel,
-        cleanName: cleanStatName(pool.volume.stat),
-      });
+    if (pool.volume) {
+      const volumeStat = statName(pool.volume.stat);
+      const volumeLabel = pool.volumeLabel || pool.volume.name;
+      if (pool.volume.isVolume) {
+        createChart(
+          `${playerType}VolumeMaeChart`,
+          "bar",
+          prepareVolumeMaeData(yearData, playerType, projectionSystems, volumeStat),
+          `${volumeLabel} MAE`,
+          "MAE"
+        );
+        createChart(
+          `${playerType}VolumeRmseChart`,
+          "bar",
+          prepareVolumeRmseData(yearData, playerType, projectionSystems, volumeStat),
+          `${volumeLabel} RMSE`,
+          "RMSE"
+        );
+      } else {
+        drawRateStatCharts(yearData, playerType, projectionSystems, {
+          stat: volumeStat,
+          name: volumeLabel,
+          cleanName: cleanStatName(pool.volume.stat),
+        });
+      }
     }
 
     (pool.rates || []).forEach((statInfo) => {
@@ -263,8 +265,16 @@ function initializeSummaryTable(yearData, rootId, playerTypes) {
   render();
 }
 
-function bindSeasonCharts(yearData, projectionSystems, pools, fantasy) {
+function bindSeasonCharts(yearData, projectionSystems, pools, fantasy, options = {}) {
   seasonProjectionSystems = projectionSystems || [];
-  initializeSeasonCharts(yearData, seasonProjectionSystems, pools, fantasy);
-  initializeSummaryTable(yearData, fantasy ? "fantasy-summary" : "season-summary", (pools || []).map((pool) => pool.key));
+  if (!options.summaryOnly) {
+    initializeSeasonCharts(yearData, seasonProjectionSystems, pools, fantasy);
+  }
+  if (!options.chartsOnly) {
+    initializeSummaryTable(
+      yearData,
+      fantasy ? "fantasy-summary" : "season-summary",
+      (pools || []).map((pool) => pool.key)
+    );
+  }
 }

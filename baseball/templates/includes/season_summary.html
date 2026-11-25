@@ -1,0 +1,71 @@
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted' },
+  { "value": 'league-adj', "name": 'League-Adjusted' },
+  { "value": 'raw', "name": 'Raw' }
+] %}
+{% set summary_id = summary_id if summary_id is defined else 'season-summary' %}
+{% set summary_layout = summary_layout if summary_layout is defined else 'stacked' %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ heading }}</h1>
+    {% if blurb %}
+    <p class="max-w-3xl mx-auto text-lg text-slate-700 dark:text-slate-300">{{ blurb }}</p>
+    {% endif %}
+  </div>
+
+  <div id="{{ summary_id }}" class="mb-12">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Summary</h2>
+      <div class="flex flex-wrap gap-4">
+        <select class="summary-metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Error metric">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        <select class="summary-adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" aria-label="Adjustment">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="{% if summary_layout == 'grid' %}grid grid-cols-1 xl:grid-cols-2 gap-6{% else %}space-y-6{% endif %}">
+      {% for summary in [
+        { "title": "Batting", "columns": hittingSummary },
+        { "title": "Pitching", "columns": pitchingSummary }
+      ] %}
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300 mb-2">{{ summary.title }}</h3>
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          <table class="w-full text-sm text-slate-700 dark:text-slate-300">
+            <thead class="text-xs uppercase text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
+              <tr>
+                <th scope="col" class="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left">System</th>
+                {% for col in summary.columns %}
+                <th scope="col" class="px-2 py-2 text-center font-medium whitespace-nowrap normal-case" title="{{ col.title }}">
+                  <a href="{{ col.href }}" class="hover:underline">{{ col.label }}</a>
+                  {% if col.isVolume %}<span class="summary-raw-tag hidden font-normal normal-case text-slate-500 dark:text-slate-400"> raw</span>{% endif %}
+                </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for system in site.meta.projection_systems %}
+              <tr class="border-t border-slate-200 dark:border-slate-700" data-system="{{ system }}" data-order="{{ loop.index0 }}">
+                <th scope="row" class="sticky left-0 z-10 bg-white dark:bg-slate-900 px-3 py-1.5 text-left font-medium whitespace-nowrap text-slate-900 dark:text-slate-100">{{ system }}</th>
+                {% for col in summary.columns %}
+                <td class="summary-cell px-2 py-1.5 text-center font-mono tabular-nums" data-player-type="{{ col.playerType }}" data-stat="{{ col.stat }}"{% if col.isVolume %} data-volume="true"{% endif %}></td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% include "includes/stat-nav.html" %}
+</div>

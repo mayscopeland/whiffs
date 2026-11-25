@@ -58,12 +58,14 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
     return;
   }
 
-  const battingStats = options.battingStats || DEFAULT_SEASON_BATTING_STATS;
-  const pitchingStats = options.pitchingStats || DEFAULT_SEASON_PITCHING_STATS;
+  const battingStats = options.battingStats !== undefined ? options.battingStats : DEFAULT_SEASON_BATTING_STATS;
+  const pitchingStats = options.pitchingStats !== undefined ? options.pitchingStats : DEFAULT_SEASON_PITCHING_STATS;
   const battingVolumeStat = options.battingVolumeStat || "PA";
   const pitchingVolumeStat = options.pitchingVolumeStat || "BF";
   const battingVolumeLabel = options.battingVolumeLabel || "Batting PA";
   const pitchingVolumeLabel = options.pitchingVolumeLabel || "Pitching BF";
+  const includeBattingVolume = options.includeBattingVolume !== false;
+  const includePitchingVolume = options.includePitchingVolume !== false;
 
   // Helper function to clean stat names for chart IDs
   function cleanStatName(stat) {
@@ -127,13 +129,13 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
 
   // Batting Charts
   if (yearData.batting && yearData.batting.length > 0) {
-    // Volume MAE/RMSE
-    const battingVolumeMaeData = prepareVolumeMaeData(yearData, "batting", projectionSystems, battingVolumeStat);
-    createChart("battingVolumeMaeChart", "bar", battingVolumeMaeData, `${battingVolumeLabel} MAE`, "MAE");
-    const battingVolumeRmseData = prepareVolumeRmseData(yearData, "batting", projectionSystems, battingVolumeStat);
-    createChart("battingVolumeRmseChart", "bar", battingVolumeRmseData, `${battingVolumeLabel} RMSE`, "RMSE");
+    if (includeBattingVolume) {
+      const battingVolumeMaeData = prepareVolumeMaeData(yearData, "batting", projectionSystems, battingVolumeStat);
+      createChart("battingVolumeMaeChart", "bar", battingVolumeMaeData, `${battingVolumeLabel} MAE`, "MAE");
+      const battingVolumeRmseData = prepareVolumeRmseData(yearData, "batting", projectionSystems, battingVolumeStat);
+      createChart("battingVolumeRmseChart", "bar", battingVolumeRmseData, `${battingVolumeLabel} RMSE`, "RMSE");
+    }
 
-    // Individual batting stat charts
     battingStats.forEach((statInfo) => {
       const cleanName = cleanStatName(statInfo.stat);
 
@@ -174,13 +176,13 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
 
   // Pitching Charts
   if (yearData.pitching && yearData.pitching.length > 0) {
-    // Volume MAE/RMSE
-    const pitchingVolumeMaeData = prepareVolumeMaeData(yearData, "pitching", projectionSystems, pitchingVolumeStat);
-    createChart("pitchingVolumeMaeChart", "bar", pitchingVolumeMaeData, `${pitchingVolumeLabel} MAE`, "MAE");
-    const pitchingVolumeRmseData = prepareVolumeRmseData(yearData, "pitching", projectionSystems, pitchingVolumeStat);
-    createChart("pitchingVolumeRmseChart", "bar", pitchingVolumeRmseData, `${pitchingVolumeLabel} RMSE`, "RMSE");
+    if (includePitchingVolume) {
+      const pitchingVolumeMaeData = prepareVolumeMaeData(yearData, "pitching", projectionSystems, pitchingVolumeStat);
+      createChart("pitchingVolumeMaeChart", "bar", pitchingVolumeMaeData, `${pitchingVolumeLabel} MAE`, "MAE");
+      const pitchingVolumeRmseData = prepareVolumeRmseData(yearData, "pitching", projectionSystems, pitchingVolumeStat);
+      createChart("pitchingVolumeRmseChart", "bar", pitchingVolumeRmseData, `${pitchingVolumeLabel} RMSE`, "RMSE");
+    }
 
-    // Individual pitching stat charts
     pitchingStats.forEach((statInfo) => {
       const cleanName = cleanStatName(statInfo.stat);
 
@@ -228,6 +230,27 @@ function initializeFantasySeasonCharts(yearData, projectionSystems) {
     pitchingVolumeStat: "fan_BF",
     battingVolumeLabel: "Fantasy Batting PA",
     pitchingVolumeLabel: "Fantasy Pitching BF",
+  });
+}
+
+const ROOKIES_SEASON_BATTING_STATS = DEFAULT_SEASON_BATTING_STATS.map((s) => ({
+  ...s,
+  stat: `rok_${s.stat}`,
+}));
+
+const ROOKIES_SEASON_PITCHING_STATS = DEFAULT_SEASON_PITCHING_STATS.map((s) => ({
+  ...s,
+  stat: `rok_${s.stat}`,
+}));
+
+function initializeRookiesSeasonCharts(yearData, projectionSystems) {
+  initializeSeasonCharts(yearData, projectionSystems, {
+    battingStats: ROOKIES_SEASON_BATTING_STATS,
+    pitchingStats: ROOKIES_SEASON_PITCHING_STATS,
+    battingVolumeStat: "rok_PA",
+    pitchingVolumeStat: "rok_BF",
+    battingVolumeLabel: "Rookies Batting PA",
+    pitchingVolumeLabel: "Rookies Pitching BF",
   });
 }
 

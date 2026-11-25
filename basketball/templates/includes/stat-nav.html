@@ -1,16 +1,26 @@
-{# Compact jump links for stat sections.
-   Expects navStats: list of dicts with name/label and optional anchor/stat. #}
+{# Jump links for player stats. Path links when summary_url/href present; else hash anchors. #}
 <nav class="mb-8 text-sm text-slate-600 dark:text-slate-400" aria-label="Stat categories">
   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
     <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Stats:</span>
     {% for s in navStats %}
       {% set label = s.label if s.label is defined else (s.name if s.name is defined else s.stat) %}
-      {% if s.anchor is defined %}
-        {% set sid = s.anchor %}
+      {% if s.href is defined %}
+        {% set href = s.href %}
+        {% set slug = s.slug if s.slug is defined else none %}
+      {% elif summary_url is defined and summary_url %}
+        {% set slug = 'player-' ~ (s.stat | replace('fan_', '') | replace('/', '-') | lower) %}
+        {% set href = summary_url ~ slug ~ '/' %}
       {% else %}
-        {% set sid = 'player-' ~ (s.stat | replace('fan_', '') | replace('/', '-')) %}
+        {% if s.anchor is defined %}
+          {% set sid = s.anchor %}
+        {% else %}
+          {% set sid = 'player-' ~ (s.stat | replace('fan_', '') | replace('/', '-')) %}
+        {% endif %}
+        {% set href = '#' ~ sid %}
+        {% set slug = none %}
       {% endif %}
-      <a href="#{{ sid }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ label }}</a>
+      {% set is_current = current_slug is defined and slug and current_slug == slug %}
+      <a href="{{ href }}" class="{% if is_current %}font-semibold text-slate-900 dark:text-slate-100{% else %}text-blue-600 dark:text-blue-400 hover:underline{% endif %}">{{ label }}</a>
     {% endfor %}
   </div>
 </nav>

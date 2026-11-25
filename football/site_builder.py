@@ -77,6 +77,20 @@ def sanitize(obj: Any) -> Any:
     return obj
 
 
+def stat_slug(stat: str) -> str:
+    display = stat[4:] if stat.startswith("fan_") else stat
+    return display.replace("/", "-").replace("(", "").replace(")", "").lower()
+
+
+def page_slug(pool: str, stat: str) -> str:
+    return f"{pool}-{stat_slug(stat)}"
+
+
+def chart_clean(stat: str) -> str:
+    display = stat[4:] if stat.startswith("fan_") else stat
+    return display.replace("/", "").replace("-", "")
+
+
 def template_pools() -> list[dict[str, Any]]:
     pools = []
     for key, pool in POOLS.items():
@@ -90,6 +104,7 @@ def template_pools() -> list[dict[str, Any]]:
                 "baseName": stat_base_name(key, stat),
                 "isVolume": False,
                 "overview": stat in overview,
+                "slug": page_slug(key, stat),
             }
             for stat in pool["rates"]
         ]
@@ -106,11 +121,75 @@ def template_pools() -> list[dict[str, Any]]:
                     "baseName": stat_base_name(key, volume_stat),
                     "isVolume": not volume_as_rate,
                     "overview": volume_stat in overview,
+                    "slug": page_slug(key, volume_stat),
                 },
                 "rates": rates,
             }
         )
     return pools
+
+
+def season_stat_defs(pools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    pages = []
+    for pool in pools:
+        volume = pool["volume"]
+        pages.append(
+            {
+                "pool": pool["key"],
+                "pool_label": pool["label"],
+                "name": volume["name"],
+                "stat": volume["stat"],
+                "slug": volume["slug"],
+                "is_volume": volume["isVolume"],
+                "chart_id": (
+                    f"{pool['key']}Volume"
+                    if volume["isVolume"]
+                    else f"{pool['key']}{chart_clean(volume['stat'])}"
+                ),
+            }
+        )
+        for rate in pool["rates"]:
+            pages.append(
+                {
+                    "pool": pool["key"],
+                    "pool_label": pool["label"],
+                    "name": rate["name"],
+                    "stat": rate["stat"],
+                    "slug": rate["slug"],
+                    "is_volume": False,
+                    "chart_id": f"{pool['key']}{chart_clean(rate['stat'])}",
+                }
+            )
+    return pages
+
+
+def filter_year_data(year_data: dict[str, Any] | None, pool: str, stats: set[str]) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    rows = year_data.get(pool) or []
+    return {pool: [row for row in rows if row.get("stat") in stats]}
+
+
+def filter_year_data_summary(year_data: dict[str, Any] | None, pools: list[dict[str, Any]], fantasy: bool) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    out: dict[str, Any] = {}
+    for pool in pools:
+        wanted = {pool["volume"]["stat"], *[r["stat"] for r in pool["rates"]]}
+        if fantasy:
+            wanted = {f"fan_{s}" for s in wanted}
+        rows = year_data.get(pool["key"]) or []
+        out[pool["key"]] = [row for row in rows if row.get("stat") in wanted]
+    return out
+
+
+def pools_with_hrefs(pools: list[dict[str, Any]], summary_url: str) -> list[dict[str, Any]]:
+    enriched = []
+    for pool in pools:
+        volume = {**pool["volume"], "href": f"{summary_url}{pool['volume']['slug']}/"}
+        rates = [{**rate, "href": f"{summary_url}{rate['slug']}/"} for rate in pool["rates"]]
+        enriched.append({**pool, "volume": volume, "rates": rates})
+    return enriched
 
 
 def create_env() -> Environment:
@@ -249,16 +328,16 @@ def build_site(
     print(f"  Wrote {index_path.relative_to(site_dir)} ({len(players)} players)")
 
     env = create_env()
+    pools = template_pools()
     base_ctx = {
         "site": site,
         "years": years,
         "misses": misses,
         "system_colors": SYSTEM_COLORS,
-        "pools": template_pools(),
         "brand": "Drops",
     }
 
-    pages = [
+    static_pages = [
         ("index.html", "index.html", "/", {"title": "NFL Projection Accuracy"}),
         ("stats.html", "stats/index.html", "/stats/", {"title": "All-Time Projection Accuracy"}),
         ("fantasy.html", "fantasy/index.html", "/fantasy/", {"title": "Fantasy Leaderboards"}),
@@ -266,38 +345,64 @@ def build_site(
         ("404.html", "404.html", "/404.html", {"title": "Page Not Found"}),
     ]
 
-    for template_name, out_rel, page_url, extra in pages:
-        html = env.get_template(template_name).render(**base_ctx, page_url=page_url, **extra)
+    for template_name, out_rel, page_url, extra in static_pages:
+        html = env.get_template(template_name).render(**base_ctx, pools=pools, page_url=page_url, **extra)
         _write(site_dir / out_rel, html)
         print(f"  Wrote {out_rel}")
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        html = env.get_template("season.html").render(
-            **base_ctx,
-            page_url=f"/seasons/{year}/",
-            year=year,
-            year_key=year_key,
-            season=str(year),
-            yearData=years.get(year_key),
-            title=f"{year} Projection Accuracy",
-        )
-        _write(site_dir / "seasons" / year_key / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} season pages")
+    pages = season_stat_defs(pools)
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        html = env.get_template("fantasy_season.html").render(
-            **base_ctx,
-            page_url=f"/fantasy/{year}/",
-            year=year,
-            year_key=year_key,
-            season=str(year),
-            yearData=years.get(year_key),
-            title=f"{year} Fantasy Projection Accuracy",
-        )
-        _write(site_dir / "fantasy" / year_key / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
+    def write_season_variant(*, fantasy: bool, section: str, title_suffix: str) -> None:
+        summary_count = 0
+        stat_count = 0
+        for year in site.get("years", []):
+            year_key = str(year)
+            summary_url = f"/{section}/{year}/"
+            year_full = years.get(year_key)
+            year_misses = misses.get(year_key) or {}
+            pools_linked = pools_with_hrefs(pools, summary_url)
+            html = env.get_template("season.html" if not fantasy else "fantasy_season.html").render(
+                **base_ctx,
+                pools=pools_linked,
+                page_url=summary_url,
+                summary_url=summary_url,
+                year=year,
+                year_key=year_key,
+                season=str(year),
+                yearData=filter_year_data_summary(year_full, pools, fantasy),
+                title=f"{year} {title_suffix}",
+                fantasy=fantasy,
+            )
+            _write(site_dir / section / year_key / "index.html", html)
+            summary_count += 1
+
+            for page in pages:
+                data_stat = f"fan_{page['stat']}" if fantasy else page["stat"]
+                page_url = f"{summary_url}{page['slug']}/"
+                pool_obj = next(p for p in pools_linked if p["key"] == page["pool"])
+                html = env.get_template("season_stat.html").render(
+                    **base_ctx,
+                    pools=pools_linked,
+                    page_url=page_url,
+                    summary_url=summary_url,
+                    year=year,
+                    year_key=year_key,
+                    season=str(year),
+                    yearData=filter_year_data(year_full, page["pool"], {data_stat}),
+                    yearMisses=year_misses,
+                    title=f"{year} {page['pool_label']} {page['name']}",
+                    heading=f"{year} {page['pool_label']}: {page['name']}",
+                    fantasy=fantasy,
+                    current_slug=page["slug"],
+                    stat_page={**page, "data_stat": data_stat},
+                    pool=pool_obj,
+                )
+                _write(site_dir / section / year_key / page["slug"] / "index.html", html)
+                stat_count += 1
+        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+
+    write_season_variant(fantasy=False, section="seasons", title_suffix="Projection Accuracy")
+    write_season_variant(fantasy=True, section="fantasy", title_suffix="Fantasy Projection Accuracy")
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(

@@ -103,7 +103,7 @@
               </li>
               {% for year in site.years | reverse %}
               <li>
-                <a href="/seasons/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/seasons/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year | season }}</a>
+                <a href="/seasons/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url.startswith('/seasons/' ~ year ~ '/') %} text-blue-500{% endif %}">{{ year | season }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -124,7 +124,7 @@
               </li>
               {% for year in site.years | reverse %}
               <li>
-                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url == '/fantasy/' ~ year ~ '/' %} text-blue-500{% endif %}">{{ year | season }}</a>
+                <a href="/fantasy/{{ year }}/" class="block px-4 py-2 hover:bg-slate-700 hover:text-slate-100{% if page_url.startswith('/fantasy/' ~ year ~ '/') %} text-blue-500{% endif %}">{{ year | season }}</a>
               </li>
               {% endfor %}
             </ul>

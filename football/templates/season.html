@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set fantasy = false %}
+{% set fantasy = fantasy if fantasy is defined else false %}
 
 {% block content %}
 {% include "includes/season_body.html" %}
@@ -13,24 +13,7 @@
     const yearData = {{ yearData | tojson }};
     const projectionSystems = {{ site.meta.projection_systems | tojson }};
     const pools = {{ pools | tojson }};
-    bindSeasonCharts(yearData, projectionSystems, pools, false);
-    document.querySelectorAll('.chart-section').forEach(section => {
-      const metricSelect = section.querySelector('.metric-select');
-      const adjustmentSelect = section.querySelector('.adjustment-select');
-      if (!metricSelect) return;
-      function updateVisibility() {
-        const selectedMetric = metricSelect.value;
-        const selectedAdjustment = adjustmentSelect ? adjustmentSelect.value : 'raw';
-        section.querySelectorAll('.chart-container').forEach(container => {
-          const isVolume = container.dataset.volume === 'true';
-          const shouldShow = container.dataset.metric === selectedMetric && (isVolume || container.dataset.adjustment === selectedAdjustment);
-          container.style.display = shouldShow ? 'block' : 'none';
-        });
-      }
-      metricSelect.addEventListener('change', updateVisibility);
-      if (adjustmentSelect) adjustmentSelect.addEventListener('change', updateVisibility);
-      updateVisibility();
-    });
+    bindSeasonCharts(yearData, projectionSystems, pools, {{ fantasy | tojson }}, { summaryOnly: true });
   });
 </script>
 {% endblock %}

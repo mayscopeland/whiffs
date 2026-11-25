@@ -1,0 +1,89 @@
+{% macro renderEverybodyMissed(everybodyMissedData, statName, showVolume=false) %}
+  {% if everybodyMissedData %}
+    {% set ns = namespace(systemsWithData=[]) %}
+    {% for miss in everybodyMissedData %}
+      {% for system, projection in miss.projections.items() %}
+        {% if projection and system not in ns.systemsWithData %}
+          {% set _ = ns.systemsWithData.append(system) %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Everybody Missed for {{ statName }}</h3>
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4 overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="px-4 py-2">Player</th>
+              <th class="px-4 py-2 text-right">Actual</th>
+              {% for system in ns.systemsWithData %}<th class="px-4 py-2 text-right">{{ system }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for miss in everybodyMissedData %}
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-2"><a href="/players/{{ miss.player_id }}/" class="text-blue-600 dark:text-blue-400 hover:underline">{{ miss.player_name }}</a></td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
+              {% for system in ns.systemsWithData %}
+                {% set projection = miss.projections[system] %}
+                <td class="px-4 py-2 font-mono text-right">
+                  {% if projection %}
+                    <div>{{ projection.projected | toFixed(0 if showVolume else 4) }}</div>
+                    <div class="text-xs text-red-600 dark:text-red-400">({{ projection.error | toFixed(1) }})</div>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro renderBiggestMisses(stat, statName, showVolume, poolMisses) %}
+<div class="mb-8">
+  <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Individual Misses for {{ statName }}</h3>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for system in site.meta.projection_systems %}
+      {% set miss_ns = namespace(rows=none) %}
+      {% set statMisses = poolMisses.player_misses[stat] if poolMisses and poolMisses.player_misses else none %}
+      {% if statMisses %}
+        {% for missResult in statMisses %}
+          {% if missResult.system == system %}
+            {% set miss_ns.rows = missResult.biggest_misses %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      {% if miss_ns.rows %}
+      <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+        <h4 class="text-lg font-medium {{ system_colors[system] or 'text-slate-600 dark:text-slate-400' }} mb-4">{{ system }}</h4>
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+          <thead class="text-xs uppercase bg-slate-50 dark:bg-slate-800">
+            <tr>
+              <th class="px-4 py-2">Rank</th>
+              <th class="px-4 py-2">Player</th>
+              <th class="px-4 py-2 text-right">Proj</th>
+              <th class="px-4 py-2 text-right">Actual</th>
+              <th class="px-4 py-2 text-right">Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for miss in miss_ns.rows[:10] %}
+            <tr class="border-b border-slate-200 dark:border-slate-700">
+              <td class="px-4 py-2 font-mono">{{ loop.index }}</td>
+              <td class="px-4 py-2"><a href="/players/{{ miss.player_id }}/" class="text-blue-600 dark:text-blue-400 hover:underline">{{ miss.player_name }}</a></td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.projected | toFixed(0 if showVolume else 4) }}</td>
+              <td class="px-4 py-2 font-mono text-right">{{ miss.actual | toFixed(0 if showVolume else 4) }}</td>
+              <td class="px-4 py-2 font-mono text-right text-red-600 dark:text-red-400">{{ miss.error | toFixed(1) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}

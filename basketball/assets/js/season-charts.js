@@ -23,10 +23,12 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
     return;
   }
 
-  const playerStats = options.playerStats || DEFAULT_SEASON_STATS;
+  const playerStats = options.playerStats !== undefined ? options.playerStats : DEFAULT_SEASON_STATS;
   const volumeStat = options.volumeStat || "MIN";
   const volumeLabel = options.volumeLabel || "Minutes";
   const gamesStat = options.gamesStat || "G";
+  const includeMinutes = options.includeMinutes !== false;
+  const includeGames = options.includeGames !== false;
 
   function cleanStatName(stat) {
     return String(stat).replace(/^fan_/, "").replace(/[\/\(\)\-]/g, "");
@@ -79,10 +81,14 @@ function initializeSeasonCharts(yearData, projectionSystems, options = {}) {
 
   if (!yearData.player || yearData.player.length === 0) return;
 
-  createChart("playerVolumeMaeChart", "bar", prepareVolumeMaeData(yearData, "player", projectionSystems, volumeStat), `${volumeLabel} MAE`, "MAE");
-  createChart("playerVolumeRmseChart", "bar", prepareVolumeRmseData(yearData, "player", projectionSystems, volumeStat), `${volumeLabel} RMSE`, "RMSE");
-  createChart("playerGMaeChart", "bar", prepareVolumeMaeData(yearData, "player", projectionSystems, gamesStat), "Games MAE", "MAE");
-  createChart("playerGRmseChart", "bar", prepareVolumeRmseData(yearData, "player", projectionSystems, gamesStat), "Games RMSE", "RMSE");
+  if (includeMinutes) {
+    createChart("playerVolumeMaeChart", "bar", prepareVolumeMaeData(yearData, "player", projectionSystems, volumeStat), `${volumeLabel} MAE`, "MAE");
+    createChart("playerVolumeRmseChart", "bar", prepareVolumeRmseData(yearData, "player", projectionSystems, volumeStat), `${volumeLabel} RMSE`, "RMSE");
+  }
+  if (includeGames) {
+    createChart("playerGMaeChart", "bar", prepareVolumeMaeData(yearData, "player", projectionSystems, gamesStat), "Games MAE", "MAE");
+    createChart("playerGRmseChart", "bar", prepareVolumeRmseData(yearData, "player", projectionSystems, gamesStat), "Games RMSE", "RMSE");
+  }
 
   playerStats.forEach((statInfo) => {
     const cleanName = cleanStatName(statInfo.stat);

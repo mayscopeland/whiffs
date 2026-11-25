@@ -10,6 +10,7 @@
     "baseball:serve": "uv run python -m http.server 8080 --directory baseball/_site",
     "baseball:deploy": "npx wrangler pages deploy --cwd baseball",
     "baseball:stats": "uv run python baseball/utils/fetch_mlb_stats.py",
+    "baseball:rookies": "uv run python -u baseball/utils/build_rookie_eligibility.py",
     "baseball:marcel": "uv run python baseball/utils/marcel-like.py",
     "basketball": "npm run basketball:evals && npm run basketball:site && npm run basketball:css",
     "basketball:evals": "uv run python basketball/projection_evaluation.py",

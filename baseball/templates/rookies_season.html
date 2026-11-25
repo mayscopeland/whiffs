@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set summary_id = 'rookies-summary' %}
+
+{% block content %}
+{% include "includes/season_summary.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/season-charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const yearData = {{ yearData | tojson }};
+  initializeSummaryTable(yearData, "rookies-summary");
+});
+</script>
+{% endblock %}

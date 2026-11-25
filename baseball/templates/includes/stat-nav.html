@@ -1,20 +1,42 @@
-{# Compact jump links for batting/pitching stat sections.
-   Expects battingNavStats and pitchingNavStats: lists of dicts with a "stat" key. #}
+{# Jump links for batting/pitching stats.
+   When summary_url/href is set, links go to per-stat pages; otherwise hash anchors (all-time pages). #}
 <nav class="mb-8 text-sm text-slate-600 dark:text-slate-400 space-y-1" aria-label="Stat categories">
   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
     <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Batting:</span>
     {% for s in battingNavStats %}
-      {% set label = s.stat | replace('fan_', '') %}
-      {% set sid = 'batting-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '')) %}
-      <a href="#{{ sid }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ label }}</a>
+      {% set label = s.stat | replace('fan_', '') | replace('rok_', '') %}
+      {% if s.href is defined %}
+        {% set href = s.href %}
+        {% set slug = s.slug if s.slug is defined else none %}
+      {% elif summary_url is defined and summary_url %}
+        {% set slug = 'batting-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '') | lower) %}
+        {% set href = summary_url ~ slug ~ '/' %}
+      {% else %}
+        {% set sid = 'batting-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '')) %}
+        {% set href = '#' ~ sid %}
+        {% set slug = none %}
+      {% endif %}
+      {% set is_current = current_slug is defined and slug and current_slug == slug %}
+      <a href="{{ href }}" class="{% if is_current %}font-semibold text-slate-900 dark:text-slate-100{% else %}text-blue-600 dark:text-blue-400 hover:underline{% endif %}">{{ label }}</a>
     {% endfor %}
   </div>
   <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
     <span class="font-medium text-slate-800 dark:text-slate-200 shrink-0">Pitching:</span>
     {% for s in pitchingNavStats %}
-      {% set label = s.stat | replace('fan_', '') %}
-      {% set sid = 'pitching-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '')) %}
-      <a href="#{{ sid }}" class="text-blue-600 dark:text-blue-400 hover:underline">{{ label }}</a>
+      {% set label = s.stat | replace('fan_', '') | replace('rok_', '') %}
+      {% if s.href is defined %}
+        {% set href = s.href %}
+        {% set slug = s.slug if s.slug is defined else none %}
+      {% elif summary_url is defined and summary_url %}
+        {% set slug = 'pitching-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '') | lower) %}
+        {% set href = summary_url ~ slug ~ '/' %}
+      {% else %}
+        {% set sid = 'pitching-' ~ (label | replace('/', '-') | replace('(', '') | replace(')', '')) %}
+        {% set href = '#' ~ sid %}
+        {% set slug = none %}
+      {% endif %}
+      {% set is_current = current_slug is defined and slug and current_slug == slug %}
+      <a href="{{ href }}" class="{% if is_current %}font-semibold text-slate-900 dark:text-slate-100{% else %}text-blue-600 dark:text-blue-400 hover:underline{% endif %}">{{ label }}</a>
     {% endfor %}
   </div>
 </nav>

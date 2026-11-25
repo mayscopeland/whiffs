@@ -80,6 +80,7 @@ STATS_DIR = ROOT / "stats"
 PROJECTIONS_DIR = ROOT / "projections"
 REPORTS_DIR = ROOT / "reports"
 ADP_DIR = ROOT / "adp"
+ROOKIES_DIR = ROOT / "rookies"
 
 # PA or BF assigned when a player is missing from a projection.
 MISSING_PLAYING_TIME = 100
@@ -340,6 +341,28 @@ def load_fantasy_adp_ids(year: int, top_n: int = FAN_ADP_TOP_N) -> List[str]:
     ids = (
         top.drop_duplicates(subset=["mlbam_id"], keep="first")
         .head(top_n)["mlbam_id"]
+        .astype(int)
+        .astype(str)
+        .tolist()
+    )
+    return ids
+
+
+def load_rookie_ids(year: int) -> List[str]:
+    """Return MLBAM IDs for players who entered the season with rookie eligibility."""
+    path = ROOKIES_DIR / f"{year}.csv"
+    if not path.exists():
+        return []
+
+    rookies = pd.read_csv(path)
+    if "playerId" not in rookies.columns:
+        print(f"Warning: {path} missing playerId column")
+        return []
+
+    rookies["playerId"] = pd.to_numeric(rookies["playerId"], errors="coerce")
+    ids = (
+        rookies.dropna(subset=["playerId"])
+        .drop_duplicates(subset=["playerId"], keep="first")["playerId"]
         .astype(int)
         .astype(str)
         .tolist()
@@ -815,6 +838,7 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                             )
                             all_stats = list(set(all_cols + rate_stats))
                             all_fan_stats = [f"fan_{s}" for s in fan_rate_stats]
+                            all_rok_stats = [f"rok_{s}" for s in rate_stats]
 
                             # Raw actual stats
                             for stat in all_stats:
@@ -825,7 +849,7 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                                     val = player_row[actual_col]
                                     actual_stats[stat] = None if pd.isna(val) else val
 
-                            for stat in all_fan_stats:
+                            for stat in all_fan_stats + all_rok_stats:
                                 actual_col = (
                                     f"{stat}_x" if f"{stat}_x" in player_row else stat
                                 )
@@ -904,6 +928,7 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                         )
                         all_stats = list(set(all_cols + rate_stats))
                         all_fan_stats = [f"fan_{s}" for s in fan_rate_stats]
+                        all_rok_stats = [f"rok_{s}" for s in rate_stats]
 
                         # Raw projected stats
                         for stat in all_stats:
@@ -912,7 +937,7 @@ def generate_players_data_from_merged(merged_dataframes: Dict) -> List[Dict[str,
                                 val = player_row[proj_col]
                                 proj_stats[stat] = None if pd.isna(val) else val
 
-                        for stat in all_fan_stats:
+                        for stat in all_fan_stats + all_rok_stats:
                             proj_col = f"{stat}_y"
                             if proj_col in player_row:
                                 val = player_row[proj_col]
@@ -970,9 +995,15 @@ def generate_summary_spreadsheet(results: List[ProjectionResult], output_dir: Pa
 
     data = []
     for r in results:
-        is_fantasy = r.stat.startswith("fan_")
-        stat_group = "Fantasy" if is_fantasy else "Standard"
-        stat_name = r.stat.replace("fan_", "") if is_fantasy else r.stat
+        if r.stat.startswith("fan_"):
+            stat_group = "Fantasy"
+            stat_name = r.stat.replace("fan_", "", 1)
+        elif r.stat.startswith("rok_"):
+            stat_group = "Rookies"
+            stat_name = r.stat.replace("rok_", "", 1)
+        else:
+            stat_group = "Standard"
+            stat_name = r.stat
 
         data.append({
             "Year": r.year,
@@ -1030,6 +1061,10 @@ def run_evaluation():
                 fantasy_results = process_fantasy_stats(year, system, player_type)
                 all_results.extend(fantasy_results)
 
+                # Process rookies stats (same columns as standard, restricted cohort)
+                rookies_results = process_rookies_stats(year, system, player_type)
+                all_results.extend(rookies_results)
+
     print(f"\nCompleted evaluation. Total results: {len(all_results)}")
     if not all_results:
         print("No projection files overlap baseball/stats. Writing an empty site cache.")
@@ -1039,11 +1074,27 @@ def run_evaluation():
     for year in YEARS:
         for player_type in PLAYER_TYPES:
             if player_type == "batting":
-                rate_stats = BATTING_RATE_STATS + [f"fan_{s}" for s in FAN_BATTING_RATE_STATS]
-                volume_stats = BATTING_VOLUME_STATS + [f"fan_{s}" for s in FAN_BATTING_VOLUME_STATS]
+                rate_stats = (
+                    BATTING_RATE_STATS
+                    + [f"fan_{s}" for s in FAN_BATTING_RATE_STATS]
+                    + [f"rok_{s}" for s in BATTING_RATE_STATS]
+                )
+                volume_stats = (
+                    BATTING_VOLUME_STATS
+                    + [f"fan_{s}" for s in FAN_BATTING_VOLUME_STATS]
+                    + [f"rok_{s}" for s in BATTING_VOLUME_STATS]
+                )
             else:
-                rate_stats = PITCHING_RATE_STATS + [f"fan_{s}" for s in FAN_PITCHING_RATE_STATS]
-                volume_stats = PITCHING_VOLUME_STATS + [f"fan_{s}" for s in FAN_PITCHING_VOLUME_STATS]
+                rate_stats = (
+                    PITCHING_RATE_STATS
+                    + [f"fan_{s}" for s in FAN_PITCHING_RATE_STATS]
+                    + [f"rok_{s}" for s in PITCHING_RATE_STATS]
+                )
+                volume_stats = (
+                    PITCHING_VOLUME_STATS
+                    + [f"fan_{s}" for s in FAN_PITCHING_VOLUME_STATS]
+                    + [f"rok_{s}" for s in PITCHING_VOLUME_STATS]
+                )
             all_stats_for_type = sorted(list(set(rate_stats + volume_stats)))
 
             for stat in all_stats_for_type:
@@ -1617,6 +1668,150 @@ def process_fantasy_stats(
         results.append(result)
         print(
             f"    fan_{stat}: RMSE={raw_metrics['rmse']:.4f}, LA-RMSE={la_metrics['rmse']:.4f}, WLA-RMSE={wla_metrics['rmse']:.4f}"
+        )
+
+    return results
+
+
+def process_rookies_stats(
+    year: int, system: str, player_type: str
+) -> List[ProjectionResult]:
+    """Process full standard stats for players with rookie eligibility intact."""
+    print(f"Processing rookies stats for {system} {year} {player_type}...")
+
+    actual_df = load_actual_stats(year, player_type)
+    proj_df = load_projections(year, system, player_type)
+    rookie_ids = load_rookie_ids(year)
+
+    if not rookie_ids:
+        print(f"  Skipping - no rookie eligibility cohort for {year}")
+        return []
+
+    if actual_df.empty or proj_df.empty:
+        return []
+
+    actual_df["playerId"] = actual_df["playerId"].astype(str)
+    proj_df["xMLBAMID"] = proj_df["xMLBAMID"].astype(str)
+
+    playing_time_col = "PA" if player_type == "batting" else "BF"
+    actual_df = actual_df[actual_df["playerId"].isin(rookie_ids)]
+
+    if actual_df.empty:
+        print(f"  Skipping - no {player_type} players in rookie cohort")
+        return []
+
+    print(f"  Using {len(actual_df)} {player_type} players from rookie cohort")
+
+    if player_type == "batting":
+        volume_stats = BATTING_VOLUME_STATS
+        rate_stats = BATTING_RATE_STATS
+    else:
+        volume_stats = PITCHING_VOLUME_STATS
+        rate_stats = PITCHING_RATE_STATS
+    all_rok_stats = volume_stats + rate_stats
+
+    actual_league_avgs = {}
+    for stat in rate_stats:
+        if stat in actual_df.columns and playing_time_col in actual_df.columns:
+            weights = actual_df[playing_time_col]
+            actual_league_avgs[stat] = np.average(actual_df[stat], weights=weights)
+
+    merged_df = actual_df.merge(
+        proj_df, left_on="playerId", right_on="xMLBAMID", how="left"
+    )
+    if merged_df.empty:
+        return []
+
+    playing_time_col_x = f"{playing_time_col}_x"
+
+    for stat in rate_stats:
+        proj_col = f"{stat}_y"
+        if proj_col in merged_df.columns and stat in actual_league_avgs:
+            merged_df[proj_col] = merged_df[proj_col].fillna(actual_league_avgs[stat])
+
+    for stat in volume_stats:
+        proj_col = f"{stat}_y"
+        if proj_col in merged_df.columns:
+            merged_df[proj_col] = merged_df[proj_col].fillna(MISSING_PLAYING_TIME)
+
+    proj_league_avgs = {}
+    for stat in rate_stats:
+        proj_col = f"{stat}_y"
+        if proj_col in merged_df.columns and playing_time_col_x in merged_df.columns:
+            weights = merged_df[playing_time_col_x]
+            proj_league_avgs[stat] = np.average(merged_df[proj_col], weights=weights)
+
+    results = []
+    for stat in all_rok_stats:
+        actual_col = f"{stat}_x"
+        proj_col = f"{stat}_y"
+
+        if actual_col not in merged_df.columns or proj_col not in merged_df.columns:
+            continue
+
+        mask = merged_df[[actual_col, proj_col]].notna().all(axis=1)
+        clean_df = merged_df[mask]
+
+        if clean_df.empty:
+            continue
+
+        actual_vals = clean_df[actual_col].values
+        proj_vals = clean_df[proj_col].values
+        weights = clean_df[playing_time_col_x].values
+
+        if stat in rate_stats:
+            actual_la = actual_vals - actual_league_avgs.get(stat, 0)
+            proj_la = proj_vals - proj_league_avgs.get(stat, 0)
+
+            raw_metrics = calculate_metrics(actual_vals, proj_vals)
+            la_metrics = calculate_metrics(actual_la, proj_la)
+            wla_metrics = calculate_metrics(actual_la, proj_la, weights=weights)
+
+            miss_errors = np.abs(actual_la - proj_la) * weights
+        else:
+            raw_metrics = calculate_metrics(actual_vals, proj_vals)
+            la_metrics = raw_metrics
+            wla_metrics = raw_metrics
+            miss_errors = np.abs(actual_vals - proj_vals)
+
+        temp_df = clean_df.copy()
+        temp_df["miss_error"] = miss_errors
+        all_misses = collect_player_misses(
+            temp_df, actual_col, proj_col, error_col="miss_error"
+        )
+        biggest_misses = find_biggest_misses(
+            temp_df,
+            stat,
+            actual_col,
+            proj_col,
+            error_col="miss_error",
+            player_misses=all_misses,
+        )
+
+        result = ProjectionResult(
+            year=year,
+            system=system,
+            player_type=player_type,
+            stat=f"rok_{stat}",
+            rmse=raw_metrics["rmse"],
+            mae=raw_metrics["mae"],
+            bias=raw_metrics["bias"],
+            r_squared=raw_metrics["r_squared"],
+            la_rmse=la_metrics["rmse"],
+            la_mae=la_metrics["mae"],
+            la_bias=la_metrics["bias"],
+            la_r_squared=la_metrics["r_squared"],
+            wla_rmse=wla_metrics["rmse"],
+            wla_mae=wla_metrics["mae"],
+            wla_bias=wla_metrics["bias"],
+            wla_r_squared=wla_metrics["r_squared"],
+            n_players=len(clean_df),
+            biggest_misses=biggest_misses,
+            all_misses=all_misses,
+        )
+        results.append(result)
+        print(
+            f"    rok_{stat}: RMSE={raw_metrics['rmse']:.4f}, LA-RMSE={la_metrics['rmse']:.4f}, WLA-RMSE={wla_metrics['rmse']:.4f}"
         )
 
     return results

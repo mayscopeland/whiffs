@@ -35,6 +35,266 @@ SYSTEM_COLORS = {
     "ZiPS": "text-green-600 dark:text-green-400",
 }
 
+BATTING_RATE_STATS = [
+    {"name": "wOBA", "stat": "wOBA"},
+    {"name": "Strikeout Rate", "stat": "SO/PA"},
+    {"name": "Walk Rate", "stat": "BB/PA"},
+    {"name": "Hit By Pitch Rate", "stat": "HBP/PA"},
+    {"name": "Home Run Rate", "stat": "HR/BIP"},
+    {"name": "BABIP", "stat": "BABIP"},
+    {"name": "Single Rate", "stat": "1B/(BIP-HR)"},
+    {"name": "Double Rate", "stat": "2B/(BIP-HR)"},
+    {"name": "Triple Rate", "stat": "3B/(BIP-HR)"},
+    {"name": "Run Rate", "stat": "R/PA"},
+    {"name": "RBI Rate", "stat": "RBI/PA"},
+    {"name": "Stolen Base Rate", "stat": "SB/TOF"},
+    {"name": "Batting Average", "stat": "AVG"},
+    {"name": "On-Base Percentage", "stat": "OBP"},
+    {"name": "Slugging Percentage", "stat": "SLG"},
+]
+
+PITCHING_RATE_STATS = [
+    {"name": "wOBA", "stat": "wOBA"},
+    {"name": "Strikeout Rate", "stat": "SO/BF"},
+    {"name": "Walk Rate", "stat": "BB/BF"},
+    {"name": "Hit By Pitch Rate", "stat": "HBP/BF"},
+    {"name": "Home Run Rate", "stat": "HR/BIP"},
+    {"name": "BABIP", "stat": "BABIP"},
+    {"name": "Single Rate", "stat": "1B/(BIP-HR)"},
+    {"name": "Double Rate", "stat": "2B/(BIP-HR)"},
+    {"name": "Triple Rate", "stat": "3B/(BIP-HR)"},
+    {"name": "Run Rate", "stat": "R/BF"},
+    {"name": "Earned Run Rate", "stat": "ER/BF"},
+    {"name": "Win Rate", "stat": "W/G"},
+    {"name": "Loss Rate", "stat": "L/G"},
+    {"name": "Save Rate", "stat": "SV/G"},
+    {"name": "Hold Rate", "stat": "HLD/G"},
+    {"name": "ERA", "stat": "ERA"},
+    {"name": "WHIP", "stat": "WHIP"},
+]
+
+FANTASY_BATTING_RATES = [
+    {"name": "Home Run Rate", "stat": "HR/BIP"},
+    {"name": "Stolen Base Rate", "stat": "SB/TOF"},
+    {"name": "Run Rate", "stat": "R/PA"},
+    {"name": "RBI Rate", "stat": "RBI/PA"},
+    {"name": "Batting Average", "stat": "AVG"},
+]
+
+FANTASY_PITCHING_RATES = [
+    {"name": "Strikeout Rate", "stat": "SO/BF"},
+    {"name": "Win Rate", "stat": "W/G"},
+    {"name": "Save Rate", "stat": "SV/G"},
+    {"name": "ERA", "stat": "ERA"},
+    {"name": "WHIP", "stat": "WHIP"},
+]
+
+HITTING_SUMMARY = [
+    {"label": "PA", "title": "Plate appearances", "stat": "PA", "is_volume": True},
+    {"label": "wOBA", "title": "wOBA", "stat": "wOBA"},
+    {"label": "SO", "title": "Strikeout rate (SO/PA)", "stat": "SO/PA"},
+    {"label": "BB", "title": "Walk rate (BB/PA)", "stat": "BB/PA"},
+    {"label": "HR", "title": "Home run rate (HR/BIP)", "stat": "HR/BIP"},
+    {"label": "R", "title": "Run rate (R/PA)", "stat": "R/PA"},
+    {"label": "RBI", "title": "RBI rate (RBI/PA)", "stat": "RBI/PA"},
+    {"label": "SB", "title": "Stolen base rate (SB/TOF)", "stat": "SB/TOF"},
+    {"label": "BABIP", "title": "BABIP", "stat": "BABIP"},
+]
+
+PITCHING_SUMMARY = [
+    {"label": "BF", "title": "Batters faced", "stat": "BF", "is_volume": True},
+    {"label": "wOBA", "title": "wOBA", "stat": "wOBA"},
+    {"label": "ERA", "title": "ERA", "stat": "ERA"},
+    {"label": "SO", "title": "Strikeout rate (SO/BF)", "stat": "SO/BF"},
+    {"label": "BB", "title": "Walk rate (BB/BF)", "stat": "BB/BF"},
+    {"label": "HR", "title": "Home run rate (HR/BIP)", "stat": "HR/BIP"},
+    {"label": "W", "title": "Win rate (W/G)", "stat": "W/G"},
+    {"label": "L", "title": "Loss rate (L/G)", "stat": "L/G"},
+    {"label": "SV", "title": "Save rate (SV/G)", "stat": "SV/G"},
+    {"label": "HLD", "title": "Hold rate (HLD/G)", "stat": "HLD/G"},
+    {"label": "BABIP", "title": "BABIP", "stat": "BABIP"},
+]
+
+FANTASY_HITTING_SUMMARY = [
+    {"label": "PA", "title": "Plate appearances", "stat": "PA", "is_volume": True},
+    {"label": "HR", "title": "Home run rate (HR/BIP)", "stat": "HR/BIP"},
+    {"label": "SB", "title": "Stolen base rate (SB/TOF)", "stat": "SB/TOF"},
+    {"label": "R", "title": "Run rate (R/PA)", "stat": "R/PA"},
+    {"label": "RBI", "title": "RBI rate (RBI/PA)", "stat": "RBI/PA"},
+    {"label": "AVG", "title": "Batting average", "stat": "AVG"},
+]
+
+FANTASY_PITCHING_SUMMARY = [
+    {"label": "BF", "title": "Batters faced", "stat": "BF", "is_volume": True},
+    {"label": "SO", "title": "Strikeout rate (SO/BF)", "stat": "SO/BF"},
+    {"label": "W", "title": "Win rate (W/G)", "stat": "W/G"},
+    {"label": "SV", "title": "Save rate (SV/G)", "stat": "SV/G"},
+    {"label": "ERA", "title": "ERA", "stat": "ERA"},
+    {"label": "WHIP", "title": "WHIP", "stat": "WHIP"},
+]
+
+
+def stat_slug(stat: str) -> str:
+    """URL slug: strip fan_/rok_, / → -, lowercase (e.g. pitching-woba)."""
+    display = stat
+    for prefix in ("fan_", "rok_"):
+        if display.startswith(prefix):
+            display = display[len(prefix) :]
+            break
+    return display.replace("/", "-").replace("(", "").replace(")", "").lower()
+
+
+def page_slug(pool: str, stat: str) -> str:
+    return f"{pool}-{stat_slug(stat)}"
+
+
+def chart_clean(stat: str) -> str:
+    """Canvas id fragment matching season-charts.js cleanStatName."""
+    return stat.replace("/", "").replace("(", "").replace(")", "").replace("-", "")
+
+
+def _prefix_stat(stat: str, prefix: str) -> str:
+    return f"{prefix}{stat}" if prefix else stat
+
+
+def season_stat_defs(variant: str = "season") -> list[dict[str, Any]]:
+    """Flat list of per-stat page definitions for a season variant."""
+    if variant == "fantasy":
+        prefix = "fan_"
+        batting_rates = FANTASY_BATTING_RATES
+        pitching_rates = FANTASY_PITCHING_RATES
+        batting_volume_name = "Plate Appearances (PA)"
+        pitching_volume_name = "Batters Faced (BF)"
+    elif variant == "rookies":
+        prefix = "rok_"
+        batting_rates = BATTING_RATE_STATS
+        pitching_rates = PITCHING_RATE_STATS
+        batting_volume_name = "Plate Appearances (PA)"
+        pitching_volume_name = "Batters Faced (BF)"
+    else:
+        prefix = ""
+        batting_rates = BATTING_RATE_STATS
+        pitching_rates = PITCHING_RATE_STATS
+        batting_volume_name = "Plate Appearances (PA)"
+        pitching_volume_name = "Batters Faced (BF)"
+
+    pages: list[dict[str, Any]] = []
+    pages.append(
+        {
+            "pool": "batting",
+            "pool_label": "Batting",
+            "name": batting_volume_name,
+            "stat": _prefix_stat("PA", prefix),
+            "slug": page_slug("batting", "PA"),
+            "is_volume": True,
+            "chart_id": "battingVolume",
+        }
+    )
+    for rate in batting_rates:
+        data_stat = _prefix_stat(rate["stat"], prefix)
+        pages.append(
+            {
+                "pool": "batting",
+                "pool_label": "Batting",
+                "name": rate["name"],
+                "stat": data_stat,
+                "slug": page_slug("batting", rate["stat"]),
+                "is_volume": False,
+                "chart_id": f"batting{chart_clean(data_stat)}",
+            }
+        )
+    pages.append(
+        {
+            "pool": "pitching",
+            "pool_label": "Pitching",
+            "name": pitching_volume_name,
+            "stat": _prefix_stat("BF", prefix),
+            "slug": page_slug("pitching", "BF"),
+            "is_volume": True,
+            "chart_id": "pitchingVolume",
+        }
+    )
+    for rate in pitching_rates:
+        data_stat = _prefix_stat(rate["stat"], prefix)
+        pages.append(
+            {
+                "pool": "pitching",
+                "pool_label": "Pitching",
+                "name": rate["name"],
+                "stat": data_stat,
+                "slug": page_slug("pitching", rate["stat"]),
+                "is_volume": False,
+                "chart_id": f"pitching{chart_clean(data_stat)}",
+            }
+        )
+    return pages
+
+
+def summary_columns(variant: str = "season") -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    prefix = {"fantasy": "fan_", "rookies": "rok_"}.get(variant, "")
+    if variant == "fantasy":
+        hitting, pitching = FANTASY_HITTING_SUMMARY, FANTASY_PITCHING_SUMMARY
+    else:
+        hitting, pitching = HITTING_SUMMARY, PITCHING_SUMMARY
+
+    def decorate(cols: list[dict[str, Any]], pool: str) -> list[dict[str, Any]]:
+        out = []
+        for col in cols:
+            base = col["stat"]
+            data_stat = _prefix_stat(base, prefix)
+            out.append(
+                {
+                    **col,
+                    "stat": data_stat,
+                    "playerType": pool,
+                    "isVolume": bool(col.get("is_volume")),
+                    "slug": page_slug(pool, base),
+                }
+            )
+        return out
+
+    return decorate(hitting, "batting"), decorate(pitching, "pitching")
+
+
+def filter_year_data(year_data: dict[str, Any] | None, pool: str, stat: str) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    rows = year_data.get(pool) or []
+    return {pool: [row for row in rows if row.get("stat") == stat]}
+
+
+def filter_year_data_summary(
+    year_data: dict[str, Any] | None,
+    hitting: list[dict[str, Any]],
+    pitching: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not year_data:
+        return {}
+    batting_stats = {c["stat"] for c in hitting}
+    pitching_stats = {c["stat"] for c in pitching}
+    return {
+        "batting": [row for row in (year_data.get("batting") or []) if row.get("stat") in batting_stats],
+        "pitching": [row for row in (year_data.get("pitching") or []) if row.get("stat") in pitching_stats],
+    }
+
+
+def nav_stats_for_pages(pages: list[dict[str, Any]], summary_url: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    batting = []
+    pitching = []
+    for page in pages:
+        entry = {
+            "stat": page["stat"],
+            "name": page["name"],
+            "href": f"{summary_url}{page['slug']}/",
+            "pool": page["pool"],
+            "slug": page["slug"],
+        }
+        if page["pool"] == "batting":
+            batting.append(entry)
+        else:
+            pitching.append(entry)
+    return batting, pitching
+
 
 def to_fixed(value: Any, decimals: int = 2) -> str:
     """Format a number to fixed decimals; nullish/NaN values become '-'."""
@@ -250,6 +510,7 @@ def build_site(
         ("index.html", "index.html", "/", {"title": "MLB Projection Accuracy"}),
         ("stats.html", "stats/index.html", "/stats/", {"title": "All-Time Projection Accuracy"}),
         ("fantasy.html", "fantasy/index.html", "/fantasy/", {"title": "Fantasy Leaderboards"}),
+        ("rookies.html", "rookies/index.html", "/rookies/", {"title": "Rookies Projection Accuracy"}),
         ("methodology.html", "methodology/index.html", "/methodology/", {"title": "Methodology"}),
         ("404.html", "404.html", "/404.html", {"title": "Page Not Found"}),
     ]
@@ -263,31 +524,100 @@ def build_site(
         _write(site_dir / out_rel, html)
         print(f"  Wrote {out_rel}")
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        html = env.get_template("season.html").render(
-            **base_ctx,
-            page_url=f"/seasons/{year}/",
-            year=year,
-            year_key=year_key,
-            yearData=years.get(year_key),
-            title=f"{year} Projection Accuracy",
-        )
-        _write(site_dir / "seasons" / year_key / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} season pages")
+    def write_season_variant(
+        *,
+        variant: str,
+        section: str,
+        summary_template: str,
+        stat_template: str,
+        title_prefix: str,
+        heading: str,
+        blurb: str | None = None,
+    ) -> None:
+        pages = season_stat_defs(variant)
+        hitting, pitching = summary_columns(variant)
+        summary_count = 0
+        stat_count = 0
+        for year in site.get("years", []):
+            year_key = str(year)
+            summary_url = f"/{section}/{year}/"
+            batting_nav, pitching_nav = nav_stats_for_pages(pages, summary_url)
+            year_full = years.get(year_key)
+            year_misses = misses.get(year_key) or {}
+            for col in hitting + pitching:
+                col["href"] = f"{summary_url}{col['slug']}/"
 
-    for year in site.get("years", []):
-        year_key = str(year)
-        html = env.get_template("fantasy_season.html").render(
-            **base_ctx,
-            page_url=f"/fantasy/{year}/",
-            year=year,
-            year_key=year_key,
-            yearData=years.get(year_key),
-            title=f"{year} Fantasy Projection Accuracy",
-        )
-        _write(site_dir / "fantasy" / year_key / "index.html", html)
-    print(f"  Wrote {len(site.get('years', []))} fantasy season pages")
+            html = env.get_template(summary_template).render(
+                **base_ctx,
+                page_url=summary_url,
+                summary_url=summary_url,
+                year=year,
+                year_key=year_key,
+                yearData=filter_year_data_summary(year_full, hitting, pitching),
+                title=f"{year} {title_prefix}",
+                heading=heading.format(year=year),
+                blurb=blurb.format(year=year) if blurb else None,
+                hittingSummary=hitting,
+                pitchingSummary=pitching,
+                battingNavStats=batting_nav,
+                pitchingNavStats=pitching_nav,
+                variant=variant,
+            )
+            _write(site_dir / section / year_key / "index.html", html)
+            summary_count += 1
+
+            for page in pages:
+                page_url = f"{summary_url}{page['slug']}/"
+                html = env.get_template(stat_template).render(
+                    **base_ctx,
+                    page_url=page_url,
+                    summary_url=summary_url,
+                    year=year,
+                    year_key=year_key,
+                    yearData=filter_year_data(year_full, page["pool"], page["stat"]),
+                    yearMisses=year_misses,
+                    title=f"{year} {page['pool_label']} {page['name']}",
+                    heading=f"{year} {page['pool_label']}: {page['name']}",
+                    blurb=None,
+                    battingNavStats=batting_nav,
+                    pitchingNavStats=pitching_nav,
+                    variant=variant,
+                    current_slug=page["slug"],
+                    stat_page=page,
+                )
+                _write(site_dir / section / year_key / page["slug"] / "index.html", html)
+                stat_count += 1
+        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+
+    write_season_variant(
+        variant="season",
+        section="seasons",
+        summary_template="season.html",
+        stat_template="season_stat.html",
+        title_prefix="Projection Accuracy",
+        heading="{year} Projection Evaluation",
+    )
+    write_season_variant(
+        variant="fantasy",
+        section="fantasy",
+        summary_template="fantasy_season.html",
+        stat_template="season_stat.html",
+        title_prefix="Fantasy Projection Accuracy",
+        heading="{year} Fantasy Projection Evaluation",
+        blurb=(
+            "Fantasy-relevant accuracy for {year}, limited to the top 250 players by "
+            "FantasyPros's preseason ADP aggregate. Limited to 5x5 categories, with "
+            "playing time (PA/BF) split out from rates."
+        ),
+    )
+    write_season_variant(
+        variant="rookies",
+        section="rookies",
+        summary_template="rookies_season.html",
+        stat_template="season_stat.html",
+        title_prefix="Rookies Projection Accuracy",
+        heading="{year} Rookies Projection Evaluation",
+    )
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(
