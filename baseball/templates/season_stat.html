@@ -1,20 +1,10 @@
 {% extends "base.html" %}
 {% from "includes/miss_tables.html" import renderEverybodyMissed, renderBiggestMisses, renderUniqueMisses with context %}
 
-{% set metrics = [
-  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
-  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
-] %}
-{% set adjustments = [
-  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted' },
-  { "value": 'league-adj', "name": 'League-Adjusted' },
-  { "value": 'raw', "name": 'Raw' }
-] %}
-
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6">
-    <a href="{{ summary_url }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; {{ year }} summary</a>
+    <a href="{{ summary_url }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; {{ back_label }}</a>
   </div>
   <div class="text-center mb-8">
     <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ heading }}</h1>
@@ -22,48 +12,10 @@
 
   {% include "includes/stat-nav.html" %}
 
-  <div class="chart-section mb-8">
-    <div class="mb-4 py-4">
-      <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ stat_page.name }}</h2>
-      <div class="flex flex-wrap gap-4">
-        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
-        </select>
-        {% if not stat_page.is_volume %}
-        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
-        </select>
-        {% endif %}
-      </div>
-    </div>
-    {% if stat_page.is_volume %}
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="raw">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}MaeChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="raw">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}RmseChart"></canvas></div>
-      </div>
-    {% else %}
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="raw">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}MaeChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="raw">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}RmseChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="league-adj">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}LeagueAdjMaeChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="league-adj">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}LeagueAdjRmseChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}WLAMaeChart"></canvas></div>
-      </div>
-      <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj">
-        <div class="h-128"><canvas id="{{ stat_page.chart_id }}WLARmseChart"></canvas></div>
-      </div>
-    {% endif %}
-  </div>
+  {% set page = stat_page %}
+  {% set show_miss_link = false %}
+  {% set show_title = false %}
+  {% include "includes/stat_chart_section.html" %}
 
   {% if yearMisses %}
     {% set everybody_key = 'everybody_missed_batting' if stat_page.pool == 'batting' else 'everybody_missed_pitching' %}
@@ -115,10 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   initializeSeasonCharts(yearData, projectionSystems, chartOptions);
-  initializeChartFilters();
-});
 
-function initializeChartFilters() {
   document.querySelectorAll('.chart-section').forEach(section => {
     const metricSelect = section.querySelector('.metric-select');
     const adjustmentSelect = section.querySelector('.adjustment-select');
@@ -127,15 +76,16 @@ function initializeChartFilters() {
       const selectedMetric = metricSelect.value;
       const selectedAdjustment = adjustmentSelect ? adjustmentSelect.value : 'raw';
       section.querySelectorAll('.chart-container').forEach(container => {
-        const shouldShow = container.dataset.metric === selectedMetric &&
-          container.dataset.adjustment === selectedAdjustment;
-        container.style.display = shouldShow ? 'block' : 'none';
+        container.style.display =
+          container.dataset.metric === selectedMetric &&
+          container.dataset.adjustment === selectedAdjustment
+            ? 'block' : 'none';
       });
     }
     metricSelect.addEventListener('change', updateVisibility);
     if (adjustmentSelect) adjustmentSelect.addEventListener('change', updateVisibility);
     updateVisibility();
   });
-}
+});
 </script>
 {% endblock %}

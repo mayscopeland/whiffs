@@ -12,7 +12,7 @@
     {% set systemsWithData = ns.systemsWithData %}
 
     <div class="mb-8">
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Everybody Missed for {{ statName }}</h3>
+      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Biggest misses for every system</h3>
       <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
         <div class="relative overflow-x-auto">
           <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
@@ -55,7 +55,7 @@
 
 {% macro renderBiggestMisses(playerType, stat, statName, showVolume=false, missesData=none) %}
 <div class="mb-8">
-    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Individual Misses for {{ statName }}</h3>
+    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Other big misses by system</h3>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {% for system in site.meta.projection_systems %}
         {% set miss_ns = namespace(missesForSystem=none) %}
@@ -111,8 +111,8 @@
 
 {% macro renderUniqueMisses(playerType, stat, statName, showVolume=false, missesData=none) %}
 <div class="mb-8">
-    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Most Unique Misses for {{ statName }}</h3>
-    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Players where this system’s error exceeded Aggregate’s error by the largest margin.</p>
+    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Biggest unique misses by system</h3>
+    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Who did each system miss that everyone else (i.e. the Aggregate) got right?</p>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {% for system in site.meta.projection_systems %}
         {% if system != 'Aggregate' %}

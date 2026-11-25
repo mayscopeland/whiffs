@@ -57,4 +57,8 @@
   </div>
 
   {% include "includes/stat-nav.html" %}
+
+  {% if stat_pages is defined and stat_pages %}
+    {% include "includes/season_charts.html" %}
+  {% endif %}
 </div>

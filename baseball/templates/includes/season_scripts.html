@@ -1,0 +1,38 @@
+<script src="/assets/js/chart-utils.js"></script>
+<script src="/assets/js/season-charts.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const yearData = {{ yearData | tojson }};
+  const projectionSystems = {{ site.meta.projection_systems | tojson }};
+  const variant = {{ variant | tojson }};
+  const summaryId = {{ (summary_id if summary_id is defined else 'season-summary') | tojson }};
+
+  const chartOptions = {};
+  if (variant === 'fantasy') {
+    initializeFantasySeasonCharts(yearData, projectionSystems);
+  } else if (variant === 'rookies') {
+    initializeRookiesSeasonCharts(yearData, projectionSystems);
+  } else {
+    initializeSeasonCharts(yearData, projectionSystems);
+  }
+  initializeSummaryTable(yearData, summaryId);
+
+  document.querySelectorAll('.chart-section').forEach(section => {
+    const metricSelect = section.querySelector('.metric-select');
+    const adjustmentSelect = section.querySelector('.adjustment-select');
+    if (!metricSelect) return;
+    function updateVisibility() {
+      const selectedMetric = metricSelect.value;
+      const selectedAdjustment = adjustmentSelect ? adjustmentSelect.value : 'raw';
+      section.querySelectorAll('.chart-container').forEach(container => {
+        const shouldShow = container.dataset.metric === selectedMetric &&
+          container.dataset.adjustment === selectedAdjustment;
+        container.style.display = shouldShow ? 'block' : 'none';
+      });
+    }
+    metricSelect.addEventListener('change', updateVisibility);
+    if (adjustmentSelect) adjustmentSelect.addEventListener('change', updateVisibility);
+    updateVisibility();
+  });
+});
+</script>

@@ -40,7 +40,7 @@
               {% set columns = [pool.volume] + pool.rates %}
               {% for col in columns %}
               <th class="px-2 py-2 text-center font-medium whitespace-nowrap normal-case">
-                <a href="{{ col.href }}" class="hover:underline">{{ col.name }}</a>
+                <a href="#{{ col.slug }}" class="hover:underline">{{ col.name }}</a>
                 {% if col.isVolume %}<span class="summary-raw-tag hidden font-normal normal-case text-slate-500"> raw</span>{% endif %}
               </th>
               {% endfor %}
@@ -64,4 +64,67 @@
   </div>
 
   {% include "includes/stat-nav.html" %}
+
+  {% for pool in pools %}
+  <div class="mb-16">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">{{ pool.label }}</h2>
+    {% set volume_stat = ('fan_' ~ pool.volume.stat) if fantasy else pool.volume.stat %}
+    {% set volume_clean = pool.volume.stat | replace('/', '') | replace('-', '') %}
+    <div id="{{ pool.volume.slug }}" class="chart-section mb-8 scroll-mt-4">
+      <h4 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ pool.volume.name }}</h4>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        {% if not pool.volume.isVolume %}
+        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+        {% endif %}
+      </div>
+      {% for metric in metrics %}
+        {% if pool.volume.isVolume %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-volume="true" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="raw">
+          <div class="h-80"><canvas id="{{ pool.key }}Volume{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+        </div>
+        {% else %}
+          {% for adj in adjustments %}
+          <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="{{ volume_stat }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+            <div class="h-80"><canvas id="{{ pool.key }}{{ volume_clean }}{{ adj.chartSuffix }}{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+      <p class="mt-4">
+        <a href="{{ pool.volume.miss_href }}" class="text-blue-600 dark:text-blue-400 hover:underline">See who the projections missed for {{ pool.volume.name }}</a>
+      </p>
+    </div>
+
+    {% for statInfo in pool.rates %}
+    {% set stat_name = ('fan_' ~ statInfo.stat) if fantasy else statInfo.stat %}
+    {% set clean = statInfo.stat | replace('/', '') | replace('-', '') %}
+    <div id="{{ statInfo.slug }}" class="chart-section mb-8 scroll-mt-4">
+      <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ statInfo.name }}</h4>
+      <div class="flex flex-wrap gap-4 mb-4">
+        <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+        </select>
+        <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+        </select>
+      </div>
+      {% for metric in metrics %}
+        {% for adj in adjustments %}
+        <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6 chart-container mb-4" data-stat="{{ stat_name }}" data-metric="{{ metric.value }}" data-adjustment="{{ adj.value }}">
+          <div class="h-80"><canvas id="{{ pool.key }}{{ clean }}{{ adj.chartSuffix }}{{ 'Mae' if metric.value == 'MAE' else 'Rmse' }}Chart"></canvas></div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+      <p class="mt-4">
+        <a href="{{ statInfo.miss_href }}" class="text-blue-600 dark:text-blue-400 hover:underline">See who the projections missed for {{ statInfo.name }}</a>
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
 </div>

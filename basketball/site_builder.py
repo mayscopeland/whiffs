@@ -385,6 +385,8 @@ def build_site(
         summary_template: str,
         title_suffix: str,
         heading_suffix: str,
+        back_label_fmt: str,
+        stat_qualifier: str = "",
         blurb: str | None = None,
     ) -> None:
         pages = season_stat_defs(variant)
@@ -395,11 +397,23 @@ def build_site(
             year_key = str(year)
             season = end_year_to_season(year)
             summary_url = f"/{section}/{season}/"
-            nav = nav_stats_for_pages(pages, summary_url)
             year_full = years.get(year_key)
             year_misses = misses.get(year_key) or {}
+
+            chart_pages = [{**page, "miss_href": f"{summary_url}{page['slug']}/"} for page in pages]
+            chart_nav = [
+                {
+                    "stat": page["stat"],
+                    "name": page["name"],
+                    "label": page["name"],
+                    "href": f"#{page['slug']}",
+                    "slug": page["slug"],
+                }
+                for page in chart_pages
+            ]
+            miss_nav = nav_stats_for_pages(pages, summary_url)
             for col in columns:
-                col["href"] = f"{summary_url}{col['slug']}/"
+                col["href"] = f"#{col['slug']}"
 
             html = env.get_template(summary_template).render(
                 **base_ctx,
@@ -408,38 +422,44 @@ def build_site(
                 year=year,
                 year_key=year_key,
                 season=season,
-                yearData=filter_year_data_summary(year_full, columns),
+                yearData=year_full,
                 title=f"{season} {title_suffix}",
                 heading=f"{season} {heading_suffix}",
                 blurb=blurb.format(season=season) if blurb else None,
                 summaryColumns=columns,
-                navStats=nav,
+                navStats=chart_nav,
+                stat_pages=chart_pages,
                 variant=variant,
             )
             _write(site_dir / section / season / "index.html", html)
             summary_count += 1
 
-            for page in pages:
-                page_url = f"{summary_url}{page['slug']}/"
+            for page in chart_pages:
+                parts = [season]
+                if stat_qualifier:
+                    parts.append(stat_qualifier)
+                parts.append(page["name"])
+                page_heading = " ".join(parts)
                 html = env.get_template("season_stat.html").render(
                     **base_ctx,
-                    page_url=page_url,
+                    page_url=page["miss_href"],
                     summary_url=summary_url,
                     year=year,
                     year_key=year_key,
                     season=season,
                     yearData=filter_year_data(year_full, page["stat"]),
                     yearMisses=year_misses,
-                    title=f"{season} {page['name']}",
-                    heading=f"{season}: {page['name']}",
-                    navStats=nav,
+                    title=page_heading,
+                    heading=page_heading,
+                    back_label=back_label_fmt.format(season=season),
+                    navStats=miss_nav,
                     variant=variant,
                     current_slug=page["slug"],
                     stat_page=page,
                 )
                 _write(site_dir / section / season / page["slug"] / "index.html", html)
                 stat_count += 1
-        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+        print(f"  Wrote {summary_count} {section} season pages and {stat_count} {section} miss pages")
 
     write_season_variant(
         variant="season",
@@ -447,6 +467,7 @@ def build_site(
         summary_template="season.html",
         title_suffix="Projection Accuracy",
         heading_suffix="Projection Accuracy",
+        back_label_fmt="{season} stats",
     )
     write_season_variant(
         variant="fantasy",
@@ -454,6 +475,8 @@ def build_site(
         summary_template="fantasy_season.html",
         title_suffix="Fantasy Projection Accuracy",
         heading_suffix="Fantasy Projection Accuracy",
+        back_label_fmt="{season} fantasy stats",
+        stat_qualifier="Fantasy",
         blurb=(
             "Fantasy-relevant accuracy for {season}, excluding players with fewer than "
             "1,500 minutes. Limited to minutes, games, minutes per game, and 9-cat rates."

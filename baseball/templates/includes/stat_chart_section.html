@@ -1,0 +1,62 @@
+{# Renders one stat chart block. Expects `page` with name/slug/chart_id/is_volume/miss_href. #}
+{% set metrics = [
+  { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
+  { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
+] %}
+{% set adjustments = [
+  { "value": 'weighted-league-adj', "name": 'Weighted League-Adjusted' },
+  { "value": 'league-adj', "name": 'League-Adjusted' },
+  { "value": 'raw', "name": 'Raw' }
+] %}
+{% set show_miss_link = show_miss_link if show_miss_link is defined else false %}
+{% set show_title = show_title if show_title is defined else true %}
+
+<div id="{{ page.slug }}" class="chart-section mb-8 scroll-mt-4">
+  <div class="mb-4 py-4">
+    {% if show_title %}
+    <h4 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ page.name }}</h4>
+    {% endif %}
+    <div class="flex flex-wrap gap-4">
+      <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
+      </select>
+      {% if not page.is_volume %}
+      <select class="adjustment-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {% for adj in adjustments %}<option value="{{ adj.value }}">{{ adj.name }}</option>{% endfor %}
+      </select>
+      {% endif %}
+    </div>
+  </div>
+  {% if page.is_volume %}
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="raw">
+      <div class="h-128"><canvas id="{{ page.chart_id }}MaeChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="raw">
+      <div class="h-128"><canvas id="{{ page.chart_id }}RmseChart"></canvas></div>
+    </div>
+  {% else %}
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="raw">
+      <div class="h-128"><canvas id="{{ page.chart_id }}MaeChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="raw">
+      <div class="h-128"><canvas id="{{ page.chart_id }}RmseChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="league-adj">
+      <div class="h-128"><canvas id="{{ page.chart_id }}LeagueAdjMaeChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="league-adj">
+      <div class="h-128"><canvas id="{{ page.chart_id }}LeagueAdjRmseChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="MAE" data-adjustment="weighted-league-adj">
+      <div class="h-128"><canvas id="{{ page.chart_id }}WLAMaeChart"></canvas></div>
+    </div>
+    <div class="chart-container bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-6" data-metric="RMSE" data-adjustment="weighted-league-adj">
+      <div class="h-128"><canvas id="{{ page.chart_id }}WLARmseChart"></canvas></div>
+    </div>
+  {% endif %}
+  {% if show_miss_link and page.miss_href is defined %}
+  <p class="mt-4">
+    <a href="{{ page.miss_href }}" class="text-blue-600 dark:text-blue-400 hover:underline">See who the projections missed for {{ page.name }}</a>
+  </p>
+  {% endif %}
+</div>

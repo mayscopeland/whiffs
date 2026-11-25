@@ -532,6 +532,8 @@ def build_site(
         stat_template: str,
         title_prefix: str,
         heading: str,
+        back_label_fmt: str,
+        stat_qualifier: str = "",
         blurb: str | None = None,
     ) -> None:
         pages = season_stat_defs(variant)
@@ -541,11 +543,28 @@ def build_site(
         for year in site.get("years", []):
             year_key = str(year)
             summary_url = f"/{section}/{year}/"
-            batting_nav, pitching_nav = nav_stats_for_pages(pages, summary_url)
             year_full = years.get(year_key)
             year_misses = misses.get(year_key) or {}
+
+            chart_pages = []
+            for page in pages:
+                miss_href = f"{summary_url}{page['slug']}/"
+                chart_pages.append({**page, "miss_href": miss_href})
+
+            chart_nav_batting = [
+                {"stat": p["stat"], "name": p["name"], "href": f"#{p['slug']}", "slug": p["slug"]}
+                for p in chart_pages
+                if p["pool"] == "batting"
+            ]
+            chart_nav_pitching = [
+                {"stat": p["stat"], "name": p["name"], "href": f"#{p['slug']}", "slug": p["slug"]}
+                for p in chart_pages
+                if p["pool"] == "pitching"
+            ]
+            miss_nav_batting, miss_nav_pitching = nav_stats_for_pages(pages, summary_url)
+
             for col in hitting + pitching:
-                col["href"] = f"{summary_url}{col['slug']}/"
+                col["href"] = f"#{col['slug']}"
 
             html = env.get_template(summary_template).render(
                 **base_ctx,
@@ -553,21 +572,27 @@ def build_site(
                 summary_url=summary_url,
                 year=year,
                 year_key=year_key,
-                yearData=filter_year_data_summary(year_full, hitting, pitching),
+                yearData=year_full,
                 title=f"{year} {title_prefix}",
                 heading=heading.format(year=year),
                 blurb=blurb.format(year=year) if blurb else None,
                 hittingSummary=hitting,
                 pitchingSummary=pitching,
-                battingNavStats=batting_nav,
-                pitchingNavStats=pitching_nav,
+                battingNavStats=chart_nav_batting,
+                pitchingNavStats=chart_nav_pitching,
+                stat_pages=chart_pages,
                 variant=variant,
             )
             _write(site_dir / section / year_key / "index.html", html)
             summary_count += 1
 
-            for page in pages:
-                page_url = f"{summary_url}{page['slug']}/"
+            for page in chart_pages:
+                page_url = page["miss_href"]
+                parts = [str(year)]
+                if stat_qualifier:
+                    parts.append(stat_qualifier)
+                parts.extend([page["pool_label"], page["name"]])
+                page_heading = " ".join(parts)
                 html = env.get_template(stat_template).render(
                     **base_ctx,
                     page_url=page_url,
@@ -576,18 +601,18 @@ def build_site(
                     year_key=year_key,
                     yearData=filter_year_data(year_full, page["pool"], page["stat"]),
                     yearMisses=year_misses,
-                    title=f"{year} {page['pool_label']} {page['name']}",
-                    heading=f"{year} {page['pool_label']}: {page['name']}",
-                    blurb=None,
-                    battingNavStats=batting_nav,
-                    pitchingNavStats=pitching_nav,
+                    title=page_heading,
+                    heading=page_heading,
+                    back_label=back_label_fmt.format(year=year),
+                    battingNavStats=miss_nav_batting,
+                    pitchingNavStats=miss_nav_pitching,
                     variant=variant,
                     current_slug=page["slug"],
                     stat_page=page,
                 )
                 _write(site_dir / section / year_key / page["slug"] / "index.html", html)
                 stat_count += 1
-        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+        print(f"  Wrote {summary_count} {section} season pages and {stat_count} {section} miss pages")
 
     write_season_variant(
         variant="season",
@@ -596,6 +621,7 @@ def build_site(
         stat_template="season_stat.html",
         title_prefix="Projection Accuracy",
         heading="{year} Projection Evaluation",
+        back_label_fmt="{year} stats",
     )
     write_season_variant(
         variant="fantasy",
@@ -604,10 +630,11 @@ def build_site(
         stat_template="season_stat.html",
         title_prefix="Fantasy Projection Accuracy",
         heading="{year} Fantasy Projection Evaluation",
+        back_label_fmt="{year} fantasy stats",
+        stat_qualifier="Fantasy",
         blurb=(
             "Fantasy-relevant accuracy for {year}, limited to the top 250 players by "
-            "FantasyPros's preseason ADP aggregate. Limited to 5x5 categories, with "
-            "playing time (PA/BF) split out from rates."
+            "FantasyPros's preseason ADP aggregate."
         ),
     )
     write_season_variant(
@@ -617,6 +644,8 @@ def build_site(
         stat_template="season_stat.html",
         title_prefix="Rookies Projection Accuracy",
         heading="{year} Rookies Projection Evaluation",
+        back_label_fmt="{year} rookies",
+        stat_qualifier="Rookie",
     )
 
     for i, player in enumerate(players):

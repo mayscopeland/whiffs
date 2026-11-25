@@ -1,0 +1,12 @@
+{% for pool_key, pool_title in [('batting', 'Batting'), ('pitching', 'Pitching')] %}
+{% set pool_pages = stat_pages | selectattr('pool', 'equalto', pool_key) | list %}
+{% if pool_pages %}
+<div class="space-y-8 mb-12">
+  <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">{{ pool_title }} Projection Accuracy</h2>
+  {% for page in pool_pages %}
+    {% set show_miss_link = true %}
+    {% include "includes/stat_chart_section.html" %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endfor %}

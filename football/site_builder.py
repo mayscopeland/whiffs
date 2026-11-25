@@ -183,7 +183,24 @@ def filter_year_data_summary(year_data: dict[str, Any] | None, pools: list[dict[
     return out
 
 
-def pools_with_hrefs(pools: list[dict[str, Any]], summary_url: str) -> list[dict[str, Any]]:
+def pools_for_charts(pools: list[dict[str, Any]], summary_url: str) -> list[dict[str, Any]]:
+    """Pools for season pages: hash nav + miss page links under each chart."""
+    enriched = []
+    for pool in pools:
+        volume = {
+            **pool["volume"],
+            "miss_href": f"{summary_url}{pool['volume']['slug']}/",
+        }
+        rates = [
+            {**rate, "miss_href": f"{summary_url}{rate['slug']}/"}
+            for rate in pool["rates"]
+        ]
+        enriched.append({**pool, "volume": volume, "rates": rates})
+    return enriched
+
+
+def pools_for_misses(pools: list[dict[str, Any]], summary_url: str) -> list[dict[str, Any]]:
+    """Pools for miss pages: path links between miss pages."""
     enriched = []
     for pool in pools:
         volume = {**pool["volume"], "href": f"{summary_url}{pool['volume']['slug']}/"}
@@ -352,7 +369,14 @@ def build_site(
 
     pages = season_stat_defs(pools)
 
-    def write_season_variant(*, fantasy: bool, section: str, title_suffix: str) -> None:
+    def write_season_variant(
+        *,
+        fantasy: bool,
+        section: str,
+        title_suffix: str,
+        back_label_fmt: str,
+        stat_qualifier: str = "",
+    ) -> None:
         summary_count = 0
         stat_count = 0
         for year in site.get("years", []):
@@ -360,16 +384,17 @@ def build_site(
             summary_url = f"/{section}/{year}/"
             year_full = years.get(year_key)
             year_misses = misses.get(year_key) or {}
-            pools_linked = pools_with_hrefs(pools, summary_url)
+            chart_pools = pools_for_charts(pools, summary_url)
+            miss_pools = pools_for_misses(pools, summary_url)
             html = env.get_template("season.html" if not fantasy else "fantasy_season.html").render(
                 **base_ctx,
-                pools=pools_linked,
+                pools=chart_pools,
                 page_url=summary_url,
                 summary_url=summary_url,
                 year=year,
                 year_key=year_key,
                 season=str(year),
-                yearData=filter_year_data_summary(year_full, pools, fantasy),
+                yearData=year_full,
                 title=f"{year} {title_suffix}",
                 fantasy=fantasy,
             )
@@ -379,10 +404,15 @@ def build_site(
             for page in pages:
                 data_stat = f"fan_{page['stat']}" if fantasy else page["stat"]
                 page_url = f"{summary_url}{page['slug']}/"
-                pool_obj = next(p for p in pools_linked if p["key"] == page["pool"])
+                pool_obj = next(p for p in miss_pools if p["key"] == page["pool"])
+                parts = [str(year)]
+                if stat_qualifier:
+                    parts.append(stat_qualifier)
+                parts.extend([page["pool_label"], page["name"]])
+                page_heading = " ".join(parts)
                 html = env.get_template("season_stat.html").render(
                     **base_ctx,
-                    pools=pools_linked,
+                    pools=miss_pools,
                     page_url=page_url,
                     summary_url=summary_url,
                     year=year,
@@ -390,8 +420,9 @@ def build_site(
                     season=str(year),
                     yearData=filter_year_data(year_full, page["pool"], {data_stat}),
                     yearMisses=year_misses,
-                    title=f"{year} {page['pool_label']} {page['name']}",
-                    heading=f"{year} {page['pool_label']}: {page['name']}",
+                    title=page_heading,
+                    heading=page_heading,
+                    back_label=back_label_fmt.format(year=year),
                     fantasy=fantasy,
                     current_slug=page["slug"],
                     stat_page={**page, "data_stat": data_stat},
@@ -399,10 +430,21 @@ def build_site(
                 )
                 _write(site_dir / section / year_key / page["slug"] / "index.html", html)
                 stat_count += 1
-        print(f"  Wrote {summary_count} {section} summary pages and {stat_count} {section} stat pages")
+        print(f"  Wrote {summary_count} {section} season pages and {stat_count} {section} miss pages")
 
-    write_season_variant(fantasy=False, section="seasons", title_suffix="Projection Accuracy")
-    write_season_variant(fantasy=True, section="fantasy", title_suffix="Fantasy Projection Accuracy")
+    write_season_variant(
+        fantasy=False,
+        section="seasons",
+        title_suffix="Projection Accuracy",
+        back_label_fmt="{year} stats",
+    )
+    write_season_variant(
+        fantasy=True,
+        section="fantasy",
+        title_suffix="Fantasy Projection Accuracy",
+        back_label_fmt="{year} fantasy stats",
+        stat_qualifier="Fantasy",
+    )
 
     for i, player in enumerate(players):
         html = env.get_template("player.html").render(

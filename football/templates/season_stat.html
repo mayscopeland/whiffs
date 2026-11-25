@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "includes/miss_tables.html" import renderEverybodyMissed, renderBiggestMisses with context %}
-
+{% set poolMisses = yearMisses.get(stat_page.pool, {}) if yearMisses else {} %}
 {% set metrics = [
   { "value": 'MAE', "name": 'MAE', "title": 'MAE' },
   { "value": 'RMSE', "name": 'RMSE', "title": 'RMSE'}
@@ -10,12 +10,11 @@
   { "value": 'league-adj', "name": 'League-Adjusted', "chartSuffix": 'LeagueAdj' },
   { "value": 'raw', "name": 'Raw', "chartSuffix": '' }
 ] %}
-{% set poolMisses = yearMisses.get(stat_page.pool, {}) if yearMisses else {} %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="mb-6">
-    <a href="{{ summary_url }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; {{ season }}{% if fantasy %} fantasy{% endif %} summary</a>
+    <a href="{{ summary_url }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; {{ back_label }}</a>
   </div>
   <div class="text-center mb-8">
     <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">{{ heading }}</h1>
@@ -24,7 +23,6 @@
   {% include "includes/stat-nav.html" %}
 
   <div class="chart-section mb-8">
-    <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-3">{{ stat_page.name }}</h2>
     <div class="flex flex-wrap gap-4 mb-4">
       <select class="metric-select px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
         {% for metric in metrics %}<option value="{{ metric.value }}">{{ metric.title }}</option>{% endfor %}
@@ -74,12 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
     volumeLabel: page.name,
     volume: page.is_volume
       ? { ...pool.volume, name: page.name, stat: page.stat, isVolume: true }
-      : { ...pool.volume, isVolume: false, stat: '__skip__' },
+      : null,
     rates: page.is_volume ? [] : [{ name: page.name, stat: page.stat }],
   };
-  if (!page.is_volume) {
-    singlePool.volume = null;
-  }
 
   bindSeasonCharts(yearData, projectionSystems, [singlePool], fantasy, { chartsOnly: true });
 
@@ -92,9 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const selectedAdjustment = adjustmentSelect ? adjustmentSelect.value : 'raw';
       section.querySelectorAll('.chart-container').forEach(container => {
         const isVolume = container.dataset.volume === 'true';
-        const shouldShow = container.dataset.metric === selectedMetric &&
-          (isVolume || container.dataset.adjustment === selectedAdjustment);
-        container.style.display = shouldShow ? 'block' : 'none';
+        container.style.display =
+          container.dataset.metric === selectedMetric &&
+          (isVolume || container.dataset.adjustment === selectedAdjustment)
+            ? 'block' : 'none';
       });
     }
     metricSelect.addEventListener('change', updateVisibility);

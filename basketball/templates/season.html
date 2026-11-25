@@ -5,11 +5,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/assets/js/chart-utils.js"></script>
-<script src="/assets/js/season-charts.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  initializeSummaryTable({{ yearData | tojson }}, "season-summary");
-});
-</script>
+{% include "includes/season_scripts.html" %}
 {% endblock %}
